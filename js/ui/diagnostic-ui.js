@@ -109,7 +109,7 @@ const QUESTION_POOLS = {
       itemsToSeed: ['p_c1_challenge_1']
     },
     {
-      uk: 'Незважаючи на те, що ситуація була складною, нам вдалося знайти рішення.',
+      uk: 'Незважаючи на те, щосітуація була складною, нам вдалося знайти рішення.',
       translit: 'Nezvazhayuchy na te, shcho sytuatsiya bula skladnoyu, nam vdalosya znayty rishennya.',
       en: 'Despite the situation being difficult, we managed to find a solution.',
       distractors: ['It seems to me that the main problem is not the situation.', 'This led to the fact that we were late for the meeting.', 'By the time I arrived, they already finished.'],
@@ -182,6 +182,9 @@ export function renderDiagnostic(container, { onDone } = {}) {
     const challenge = available[Math.floor(Math.random() * available.length)];
     const options = shuffle([challenge.en, ...challenge.distractors]);
 
+    // Record dynamic millisecond start time
+    challenge.startTime = Date.now();
+
     shell(
       `Adaptive placement test`,
       `
@@ -199,6 +202,13 @@ export function renderDiagnostic(container, { onDone } = {}) {
       btn.addEventListener('click', () => {
         if (answered) return;
         answered = true;
+
+        // Calculate millisecond latency and threshold dynamically based on words count
+        const timeTaken = (Date.now() - challenge.startTime) / 1000;
+        const words = challenge.uk.split(/\s+/).length;
+        const threshold = 3 + words * 1.5;
+        const isFluent = timeTaken <= threshold;
+
         const isCorrect = btn.dataset.text === challenge.en;
         btn.classList.add(isCorrect ? 'is-correct' : 'is-incorrect');
 
@@ -213,21 +223,20 @@ export function renderDiagnostic(container, { onDone } = {}) {
             question: challenge,
             level: currentDifficulty,
             isCorrect: isCorrect,
-            knownType: knownType // 'fluent', 'guessed', or 'incorrect'
+            knownType: knownType,
+            latency: timeTaken
           });
 
           // Dynamic adaptive branching
           if (isCorrect) {
             if (knownType === 'fluent') {
-              // Fluent knowledge: step up level to test boundary
               if (currentDifficulty === 'beginner') currentDifficulty = 'b1';
               else if (currentDifficulty === 'b1') currentDifficulty = 'b2';
               else if (currentDifficulty === 'b2') currentDifficulty = 'c1';
             } else {
-              // Guessed: keep at current level to collect more reliable data points
+              // Guessed or took too long to work out: stay on level to gather more precision
             }
           } else {
-            // Incorrect: step down level to find their comfort zone
             if (currentDifficulty === 'c1') currentDifficulty = 'b2';
             else if (currentDifficulty === 'b2') currentDifficulty = 'b1';
             else if (currentDifficulty === 'b1') currentDifficulty = 'beginner';
@@ -238,46 +247,44 @@ export function renderDiagnostic(container, { onDone } = {}) {
         }
 
         if (isCorrect) {
-          // Show follow-up question to distinguish fluent vs guessed knowledge
-          setTimeout(() => {
-            shell(
-              `Adaptive Calibration`,
-              `
-                <div class="diagnostic-word" style="font-size: 20px; color: var(--good); font-weight: bold; margin-bottom: 12px;">${useCzech ? 'Správná odpověď!' : 'Correct Answer!'}</div>
-                <p class="diagnostic-prompt-label" style="margin-bottom: 18px; line-height: 1.45; text-align: left; color: var(--text);">
-                  You correctly identified: "<em>${escapeHtml(challenge.en)}</em>"<br><br>
-                  To help us map your boundary and avoid overtesting, tell us honestly:<br>
-                  <strong>Did you already know this structure fluently, or did you guess / work it out?</strong>
-                </p>
-                <div class="diagnostic-options" style="max-width: 440px;">
-                  <button class="option-btn" id="know-fluent" style="font-size:14px; padding:12px; display: flex; align-items: center; gap: 8px;">
-                    <span>🌟</span> <span>I already knew it fluently (skip practicing this)</span>
-                  </button>
-                  <button class="option-btn" id="know-guessed" style="font-size:14px; padding:12px; display: flex; align-items: center; gap: 8px;">
-                    <span>🧠</span> <span>I guessed / worked it out (keep active for drills)</span>
-                  </button>
-                </div>
-              `
-            );
+          // LATENCY ADAPTIVE SEEDING:
+          // If correct within fluency threshold, automatically classify as fluent!
+          // If correct but slow, automatically classify as worked-out (no clicks/honest popup needed)!
+          if (isFluent) {
+            // Seed as fully known/mastered
+            for (const itemId of challenge.itemsToSeed) {
+              seedFromDiagnostic(progress, itemId, 'uk2en', currentDifficulty === 'c1' ? 'advanced' : 'intermediate');
+              seedFromDiagnostic(progress, itemId, 'en2uk', currentDifficulty === 'c1' ? 'advanced' : 'intermediate');
+            }
 
-            container.querySelector('#know-fluent').addEventListener('click', () => {
-              // Fluent: seed fully as mastered (advanced / intermediate levels)
-              for (const itemId of challenge.itemsToSeed) {
-                seedFromDiagnostic(progress, itemId, 'uk2en', currentDifficulty === 'c1' ? 'advanced' : 'intermediate');
-                seedFromDiagnostic(progress, itemId, 'en2uk', currentDifficulty === 'c1' ? 'advanced' : 'intermediate');
-              }
-              advanceFlow('fluent');
-            });
+            // Show feedback
+            const containerBody = container.querySelector('.diagnostic-body');
+            const feedbackText = document.createElement('div');
+            feedbackText.style.color = 'var(--good)';
+            feedbackText.style.fontWeight = 'bold';
+            feedbackText.style.marginTop = '16px';
+            feedbackText.innerHTML = `🌟 Fast &amp; Fluent! (${timeTaken.toFixed(1)}s)`;
+            containerBody.appendChild(feedbackText);
 
-            container.querySelector('#know-guessed').addEventListener('click', () => {
-              // Guessed: seed as beginner (box 2, consecutiveCorrect 1) so they get to practice it in drills!
-              for (const itemId of challenge.itemsToSeed) {
-                seedFromDiagnostic(progress, itemId, 'uk2en', 'beginner');
-                seedFromDiagnostic(progress, itemId, 'en2uk', 'beginner');
-              }
-              advanceFlow('guessed');
-            });
-          }, 600);
+            setTimeout(() => advanceFlow('fluent'), 1400);
+          } else {
+            // Worked out (took time to translate): seed at beginner level (box 2) for practice drills!
+            for (const itemId of challenge.itemsToSeed) {
+              seedFromDiagnostic(progress, itemId, 'uk2en', 'beginner');
+              seedFromDiagnostic(progress, itemId, 'en2uk', 'beginner');
+            }
+
+            // Show encouraging worked-out feedback
+            const containerBody = container.querySelector('.diagnostic-body');
+            const feedbackText = document.createElement('div');
+            feedbackText.style.color = 'var(--warn)';
+            feedbackText.style.fontWeight = 'bold';
+            feedbackText.style.marginTop = '16px';
+            feedbackText.innerHTML = `🧠 Worked out! Great persistency! (${timeTaken.toFixed(1)}s)`;
+            containerBody.appendChild(feedbackText);
+
+            setTimeout(() => advanceFlow('guessed'), 2000);
+          }
         } else {
           setTimeout(() => advanceFlow('incorrect'), 1500);
         }
@@ -307,10 +314,7 @@ export function renderDiagnostic(container, { onDone } = {}) {
       suggestedLevel = 'Elementary (A2)';
     }
 
-    // Confidence Judgement formula:
-    // High: got questions correct and > 75% of correct ones were fluent.
-    // Medium: got correct but guessed some.
-    // Low: got correct but guessed almost all, or got very few correct.
+    // Confidence score based on correctness and speed
     let confidence = 'Low Confidence';
     if (correctCount > 0) {
       const fluentRatio = fluentCorrect.length / correctCount;
@@ -347,12 +351,12 @@ export function renderDiagnostic(container, { onDone } = {}) {
           <ul class="summary-list" style="font-size: 13px; line-height: 1.5; color: var(--text-dim); margin-bottom: 20px;">
             <li>Total adaptive questions answered: <strong>${history.length}</strong></li>
             <li>Correct answers: <strong>${correctCount} / ${history.length}</strong></li>
-            <li>Fluent structures verified: <strong>${fluentCorrect.length}</strong></li>
-            <li>Context-guessed / Worked-out structures: <strong>${guessedCorrect.length}</strong></li>
+            <li>Fluent structures (Fast correct): <strong>${fluentCorrect.length}</strong></li>
+            <li>Worked-out / Guessed (Slow correct): <strong>${guessedCorrect.length}</strong></li>
           </ul>
 
           <p style="font-size: 13px; color: var(--text-dim); line-height: 1.45; margin-bottom: 24px;">
-            The guessed structures remain in active learning rotation (box 2) so they keep coming up in Drills for reinforcement! Fluent structures were seeded as mastered to save you time.
+            The worked-out structures remain active in learning rotation (box 2) so they keep coming up in Drills for reinforcement! Fluent structures were seeded as mastered to save you time.
           </p>
 
           <!-- Adaptive refinement action buttons -->
