@@ -1,7 +1,52 @@
-import { getItemById, pickDistractors } from '../core/pool.js';
 import { seedFromDiagnostic } from '../core/srs.js';
 import { loadProgress, saveProgress } from '../core/storage.js';
-import { DIAGNOSTIC_WORD_IDS, SELF_RATING_OPTIONS, SENTENCE_QUESTION } from '../data/diagnostic.js';
+import { LESSONS } from '../data/lessons.js';
+
+function escapeHtml(str) {
+  const div = document.createElement('div');
+  div.textContent = str;
+  return div.innerHTML;
+}
+
+// Challenge items representing levels A1-A2, B1-B2, C1 to find the learner's threshold
+const CHALLENGE_STEPS = [
+  {
+    level: 'beginner',
+    uk: 'Мені потрібна допомога.',
+    translit: 'Meni potribna dopomoha.',
+    en: 'I need help.',
+    distractors: [
+      'I am busy today.',
+      'Can you wait here?',
+      'I want to see you tomorrow.'
+    ],
+    itemsToSeed: ['v_voda', 'v_ruka', 'v_brat', 'v_sestra', 'v_misto', 'v_robyty', 'v_bachyty', 'v_hovoryty', 'v_pysaty', 'v_khotity', 'p_need_5']
+  },
+  {
+    level: 'intermediate',
+    uk: 'Якби я мав більше часу, я б вивчив українську швидше.',
+    translit: 'Yakby ya mav bilshe chasu, ya b vyvchyv ukrayinsku shvydshe.',
+    en: 'If I had more time, I would have learned Ukrainian faster.',
+    distractors: [
+      'The thing is that I did not have enough time today.',
+      'Unlike Czechia, in Ukraine it is quite warm.',
+      'I must go tomorrow because I have to work.'
+    ],
+    itemsToSeed: ['v_zrobyv', 'v_nikoly', 'v_molodshyi', 'v_sprava', 'v_prychyna', 'v_polyahaye', 'v_vidminu', 'v_porivnyano', 'p_b1_done_1', 'p_b1_never_1', 'p_b1_when_1', 'p_b1_thing_1', 'p_b1_compare_1', 'p_b2_hypo_1']
+  },
+  {
+    level: 'advanced',
+    uk: 'Якби я знав тоді те, що знаю зараз, я б прийняв зовсім інше рішення.',
+    translit: 'Yakby ya znav todi te, shcho znayu zaraz, ya b pryynyav zovsim inshe rishennya.',
+    en: 'If I had known then what I know now, I would have made a completely different decision.',
+    distractors: [
+      'Despite the situation being difficult, we managed to find a solution.',
+      'On one hand, technology simplified our lives, but on the other hand it created challenges.',
+      'It seems to me that the main problem is not the situation itself.'
+    ],
+    itemsToSeed: ['p_c1_challenge_1', 'p_c1_challenge_2', 'p_c1_challenge_3', 'v_sensi', 'v_zaperechyty', 'v_varto', 'v_zaznachyty', 'v_odnoho', 'v_boku']
+  }
+];
 
 function shuffle(arr) {
   const out = [...arr];
@@ -12,31 +57,23 @@ function shuffle(arr) {
   return out;
 }
 
-function escapeHtml(str) {
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
-}
-
 export function renderDiagnostic(container, { onDone } = {}) {
   const progress = loadProgress();
-  const steps = [
-    ...DIAGNOSTIC_WORD_IDS.map((id) => ({ type: 'self-rating', itemId: id })),
-    ...DIAGNOSTIC_WORD_IDS.map((id) => ({ type: 'mc', itemId: id })),
-    { type: 'sentence' },
-    { type: 'summary' },
-  ];
-  let index = 0;
-  const selfRatings = {};
-  const mcResults = {};
-  let sentenceCorrect = null;
+  let stepIndex = 0; // Starts with step 0 (beginner challenge)
+
+  // Track accuracy to perform adaptive seeding
+  const results = {
+    beginner: null,
+    intermediate: null,
+    advanced: null
+  };
 
   function shell(partLabel, bodyHtml) {
     container.innerHTML = `
       <div class="diagnostic-screen">
         <header class="diagnostic-header">
           <button class="btn-back" type="button">&larr; Menu</button>
-          <div class="diagnostic-progress">${partLabel} &middot; ${index + 1}/${steps.length}</div>
+          <div class="diagnostic-progress">${partLabel} &middot; Challenge ${stepIndex + 1}/3</div>
         </header>
         <div class="diagnostic-body">${bodyHtml}</div>
       </div>
@@ -44,103 +81,77 @@ export function renderDiagnostic(container, { onDone } = {}) {
     container.querySelector('.btn-back').addEventListener('click', () => onDone && onDone());
   }
 
-  function advance() {
-    index += 1;
-    renderStep();
-  }
-
   function renderStep() {
-    const step = steps[index];
-    if (!step) return renderSummary();
-    if (step.type === 'self-rating') return renderSelfRating(step);
-    if (step.type === 'mc') return renderMc(step);
-    if (step.type === 'sentence') return renderSentence();
-    return renderSummary();
-  }
+    if (stepIndex >= CHALLENGE_STEPS.length) {
+      return renderSummary();
+    }
 
-  function renderSelfRating(step) {
-    const item = getItemById(step.itemId);
-    shell(
-      'Part 1 &middot; What do you think this means?',
-      `
-        <div class="diagnostic-word">${escapeHtml(item.uk)}</div>
-        <div class="diagnostic-translit">${escapeHtml(item.translit)}</div>
-        <div class="diagnostic-options">
-          ${SELF_RATING_OPTIONS.map((opt) => `<button class="option-btn" data-value="${opt.value}">${escapeHtml(opt.label)}</button>`).join('')}
-        </div>
-      `
-    );
-    container.querySelectorAll('.option-btn').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        selfRatings[step.itemId] = btn.dataset.value;
-        advance();
-      });
-    });
-  }
+    const challenge = CHALLENGE_STEPS[stepIndex];
+    const options = shuffle([challenge.en, ...challenge.distractors]);
 
-  function renderMc(step) {
-    const item = getItemById(step.itemId);
-    const options = shuffle([item, ...pickDistractors(item, 'uk2en', 3)]);
     shell(
-      'Part 2 &middot; Multiple choice',
+      `Adaptive Placement &middot; Level: ${challenge.level.toUpperCase()}`,
       `
-        <p class="diagnostic-prompt-label">What does this word mean?</p>
-        <div class="diagnostic-word">${escapeHtml(item.uk)}</div>
-        <div class="diagnostic-translit">${escapeHtml(item.translit)}</div>
-        <div class="diagnostic-options">
-          ${options.map((opt) => `<button class="option-btn" data-id="${opt.id}">${escapeHtml(opt.en)}</button>`).join('')}
-        </div>
-      `
-    );
-    let answered = false;
-    container.querySelectorAll('.option-btn').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        if (answered) return;
-        answered = true;
-        const isCorrect = btn.dataset.id === item.id;
-        mcResults[step.itemId] = isCorrect;
-        btn.classList.add(isCorrect ? 'is-correct' : 'is-incorrect');
-        if (isCorrect) {
-          seedFromDiagnostic(progress, item.id, 'uk2en');
-        } else {
-          container.querySelectorAll('.option-btn').forEach((b) => {
-            if (b.dataset.id === item.id) b.classList.add('is-correct');
-          });
-        }
-        setTimeout(advance, isCorrect ? 400 : 1000);
-      });
-    });
-  }
-
-  function renderSentence() {
-    const options = shuffle([SENTENCE_QUESTION.correctEn, ...SENTENCE_QUESTION.distractorsEn]);
-    shell(
-      'Part 3 &middot; Sentence recognition',
-      `
-        <p class="diagnostic-prompt-label">What does this sentence mean?</p>
-        <div class="diagnostic-word">${escapeHtml(SENTENCE_QUESTION.uk)}</div>
-        <div class="diagnostic-translit">${escapeHtml(SENTENCE_QUESTION.translit)}</div>
+        <p class="diagnostic-prompt-label">Select the correct English meaning for this Ukrainian sentence:</p>
+        <div class="diagnostic-word" style="font-size: 22px; line-height: 1.35; margin: 16px 0;">${escapeHtml(challenge.uk)}</div>
+        <div class="diagnostic-translit" style="margin-bottom: 24px;">${escapeHtml(challenge.translit)}</div>
         <div class="diagnostic-options diagnostic-options--wide">
-          ${options.map((opt) => `<button class="option-btn" data-text="${escapeHtml(opt)}">${escapeHtml(opt)}</button>`).join('')}
+          ${options.map((opt) => `<button class="option-btn" data-text="${escapeHtml(opt)}" style="font-size:14px; padding:10px 12px;">${escapeHtml(opt)}</button>`).join('')}
         </div>
       `
     );
+
     let answered = false;
     container.querySelectorAll('.option-btn').forEach((btn) => {
       btn.addEventListener('click', () => {
         if (answered) return;
         answered = true;
-        const isCorrect = btn.dataset.text === SENTENCE_QUESTION.correctEn;
-        sentenceCorrect = isCorrect;
+        const isCorrect = btn.dataset.text === challenge.en;
+        results[challenge.level] = isCorrect;
+
         btn.classList.add(isCorrect ? 'is-correct' : 'is-incorrect');
-        if (isCorrect) {
-          seedFromDiagnostic(progress, SENTENCE_QUESTION.itemId, 'uk2en');
-        } else {
+
+        // Show correct choice if user missed
+        if (!isCorrect) {
           container.querySelectorAll('.option-btn').forEach((b) => {
-            if (b.dataset.text === SENTENCE_QUESTION.correctEn) b.classList.add('is-correct');
+            if (b.dataset.text === challenge.en) b.classList.add('is-correct');
           });
         }
-        setTimeout(advance, isCorrect ? 400 : 1200);
+
+        // ADAPTIVE PLACEMENT & SEEDING logic:
+        // Instead of climbing a linear staircase, we probe ability boundary.
+        if (isCorrect) {
+          // If they pass, we seed all associated items for this level and prior levels as mastered (advanced or intermediate)
+          for (const itemId of challenge.itemsToSeed) {
+            seedFromDiagnostic(progress, itemId, 'uk2en', challenge.level);
+            seedFromDiagnostic(progress, itemId, 'en2uk', challenge.level);
+          }
+        }
+
+        setTimeout(() => {
+          // Adaptive flow binary branching:
+          if (challenge.level === 'beginner') {
+            if (isCorrect) {
+              // Succeeded at beginner, test intermediate next (stepIndex 1)
+              stepIndex = 1;
+            } else {
+              // Failed at beginner, learner is absolute beginner. End diagnostics immediately!
+              stepIndex = 3;
+            }
+          } else if (challenge.level === 'intermediate') {
+            if (isCorrect) {
+              // Succeeded at intermediate, test advanced next (stepIndex 2)
+              stepIndex = 2;
+            } else {
+              // Failed at intermediate, boundary is intermediate. End diagnostics.
+              stepIndex = 3;
+            }
+          } else if (challenge.level === 'advanced') {
+            // End diagnostic flow
+            stepIndex = 3;
+          }
+          renderStep();
+        }, isCorrect ? 400 : 1200);
       });
     });
   }
@@ -149,28 +160,30 @@ export function renderDiagnostic(container, { onDone } = {}) {
     progress.meta.diagnosticCompletedAt = Date.now();
     saveProgress(progress);
 
-    const knownCount = Object.values(selfRatings).filter((v) => v === 'known').length;
-    const guessedCount = Object.values(selfRatings).filter((v) => v === 'guessed').length;
-    const unknownCount = Object.values(selfRatings).filter((v) => v === 'unknown').length;
-    const mcCorrect = Object.values(mcResults).filter(Boolean).length;
+    let levelPlanted = 'Beginner';
+    if (results.advanced) {
+      levelPlanted = 'Advanced (C1)';
+    } else if (results.intermediate) {
+      levelPlanted = 'Intermediate (B1-B2)';
+    }
 
     container.innerHTML = `
       <div class="diagnostic-screen">
         <header class="diagnostic-header">
           <button class="btn-back" type="button">&larr; Menu</button>
-          <div class="diagnostic-progress">Done</div>
+          <div class="diagnostic-progress">Completed</div>
         </header>
         <div class="diagnostic-body diagnostic-summary">
-          <h2>Nice work</h2>
-          <ul class="summary-list">
-            <li>Recognized immediately: ${knownCount}</li>
-            <li>Guessed correctly: ${guessedCount}</li>
-            <li>Unknown: ${unknownCount}</li>
-            <li>Multiple choice correct: ${mcCorrect} / ${DIAGNOSTIC_WORD_IDS.length}</li>
-            <li>Sentence recognition: ${sentenceCorrect ? 'correct' : 'missed'}</li>
+          <h2>Adaptive Placement Done!</h2>
+          <p>We mapped your Ukrainian sentence-building abilities using our adaptive diagnostic probe.</p>
+          <ul class="summary-list" style="margin: 16px 0;">
+            <li>Beginner Level Check: <strong>${results.beginner ? 'Passed (Seeded)' : 'Not Yet Passed'}</strong></li>
+            <li>Intermediate Level Check: <strong>${results.intermediate === null ? 'Skipped' : results.intermediate ? 'Passed (Seeded)' : 'Not Yet Passed'}</strong></li>
+            <li>Advanced Level Check: <strong>${results.advanced === null ? 'Skipped' : results.advanced ? 'Passed (Seeded)' : 'Not Yet Passed'}</strong></li>
+            <li style="margin-top: 12px; color: var(--accent-2); font-weight: bold;">Estimated Placement Zone: ${levelPlanted}</li>
           </ul>
-          <p>Words you already knew got a head start in Drill mode &mdash; you'll still see them sometimes, just less often than brand-new ones.</p>
-          <button class="btn-primary" id="diagnostic-continue">Continue</button>
+          <p>The system identified your boundary and populated your learning pool accordingly. Known structures are marked as mastered so you don't waste time on them in Drill mode!</p>
+          <button class="btn-primary" id="diagnostic-continue" style="width: 100%; margin-top: 16px;">Go to Drills</button>
         </div>
       </div>
     `;

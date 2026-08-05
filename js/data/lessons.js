@@ -1,4 +1,4 @@
-// 20 lesson sections. itemIds are the vocab.js/patterns.js ids that count toward this
+// 37 lesson sections. itemIds are the vocab.js/patterns.js ids that count toward this
 // lesson's mastery calculation (see srs.computeLessonProgress). content is display-only.
 function L(id, order, title, kind, summary, itemIds, content) {
   return { id, order, title, kind, summary, itemIds, content };
@@ -362,5 +362,242 @@ export const LESSONS = [
         { template: 'Будь ласка, ___.', translit: 'Bud\' laska, ___.', en: 'Please ___.', slotOptions: ['допоможіть', 'повторіть'] },
       ],
       czechNote: 'This is the lesson to keep mentally close at hand — "не розумію" and "повторіть, будь ласка" alone will get you through most communication breakdowns.',
+    }),
+
+  // --- B1 level expansion lessons ---
+  L('l21', 21, 'Narrating Experiences', 'grammar_b1',
+    'Learn to talk about what you have done, what you have never done, and life when you were younger.',
+    ['p_b1_done_1', 'p_b1_never_1', 'p_b1_when_1', 'v_zrobyv', 'v_nikoly', 'v_molodshyi'],
+    {
+      patterns: [
+        { uk: 'Я вже зробив... / Я ніколи не...', translit: '', en: 'I have already done... / I have never...', czNote: 'Compare Ukrainian past tense and "ніколи не" with Czech "už jsem udělal / nikdy jsem nebyl".' }
+      ],
+      examples: [
+        { uk: 'Я вже прочитав цю книгу.', translit: 'Ya vzhe prochytav tsyu knyhu.', en: 'I have already read this book.', cz: 'Už jsem přečetl tuto knihu.' },
+        { uk: 'Я ніколи не був в Україні.', translit: 'Ya nikoly ne buv v Ukrayini.', en: 'I have never been to Ukraine.', cz: 'Nikdy jsem nebyl na Ukrajině.' },
+        { uk: 'Коли я був молодший, я багато подорожував.', translit: 'Koly ya buv molodshyi, ya bahato podorozhuvav.', en: 'When I was younger, I travelled a lot.', cz: 'Když jsem byl mladší, hodně jsem cestoval.' }
+      ],
+      substitutions: [],
+      czechNote: 'Excellent structure maps 1:1 except Ukrainian drops the "jsem" auxiliary verb.'
+    }),
+
+  L('l22', 22, 'Explaining Situations', 'grammar_b1',
+    'Learn to specify root causes using "The thing is that..." and "The reason is that...".',
+    ['p_b1_thing_1', 'p_b1_reason_1', 'v_sprava', 'v_prychyna', 'v_polyahaye'],
+    {
+      patterns: [
+        { uk: 'Справа в тому, що... / Причина полягає в тому, що...', translit: '', en: 'The thing is that... / The reason is that...', czNote: 'Parallel to Czech "Jde o to, že..." or "Příčina spočívá v tom, že...".' }
+      ],
+      examples: [
+        { uk: 'Справа в тому, що я не мав достатньо часу.', translit: 'Sprava v tomu, shcho ya ne mav dostatno chasu.', en: 'The thing is that I didn\'t have enough time.', cz: 'Jde o to, že jsem neměl dost času.' }
+      ],
+      substitutions: [],
+      czechNote: '"Справа в тому, що" is incredibly common in spoken Ukrainian to explain why something happened.'
+    }),
+
+  L('l23', 23, 'Comparing and Contrasting', 'grammar_b1',
+    'Contrast elements using "Unlike..." and "Compared with...".',
+    ['p_b1_compare_1', 'p_b1_compare_2', 'v_vidminu', 'v_porivnyano'],
+    {
+      patterns: [
+        { uk: 'На відміну від... / Порівняно з...', translit: '', en: 'Unlike... / Compared with...', czNote: 'Directly transfers to Czech "Na rozdíl od..." and "Ve srovnání s...".' }
+      ],
+      examples: [
+        { uk: 'На відміну від Чехії, в Україні тепло.', translit: 'Na vidminu vid Chekhiyi, v Ukrayini teplo.', en: 'Unlike Czechia, in Ukraine it is warm.', cz: 'Na rozdíl od Česka je na Ukrajině teplo.' },
+        { uk: 'Порівняно з минулим роком, все добре.', translit: 'Porivnyano z mynulym rokom, vse dobre.', en: 'Compared with last year, everything is good.', cz: 'Ve srovnání s minulým rokem je vše v pořádku.' }
+      ],
+      substitutions: [],
+      czechNote: 'Notice that "Порівняно з" matches "porovnáno s" exactly.'
+    }),
+
+  // --- B2 level expansion lessons ---
+  L('l24', 24, 'Complex Opinions', 'grammar_b2',
+    'Express your viewpoint using "I believe that...", "From my point of view...", and "As far as I know...".',
+    ['p_b2_opinion_1', 'p_b2_opinion_2', 'p_b2_opinion_3', 'v_vazhayu', 'v_tochka', 'v_zorun'],
+    {
+      patterns: [
+        { uk: 'Я вважаю, що... / З моєї точки зору...', translit: '', en: 'I believe that... / From my point of view...', czNote: 'Equivalent to Czech "Domnívám se, že..." or "Z mého úhlu pohledu...".' }
+      ],
+      examples: [
+        { uk: 'Я вважаю, що це хороша ідея.', translit: 'Ya vazhayu, shcho tse khorosha ideya.', en: 'I believe that this is a good idea.', cz: 'Považuji to za dobrý nápad.' },
+        { uk: 'Наскільки мені відомо, це питання ще не вирішене.', translit: 'Naskilky meni vidomo, tse pytannya shche ne vyrishene.', en: 'As far as I know, this question is not resolved yet.', cz: 'Pokud vím, tato otázka ještě není vyřešena.' }
+      ],
+      substitutions: [],
+      czechNote: '"точка зору" is a literal loan-translation matching Czech "úhel pohledu" (point of view).'
+    }),
+
+  L('l25', 25, 'Agreeing and Disagreeing Politely', 'grammar_b2',
+    'Learn to navigate conversations politely and express reservations.',
+    ['p_b2_agree_1', 'p_b2_agree_2', 'p_b2_agree_3', 'v_chastkovo', 'v_pohodzhuyusya', 'v_odnak'],
+    {
+      patterns: [
+        { uk: 'Я частково погоджуюся, але...', translit: '', en: 'I partly agree, but...', czNote: 'Czech "Částečně souhlasím, ale...".' }
+      ],
+      examples: [
+        { uk: 'Я розумію вашу думку, однак не згоден.', translit: 'Ya rozumiyu vashu dumku, odnak ne zhoden.', en: 'I understand your point, however I do not agree.', cz: 'Rozumím vašemu názoru, nicméně nesouhlasím.' }
+      ],
+      substitutions: [],
+      czechNote: 'Using "однак" (however) or "частково" (partially) softens disagreements.'
+    }),
+
+  L('l26', 26, 'Hypothetical Situations', 'grammar_b2',
+    'Master subjunctive conditionals with "If..., then..." structures.',
+    ['p_b2_hypo_1', 'p_b2_hypo_2', 'v_yakby', 'v_shvydshe'],
+    {
+      patterns: [
+        { uk: 'Якби..., то ... би', translit: '', en: 'If..., then ... would...', czNote: 'Subjunctive conditionals function exactly like Czech "kdyby..., tak by...".' }
+      ],
+      examples: [
+        { uk: 'Якби я мав більше часу, я б вивчив українську швидше.', translit: 'Yakby ya mav bilshe chasu, ya b vyvchyv ukrayinsku shvydshe.', en: 'If I had more time, I would have learned Ukrainian faster.', cz: 'Kdybych měl více času, naučil bych se ukrajinsky rychleji.' }
+      ],
+      substitutions: [],
+      czechNote: 'Ukrainian "якби" works exactly like Czech "kdyby".'
+    }),
+
+  L('l27', 27, 'Reported Speech', 'grammar_b2',
+    'Describe what others said and explain reasons dynamically.',
+    ['p_b2_speech_1', 'p_b2_speech_2', 'v_poyasnyla'],
+    {
+      patterns: [
+        { uk: 'Він сказав, що... / Вона пояснила, чому...', translit: '', en: 'He said that... / She explained why...', czNote: 'Matches Czech "Řekl, že..." / "Vysvětlila, proč...".' }
+      ],
+      examples: [
+        { uk: 'Він сказав, що прийде завтра.', translit: 'Vin skazav, shcho pryyde zavtra.', en: 'He said that he will come tomorrow.', cz: 'Řekl, že přijde zítra.' }
+      ],
+      substitutions: [],
+      czechNote: 'No sequence of tenses is required in Ukrainian reported speech, unlike English.'
+    }),
+
+  // --- C1 level expansion lessons ---
+  L('l28', 28, 'Nuance and Qualification', 'grammar_c1',
+    'Qualify claims using "In a certain sense...", "It cannot be denied that...", and "It is worth noting that...".',
+    ['p_c1_nuance_1', 'p_c1_nuance_2', 'p_c1_nuance_3', 'p_c1_nuance_4', 'v_sensi', 'v_zaperechyty', 'v_varto', 'v_zaznachyty'],
+    {
+      patterns: [
+        { uk: 'У певному сенсі... / Не можна заперечувати, що...', translit: '', en: 'In a certain sense... / It cannot be denied that...', czNote: 'Equivalent to Czech "V jistém smyslu..." / "Nelze popřít, že...".' }
+      ],
+      examples: [
+        { uk: 'У певному сенсі, він правий.', translit: 'U pevnomu sensi, vin pravyi.', en: 'In a certain sense, he is right.', cz: 'V jistém smyslu má pravdu.' },
+        { uk: 'Варто зазначити, що правила змінилися.', translit: 'Varto zaznachyty, shcho pravyla zminylysya.', en: 'It is worth noting that the rules have changed.', cz: 'Stojí za zmínku, že se pravidla změnila.' }
+      ],
+      substitutions: [],
+      czechNote: '"Варто" acts as a shorthand for "stojí za to".'
+    }),
+
+  L('l29', 29, 'Complex Argumentation', 'grammar_c1',
+    'Argue complex viewpoints using "On one hand..., on the other hand..." and "I do not so much disagree as...".',
+    ['p_c1_arg_1', 'p_c1_arg_2', 'p_c1_arg_3', 'v_odnoho', 'v_boku'],
+    {
+      patterns: [
+        { uk: 'З одного боку..., з іншого боку...', translit: '', en: 'On one hand..., on the other hand...', czNote: 'Czech "Na jednu stranu..., na druhou stranu...".' }
+      ],
+      examples: [
+        { uk: 'З одного боку, це хороше рішення, з іншого боку, воно створює нові проблеми.', translit: 'Z odnoho boku, tse khoroshe rishennya, z inshoho boku, vono stvoryuye novi problemy.', en: 'On one hand, this is a good decision, on the other hand, it creates new problems.', cz: 'Na jednu stranu je to dobré rozhodnutí, na druhou stranu vytváří nové problémy.' }
+      ],
+      substitutions: [],
+      czechNote: '"З одного боку" maps directly to Czech "z jedné strany".'
+    }),
+
+  L('l30', 30, 'Expressing Consequences', 'grammar_c1',
+    'Explain outcomes using "This led to the fact that..." and "As a result...".',
+    ['p_c1_cons_1', 'p_c1_cons_2', 'p_c1_cons_3', 'v_prizvelo', 'v_rezultati'],
+    {
+      patterns: [
+        { uk: 'Це призвело до того, що... / У результаті...', translit: '', en: 'This led to the fact that... / As a result...', czNote: 'Compare with Czech "To vedlo k tomu, že..." / "Ve výsledku...".' }
+      ],
+      examples: [
+        { uk: 'Це призвело до того, що ми запізнилися.', translit: 'Tse pryzvelo do toho, shcho my zapiznylysya.', en: 'This led to the fact that we were late.', cz: 'To vedlo k tomu, že jsme se opozdili.' }
+      ],
+      substitutions: [],
+      czechNote: '"Призвело" is neuter past form agreeing with "Це".'
+    }),
+
+  L('l31', 31, 'Complex Time Relationships', 'grammar_c1',
+    'Convey sophisticated timelines using "By the time...", "After...", and "Before...".',
+    ['p_c1_time_1', 'p_c1_time_2', 'p_c1_time_3', 'v_momentu'],
+    {
+      patterns: [
+        { uk: 'До того моменту, коли... / Після того як...', translit: '', en: 'By the time... / After...', czNote: 'Matches Czech "Do té chvíle, než..." / "Poté, co...".' }
+      ],
+      examples: [
+        { uk: 'До того моменту, коли я приїхав, вони вже все закінчили.', translit: 'Do toho momentu, koly ya pryyiv, vony vzhe vse zakinchyly.', en: 'By the time I arrived, they had already finished everything.', cz: 'Do chvíle, než jsem dorazil, už všechno dokončili.' }
+      ],
+      substitutions: [],
+      czechNote: 'Notice past-tense forms work sequentially here.'
+    }),
+
+  L('l32', 32, 'Abstract Discussion', 'grammar_c1',
+    'Formulate opinions on complex areas like society, technology, and ecology.',
+    ['p_c1_abs_1', 'p_c1_abs_2', 'v_tekhnolohiyi', 'v_suchasnoho'],
+    {
+      patterns: [],
+      examples: [
+        { uk: 'Я думаю, що технології змінили спосіб, у який люди спілкуються.', translit: 'Ya dumayu, shcho tekhnolohiyi zminyly sposib, u yakyi lyudy spilkuyutsya.', en: 'I think that technologies changed the way in which people communicate.', cz: 'Myslím, že technologie změnily způsob, jakým lidé komunikují.' },
+        { uk: 'Однією з головних проблем сучасного світу є глобальне потепління.', translit: 'Odniyeyu z holovnykh problem suchasnoho svitu ye hlobalne poteplinnya.', en: 'One of the main problems of the modern world is global warming.', cz: 'Jedním z hlavních problémů současného světa je globální oteplování.' }
+      ],
+      substitutions: [],
+      czechNote: 'Great for practice of high-value abstract discourse.'
+    }),
+
+  // --- C1 Vocabulary Categories (Themed) ---
+  L('l33', 33, 'C1 Vocab: Emotions and Opinions', 'vocab_c1',
+    'Expand vocabulary to express nuance in reactions and personal views.',
+    ['v_rozhachuvannya', 'v_zadovolennya', 'v_poboyuvannya', 'v_perekonannya', 'v_stavlennya'],
+    {
+      patterns: [],
+      examples: [
+        { uk: 'розчарування', translit: 'rozhachuvannya', en: 'disappointment', cz: 'zklamání' },
+        { uk: 'задоволення', translit: 'zadovolennya', en: 'satisfaction / pleasure', cz: 'satisfakce / potěšení' }
+      ],
+      substitutions: [],
+      czechNote: 'Notice most neuter abstract nouns end in "-ння" like Czech "-ní".'
+    }),
+
+  L('l34', 34, 'C1 Vocab: Work and Professional Life', 'vocab_c1',
+    'Communicate professionally regarding responsibilities, decisions, and requirements.',
+    ['v_vidpovidalnist', 'v_mozhlyvist', 'v_rishennya', 'v_dosyahnennya', 'v_vymoha'],
+    {
+      patterns: [],
+      examples: [
+        { uk: 'відповідальність', translit: 'vidpovidalnist\'', en: 'responsibility', cz: 'odpovědnost' }
+      ],
+      substitutions: [],
+      czechNote: 'Nouns ending in "-ність" correspond to Czech "-nost".'
+    }),
+
+  L('l35', 35, 'C1 Vocab: Society and Development', 'vocab_c1',
+    'Discuss societal developments, changes, and influences.',
+    ['v_suspilstvo', 'v_rozvytok', 'v_zminy', 'v_vplyv'],
+    {
+      patterns: [],
+      examples: [
+        { uk: 'суспільство', translit: 'suspilstvo', en: 'society', cz: 'společnost' }
+      ],
+      substitutions: [],
+      czechNote: 'Excellent loanwords matching Czech cognitive structure.'
+    }),
+
+  L('l36', 36, 'C1 Vocab: Abstract Connectors', 'vocab_c1',
+    'Structure your writing and arguments fluidly with logical transitions.',
+    ['v_vodnochas', 'v_nezvazhayuchy_na', 'v_khocha', 'v_krim_toho', 'v_takym_chynom', 'v_zokrema', 'v_vidpovidno'],
+    {
+      patterns: [],
+      examples: [
+        { uk: 'водночас', translit: 'vodnochas', en: 'at the same time / simultaneously', cz: 'zároveň' }
+      ],
+      substitutions: [],
+      czechNote: '"водночас" literally translates to Czech "jedním časem" or "zároveň".'
+    }),
+
+  L('l37', 37, 'C1 Challenge Sentences', 'review_c1',
+    'Ultimate diagnostic challenge sentences to verify absolute boundary of Ukrainian sentence-building ability.',
+    ['p_c1_challenge_1', 'p_c1_challenge_2', 'p_c1_challenge_3', 'p_c1_challenge_4', 'p_c1_challenge_5'],
+    {
+      patterns: [],
+      examples: [
+        { uk: 'Якби я знав тоді те, що знаю зараз, я б прийняв зовсім інше рішення.', translit: 'Yakby ya znav todi te, shcho znayu zaraz, ya b pryynyav zovsim inshe rishennya.', en: 'If I had known then what I know now, I would have made a completely different decision.', cz: 'Kdybych tehdy věděl to, co vím teď, přijal bych zcela jiné rozhodnutí.' }
+      ],
+      substitutions: [],
+      czechNote: 'Highly advanced multi-clause sentences.'
     }),
 ];

@@ -151,4 +151,65 @@ export const VOCAB = [
   v('v_shcho', 'що', 'shcho', 'what', 'co', 'pronoun', { topics: ['l20'] }),
   v('v_chomu', 'чому', 'chomu', 'why', 'proč', 'adverb', { topics: ['l20'] }),
   v('v_yak', 'як', 'yak', 'how', 'jak', 'adverb', { topics: ['l14'] }),
+
+  // --- B1 level expansion items ---
+  v('v_zrobyv', 'зробив', 'zrobyv', 'did / made', 'udělal', 'verb', { aspect: 'perfective', topics: ['l21'] }),
+  v('v_nikoly', 'ніколи', 'nikoly', 'never', 'nikdy', 'adverb', { topics: ['l21'] }),
+  v('v_molodshyi', 'молодший', 'molodshyi', 'younger', 'mladší', 'adjective', { topics: ['l21'] }),
+  v('v_sprava', 'справа', 'sprava', 'matter / business', 'věc / záležitost', 'noun', { gender: 'f', topics: ['l22'] }),
+  v('v_prychyna', 'причина', 'prychyna', 'reason', 'příčina / důvod', 'noun', { gender: 'f', topics: ['l22'] }),
+  v('v_polyahaye', 'полягає', 'polyahaye', 'lies (in) / consists (of)', 'spočívá', 'verb', { topics: ['l22'] }),
+  v('v_vidminu', 'відміну', 'vidminu', 'difference / distinction', 'rozdíl', 'noun', { topics: ['l23'] }),
+  v('v_porivnyano', 'порівняно', 'porivnyano', 'compared', 'porovnání / srovnání', 'adverb', { topics: ['l23'] }),
+
+  // --- B2 level expansion items ---
+  v('v_vazhayu', 'вважаю', 'vazhayu', 'I consider / believe', 'považuji', 'verb', { topics: ['l24'] }),
+  v('v_tochka', 'точка', 'tochka', 'point', 'bod', 'noun', { gender: 'f', topics: ['l24'] }),
+  v('v_zorun', 'зору', 'zoru', 'sight / vision (genitive)', 'zraku / pohledu', 'noun', { topics: ['l24'] }),
+  v('v_chastkovo', 'частково', 'chastkovo', 'partly', 'částečně', 'adverb', { topics: ['l25'] }),
+  v('v_pohodzhuyusya', 'погоджуюся', 'pohodzhuyusya', 'I agree', 'souhlasím', 'verb', { topics: ['l25'] }),
+  v('v_odnak', 'однак', 'odnak', 'however / yet', 'avšak / nicméně', 'conjunction', { topics: ['l25'] }),
+  v('v_yakby', 'якби', 'yakby', 'if (hypothetical)', 'kdyby', 'conjunction', { topics: ['l26'] }),
+  v('v_shvydshe', 'швидше', 'shvydshe', 'faster / more quickly', 'rychleji', 'adverb', { topics: ['l26'] }),
+  v('v_poyasnyla', 'пояснила', 'poyasnyla', 'explained (f)', 'vysvětlila', 'verb', { gender: 'f', topics: ['l27'] }),
+
+  // --- C1 level expansion items ---
+  v('v_sensi', 'сенсі', 'sensi', 'sense (locative)', 'smyslu', 'noun', { topics: ['l28'] }),
+  v('v_zaperechyty', 'заперечити', 'zaperechyty', 'to deny / object', 'popřít / namítat', 'verb', { topics: ['l28'] }),
+  v('v_varto', 'варто', 'varto', 'worth / should', 'stojí za to / dlužno', 'adverb', { topics: ['l28'] }),
+  v('v_zaznachyty', 'зазначити', 'zaznachyty', 'to note / mention', 'poznamenat', 'verb', { topics: ['l28'] }),
+  v('v_odnoho', 'одного', 'odnoho', 'one (genitive)', 'jednoho', 'pronoun', { topics: ['l29'] }),
+  v('v_boku', 'боку', 'boku', 'side (genitive)', 'strany / boku', 'noun', { topics: ['l29'] }),
+  v('v_prizvelo', 'призвело', 'prizvelo', 'led / resulted (n)', 'vedlo / zapříčinilo', 'verb', { gender: 'n', topics: ['l30'] }),
+  v('v_rezultati', 'результаті', 'rezultati', 'result (locative)', 'výsledku', 'noun', { topics: ['l30'] }),
+  v('v_momentu', 'моменту', 'momentu', 'moment (genitive)', 'momentu / chvíle', 'noun', { topics: ['l31'] }),
+  v('v_tekhnolohiyi', 'технології', 'tekhnolohiyi', 'technologies', 'technologie', 'noun', { topics: ['l32'] }),
+  v('v_suchasnoho', 'сучасного', 'suchasnoho', 'modern (genitive)', 'moderního', 'adjective', { topics: ['l32'] }),
+
+  // C1 Vocab Categories (Themed)
+  // Emotions & opinions
+  v('v_rozhachuvannya', 'розчарування', 'rozhachuvannya', 'disappointment', 'zklamání', 'noun', { gender: 'n', topics: ['l33'] }),
+  v('v_zadovolennya', 'задоволення', 'zadovolennya', 'satisfaction / pleasure', 'satisfakce / potěšení', 'noun', { gender: 'n', topics: ['l33'] }),
+  v('v_poboyuvannya', 'побоювання', 'poboyuvannya', 'fear / apprehension', 'obava', 'noun', { gender: 'n', topics: ['l33'] }),
+  v('v_perekonannya', 'переконання', 'perekonannya', 'conviction / belief', 'přesvědčení', 'noun', { gender: 'n', topics: ['l33'] }),
+  v('v_stavlennya', 'ставлення', 'stavlennya', 'attitude / relation', 'postoj / vztah', 'noun', { gender: 'n', topics: ['l33'] }),
+  // Work and professional life
+  v('v_vidpovidalnist', 'відповідальність', 'vidpovidalnist\'', 'responsibility', 'odpovědnost', 'noun', { gender: 'f', topics: ['l34'] }),
+  v('v_mozhlyvist', 'можливість', 'mozhlyvist\'', 'opportunity / possibility', 'možnost', 'noun', { gender: 'f', topics: ['l34'] }),
+  v('v_rishennya', 'рішення', 'rishennya', 'decision / solution', 'rozhodnutí / řešení', 'noun', { gender: 'n', topics: ['l34'] }),
+  v('v_dosyahnennya', 'досягнення', 'dosyahnennya', 'achievement', 'úspěch / dosažení', 'noun', { gender: 'n', topics: ['l34'] }),
+  v('v_vymoha', 'вимога', 'vymoha', 'requirement / demand', 'požadavek', 'noun', { gender: 'f', topics: ['l34'] }),
+  // Society
+  v('v_suspilstvo', 'суспільство', 'suspilstvo', 'society', 'společnost', 'noun', { gender: 'n', topics: ['l35'] }),
+  v('v_rozvytok', 'розвиток', 'rozvytok', 'development', 'rozvoj', 'noun', { gender: 'm', topics: ['l35'] }),
+  v('v_zminy', 'зміни', 'zminy', 'changes', 'změny', 'noun', { topics: ['l35'] }),
+  v('v_vplyv', 'вплив', 'vplyv', 'influence / impact', 'vliv', 'noun', { gender: 'm', topics: ['l35'] }),
+  // Abstract connectors
+  v('v_vodnochas', 'водночас', 'vodnochas', 'at the same time / simultaneously', 'zároveň', 'adverb', { topics: ['l36'] }),
+  v('v_nezvazhayuchy_na', 'незважаючи на', 'nezvazhayuchy na', 'despite / in spite of', 'přes / nehledě na', 'phrase', { topics: ['l36'] }),
+  v('v_khocha', 'хоча', 'khocha', 'although / though', 'ačkoliv / ač', 'conjunction', { topics: ['l36'] }),
+  v('v_krim_toho', 'крім того', 'krim toho', 'besides / in addition', 'kromě toho', 'phrase', { topics: ['l36'] }),
+  v('v_takym_chynom', 'таким чином', 'takym chynom', 'thus / in this way', 'tímto způsobem / tak', 'phrase', { topics: ['l36'] }),
+  v('v_zokrema', 'зокрема', 'zokrema', 'in particular / particularly', 'zejména / konkrétně', 'adverb', { topics: ['l36'] }),
+  v('v_vidpovidno', 'відповідно', 'vidpovidno', 'accordingly / respectively', 'odpovídajícím způsobem', 'adverb', { topics: ['l36'] }),
 ];
