@@ -1,5 +1,5 @@
 // 20 lesson sections. itemIds are the vocab.js/patterns.js ids that count toward this
-// lesson's mastery calculation (see srs.computeLessonStatus). content is display-only.
+// lesson's mastery calculation (see srs.computeLessonProgress). content is display-only.
 function L(id, order, title, kind, summary, itemIds, content) {
   return { id, order, title, kind, summary, itemIds, content };
 }

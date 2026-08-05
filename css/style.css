@@ -428,6 +428,41 @@ h1, h2, h3 {
   line-height: 1.35;
 }
 
+.progress-bar {
+  width: 100%;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--surface-2);
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 999px;
+  transition: width 200ms ease;
+  min-width: 3px;
+}
+
+.status-learned .progress-bar-fill {
+  background: var(--good);
+}
+
+.status-needs-review .progress-bar-fill {
+  background: var(--warn);
+}
+
+.progress-line {
+  color: var(--text-dim);
+  font-size: 11px;
+  margin-top: 4px;
+}
+
+.lesson-detail-progress {
+  margin-bottom: 4px;
+}
+
 /* ---------- lesson detail ---------- */
 .lesson-detail-title {
   font-size: 22px;

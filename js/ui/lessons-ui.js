@@ -1,6 +1,6 @@
 import { LESSONS } from '../data/lessons.js';
 import { getItemById } from '../core/pool.js';
-import { computeLessonStatus } from '../core/srs.js';
+import { computeLessonProgress } from '../core/srs.js';
 import { loadProgress, saveProgress } from '../core/storage.js';
 
 function escapeHtml(str) {
@@ -16,15 +16,28 @@ const STATUS_LABEL = {
   'needs-review': 'Needs review',
 };
 
+function progressLine(p) {
+  if (p.attempted === 0) return 'Not started yet';
+  const word = p.attempted === 1 ? 'word/phrase' : 'words/phrases';
+  return `${p.attempted}/${p.total} ${word} practiced &middot; ${p.percent}%`;
+}
+
+function progressBarHtml(p) {
+  return `
+    <div class="progress-bar"><div class="progress-bar-fill" style="width:${p.percent}%"></div></div>
+    <div class="progress-line">${progressLine(p)}</div>
+  `;
+}
+
 export function renderLessons(container, { onExit, onOpenDiagnostic } = {}) {
   function renderList() {
     const progress = loadProgress();
     const sorted = [...LESSONS].sort((a, b) => a.order - b.order);
-    const statuses = {};
+    const stats = {};
     for (const lesson of sorted) {
-      statuses[lesson.id] = computeLessonStatus(progress, lesson);
+      stats[lesson.id] = computeLessonProgress(progress, lesson);
     }
-    saveProgress(progress); // persists any everReachedLearned flips from computeLessonStatus
+    saveProgress(progress); // persists any everReachedLearned flips from computeLessonProgress
 
     container.innerHTML = `
       <div class="lessons-screen">
@@ -35,13 +48,14 @@ export function renderLessons(container, { onExit, onOpenDiagnostic } = {}) {
         <div class="lesson-list">
           ${sorted
             .map((lesson) => `
-              <button class="lesson-card status-${statuses[lesson.id]}" data-id="${lesson.id}">
+              <button class="lesson-card status-${stats[lesson.id].status}" data-id="${lesson.id}">
                 <div class="lesson-card-top">
                   <span class="lesson-order">${lesson.order}</span>
-                  <span class="lesson-badge">${STATUS_LABEL[statuses[lesson.id]]}</span>
+                  <span class="lesson-badge">${STATUS_LABEL[stats[lesson.id].status]}</span>
                 </div>
                 <div class="lesson-title">${escapeHtml(lesson.title)}</div>
                 <div class="lesson-summary">${escapeHtml(lesson.summary)}</div>
+                ${progressBarHtml(stats[lesson.id])}
               </button>
             `)
             .join('')}
@@ -65,7 +79,7 @@ export function renderLessons(container, { onExit, onOpenDiagnostic } = {}) {
   function renderDetail(lessonId) {
     const lesson = LESSONS.find((l) => l.id === lessonId);
     const progress = loadProgress();
-    const status = computeLessonStatus(progress, lesson);
+    const p = computeLessonProgress(progress, lesson);
     saveProgress(progress);
     const { content } = lesson;
 
@@ -73,10 +87,11 @@ export function renderLessons(container, { onExit, onOpenDiagnostic } = {}) {
       <div class="lesson-detail-screen">
         <header class="lessons-header">
           <button class="btn-back-list" type="button">&larr; Lessons</button>
-          <span class="lesson-badge status-${status}">${STATUS_LABEL[status]}</span>
+          <span class="lesson-badge status-${p.status}">${STATUS_LABEL[p.status]}</span>
         </header>
         <h2 class="lesson-detail-title">${lesson.order}. ${escapeHtml(lesson.title)}</h2>
         <p class="lesson-detail-summary">${escapeHtml(lesson.summary)}</p>
+        <div class="lesson-detail-progress">${progressBarHtml(p)}</div>
 
         ${content.patterns.length ? `
           <section class="lesson-section">
