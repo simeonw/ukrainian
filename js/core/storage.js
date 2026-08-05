@@ -1,0 +1,53 @@
+const STORAGE_KEY = 'ukrainian-progress';
+const SCHEMA_VERSION = 1;
+
+function defaultProgress() {
+  return {
+    version: SCHEMA_VERSION,
+    items: {},
+    lessons: {},
+    meta: {
+      createdAt: Date.now(),
+      diagnosticCompletedAt: null,
+    },
+  };
+}
+
+export function loadProgress() {
+  let raw;
+  try {
+    raw = localStorage.getItem(STORAGE_KEY);
+  } catch {
+    return defaultProgress();
+  }
+  if (!raw) return defaultProgress();
+  try {
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== 'object' || parsed.version !== SCHEMA_VERSION) {
+      return defaultProgress();
+    }
+    const base = defaultProgress();
+    return {
+      version: SCHEMA_VERSION,
+      items: parsed.items || {},
+      lessons: parsed.lessons || {},
+      meta: { ...base.meta, ...(parsed.meta || {}) },
+    };
+  } catch {
+    return defaultProgress();
+  }
+}
+
+export function saveProgress(progress) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+  } catch {
+    // localStorage unavailable (private mode / quota) — fail silently, in-memory state still works
+  }
+}
+
+export function resetProgress() {
+  const fresh = defaultProgress();
+  saveProgress(fresh);
+  return fresh;
+}
