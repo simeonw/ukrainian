@@ -118,40 +118,71 @@ export function renderDiagnostic(container, { onDone } = {}) {
           });
         }
 
-        // ADAPTIVE PLACEMENT & SEEDING logic:
-        // Instead of climbing a linear staircase, we probe ability boundary.
-        if (isCorrect) {
-          // If they pass, we seed all associated items for this level and prior levels as mastered (advanced or intermediate)
-          for (const itemId of challenge.itemsToSeed) {
-            seedFromDiagnostic(progress, itemId, 'uk2en', challenge.level);
-            seedFromDiagnostic(progress, itemId, 'en2uk', challenge.level);
-          }
-        }
-
-        setTimeout(() => {
+        function advanceFlow() {
           // Adaptive flow binary branching:
           if (challenge.level === 'beginner') {
             if (isCorrect) {
-              // Succeeded at beginner, test intermediate next (stepIndex 1)
               stepIndex = 1;
             } else {
-              // Failed at beginner, learner is absolute beginner. End diagnostics immediately!
               stepIndex = 3;
             }
           } else if (challenge.level === 'intermediate') {
             if (isCorrect) {
-              // Succeeded at intermediate, test advanced next (stepIndex 2)
               stepIndex = 2;
             } else {
-              // Failed at intermediate, boundary is intermediate. End diagnostics.
               stepIndex = 3;
             }
           } else if (challenge.level === 'advanced') {
-            // End diagnostic flow
             stepIndex = 3;
           }
           renderStep();
-        }, isCorrect ? 400 : 1200);
+        }
+
+        if (isCorrect) {
+          // Show follow-up question to distinguish guessing vs. fluent knowing
+          setTimeout(() => {
+            shell(
+              `Adaptive Placement &middot; Verification`,
+              `
+                <div class="diagnostic-word" style="font-size: 20px; color: var(--good); font-weight: bold; margin-bottom: 12px;">Correct Answer!</div>
+                <p class="diagnostic-prompt-label" style="margin-bottom: 18px; line-height: 1.45; text-align: left; color: var(--text);">
+                  You correctly identified: "<em>${escapeHtml(challenge.en)}</em>"<br><br>
+                  To optimize your starting level and practice drills, be completely honest:<br>
+                  <strong>Did you already know this structure fluently, or did you guess / work it out?</strong>
+                </p>
+                <div class="diagnostic-options" style="max-width: 440px;">
+                  <button class="option-btn" id="know-fluent" style="font-size:14px; padding:12px; display: flex; align-items: center; gap: 8px;">
+                    <span>🌟</span> <span>I already knew it fluently (skip practicing this)</span>
+                  </button>
+                  <button class="option-btn" id="know-guessed" style="font-size:14px; padding:12px; display: flex; align-items: center; gap: 8px;">
+                    <span>🧠</span> <span>I guessed / worked it out (keep it active to practice)</span>
+                  </button>
+                </div>
+              `
+            );
+
+            container.querySelector('#know-fluent').addEventListener('click', () => {
+              // Seed as fully known/mastered
+              for (const itemId of challenge.itemsToSeed) {
+                seedFromDiagnostic(progress, itemId, 'uk2en', challenge.level === 'advanced' ? 'advanced' : 'intermediate');
+                seedFromDiagnostic(progress, itemId, 'en2uk', challenge.level === 'advanced' ? 'advanced' : 'intermediate');
+              }
+              advanceFlow();
+            });
+
+            container.querySelector('#know-guessed').addEventListener('click', () => {
+              // Seed at beginner level (box 2, consecutiveCorrect 1) so it remains active in practice drills!
+              for (const itemId of challenge.itemsToSeed) {
+                seedFromDiagnostic(progress, itemId, 'uk2en', 'beginner');
+                seedFromDiagnostic(progress, itemId, 'en2uk', 'beginner');
+              }
+              advanceFlow();
+            });
+          }, 600);
+        } else {
+          // If incorrect, advance automatically after 1.5 seconds
+          setTimeout(advanceFlow, 1500);
+        }
       });
     });
   }
