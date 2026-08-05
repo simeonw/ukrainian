@@ -12,10 +12,26 @@ export function getItemById(id) {
   return ITEMS_BY_ID.get(id) || null;
 }
 
-// Every (item, direction) pair is one quizzable "card".
-export function buildCardPool() {
+// Every (item, direction) pair is one quizzable "card", optionally filtered by active settings topics
+export function buildCardPool(activeTopics = null) {
   const cards = [];
   for (const item of ALL_ITEMS) {
+    if (activeTopics) {
+      // Determine skills for this item
+      const skills = item.skills ? [...item.skills] : [];
+      if (item.kind === 'vocab') {
+        skills.push('vocabulary');
+      }
+      if (item.id.includes('past') || item.id.includes('p_b1_done') || item.id.includes('p_b1_never') || item.id.includes('p_b1_when') || item.id.includes('p_c1_time')) {
+        skills.push('past');
+      }
+      if (item.id.includes('cond') || item.id.includes('hypo') || item.id.includes('challenge_1')) {
+        skills.push('conditional');
+      }
+
+      const hasActiveTopic = skills.some(s => activeTopics.includes(s));
+      if (!hasActiveTopic) continue; // skip item if not in checked setting topics
+    }
     cards.push({ item, direction: 'uk2en' });
     cards.push({ item, direction: 'en2uk' });
   }

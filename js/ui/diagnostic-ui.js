@@ -68,6 +68,10 @@ export function renderDiagnostic(container, { onDone } = {}) {
     advanced: null
   };
 
+  const settings = progress.meta.settings;
+  const showTranslit = settings.transliteration;
+  const useCzech = settings.language === 'cz';
+
   function shell(partLabel, bodyHtml) {
     container.innerHTML = `
       <div class="diagnostic-screen">
@@ -92,9 +96,9 @@ export function renderDiagnostic(container, { onDone } = {}) {
     shell(
       `Adaptive Placement &middot; Level: ${challenge.level.toUpperCase()}`,
       `
-        <p class="diagnostic-prompt-label">Select the correct English meaning for this Ukrainian sentence:</p>
+        <p class="diagnostic-prompt-label">${useCzech ? 'Vyberte správný význam pro tuto ukrajinskou větu:' : 'Select the correct English meaning for this Ukrainian sentence:'}</p>
         <div class="diagnostic-word" style="font-size: 22px; line-height: 1.35; margin: 16px 0;">${escapeHtml(challenge.uk)}</div>
-        <div class="diagnostic-translit" style="margin-bottom: 24px;">${escapeHtml(challenge.translit)}</div>
+        ${showTranslit ? `<div class="diagnostic-translit" style="margin-bottom: 24px;">${escapeHtml(challenge.translit)}</div>` : '<div style="margin-bottom: 24px;"></div>'}
         <div class="diagnostic-options diagnostic-options--wide">
           ${options.map((opt) => `<button class="option-btn" data-text="${escapeHtml(opt)}" style="font-size:14px; padding:10px 12px;">${escapeHtml(opt)}</button>`).join('')}
         </div>
@@ -144,18 +148,16 @@ export function renderDiagnostic(container, { onDone } = {}) {
             shell(
               `Adaptive Placement &middot; Verification`,
               `
-                <div class="diagnostic-word" style="font-size: 20px; color: var(--good); font-weight: bold; margin-bottom: 12px;">Correct Answer!</div>
+                <div class="diagnostic-word" style="font-size: 20px; color: var(--good); font-weight: bold; margin-bottom: 12px;">${useCzech ? 'Správná odpověď!' : 'Correct Answer!'}</div>
                 <p class="diagnostic-prompt-label" style="margin-bottom: 18px; line-height: 1.45; text-align: left; color: var(--text);">
-                  You correctly identified: "<em>${escapeHtml(challenge.en)}</em>"<br><br>
-                  To optimize your starting level and practice drills, be completely honest:<br>
-                  <strong>Did you already know this structure fluently, or did you guess / work it out?</strong>
+                  ${useCzech ? `Správně jste identifikovali: "<em>${escapeHtml(challenge.en)}</em>"<br><br>Pro optimalizaci startovní úrovně buďte upřímní:<br><strong>Znali jste tuto ukrajinskou strukturu plynule, nebo jste ji odvodili z kontextu/češtiny?</strong>` : `You correctly identified: "<em>${escapeHtml(challenge.en)}</em>"<br><br>To optimize your starting level and practice drills, be completely honest:<br><strong>Did you already know this structure fluently, or did you guess / work it out?</strong>`}
                 </p>
                 <div class="diagnostic-options" style="max-width: 440px;">
                   <button class="option-btn" id="know-fluent" style="font-size:14px; padding:12px; display: flex; align-items: center; gap: 8px;">
-                    <span>🌟</span> <span>I already knew it fluently (skip practicing this)</span>
+                    <span>🌟</span> <span>${useCzech ? 'Už jsem to znal plynule (přeskočit procvičování)' : 'I already knew it fluently (skip practicing this)'}</span>
                   </button>
                   <button class="option-btn" id="know-guessed" style="font-size:14px; padding:12px; display: flex; align-items: center; gap: 8px;">
-                    <span>🧠</span> <span>I guessed / worked it out (keep it active to practice)</span>
+                    <span>🧠</span> <span>${useCzech ? 'Odvodil jsem to (chci procvičovat v drillech)' : 'I guessed / worked it out (keep it active to practice)'}</span>
                   </button>
                 </div>
               `

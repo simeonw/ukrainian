@@ -83,6 +83,11 @@ export function renderLessons(container, { onExit, onOpenDiagnostic } = {}) {
     saveProgress(progress);
     const { content } = lesson;
 
+    // Check if transliteration is enabled and load target language setting
+    const settings = progress.meta.settings;
+    const showTranslit = settings.transliteration;
+    const useCzech = settings.language === 'cz';
+
     container.innerHTML = `
       <div class="lesson-detail-screen">
         <header class="lessons-header" style="justify-content: space-between;">
@@ -102,9 +107,9 @@ export function renderLessons(container, { onExit, onOpenDiagnostic } = {}) {
             ${content.patterns.map((p) => `
               <div class="pattern-block">
                 <div class="pattern-uk">${escapeHtml(p.uk)}</div>
-                ${p.translit ? `<div class="pattern-translit">${escapeHtml(p.translit)}</div>` : ''}
-                <div class="pattern-en">${escapeHtml(p.en)}</div>
-                ${p.czNote ? `<div class="pattern-cz">🇨🇿 ${escapeHtml(p.czNote)}</div>` : ''}
+                ${(showTranslit && p.translit) ? `<div class="pattern-translit">${escapeHtml(p.translit)}</div>` : ''}
+                <div class="pattern-en" style="${useCzech ? 'color: var(--text-dim);' : ''}">${escapeHtml(p.en)}</div>
+                ${p.czNote ? `<div class="pattern-cz" style="font-weight: ${useCzech ? '600' : 'normal'}; color: ${useCzech ? 'var(--accent-2)' : 'var(--text-dim)'};">🇨🇿 ${escapeHtml(p.czNote)}</div>` : ''}
               </div>
             `).join('')}
           </section>
@@ -116,9 +121,9 @@ export function renderLessons(container, { onExit, onOpenDiagnostic } = {}) {
             ${content.examples.map((ex) => `
               <div class="example-block">
                 <div class="example-uk">${escapeHtml(ex.uk)}</div>
-                <div class="example-translit">${escapeHtml(ex.translit)}</div>
-                <div class="example-en">${escapeHtml(ex.en)}</div>
-                ${ex.cz ? `<div class="example-cz">🇨🇿 ${escapeHtml(ex.cz)}</div>` : ''}
+                ${(showTranslit && ex.translit) ? `<div class="example-translit">${escapeHtml(ex.translit)}</div>` : ''}
+                <div class="example-en" style="${useCzech ? 'color: var(--text-dim);' : ''}">${escapeHtml(ex.en)}</div>
+                ${ex.cz ? `<div class="example-cz" style="font-weight: ${useCzech ? '600' : 'normal'}; color: ${useCzech ? 'var(--accent-2)' : 'var(--text-dim)'};">🇨🇿 ${escapeHtml(ex.cz)}</div>` : ''}
               </div>
             `).join('')}
           </section>
