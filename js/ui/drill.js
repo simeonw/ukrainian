@@ -133,7 +133,6 @@ export function renderDrill(container, { onExit } = {}) {
 
   function updateScore() {
     scoreEl.textContent = `${sessionCorrect} / ${sessionTotal}`;
-    // Show/hide the single-step Undo button dynamically
     undoAnswerBtn.style.visibility = lastAnswerHistory ? 'visible' : 'hidden';
   }
 
@@ -188,7 +187,6 @@ export function renderDrill(container, { onExit } = {}) {
     document.body.appendChild(backdrop);
   }
 
-  // Convert raw sentence string into clickable word span tokens (safety propagation stops swipe)
   function tokenizeSentence(sentenceStr) {
     const tokens = sentenceStr.split(/([a-zA-Zа-яА-ЯёЁіІїЇєЄґҐ’\']+)/);
     return tokens.map(token => {
@@ -202,16 +200,15 @@ export function renderDrill(container, { onExit } = {}) {
   function addTokenEventListeners(element) {
     element.querySelectorAll('.interactive-word-token').forEach(tok => {
       tok.addEventListener('pointerdown', (e) => {
-        e.stopPropagation(); // prevent swipe/drag capture
+        e.stopPropagation();
       });
       tok.addEventListener('click', (e) => {
-        e.stopPropagation(); // prevent default trigger
+        e.stopPropagation();
         showWordModal(tok.dataset.word);
       });
     });
   }
 
-  // Common wrapper to render a specific drawn card (handles both normal and re-staged undo rounds)
   function renderRound(card) {
     clearFeedback();
 
@@ -219,7 +216,6 @@ export function renderDrill(container, { onExit } = {}) {
     const isSentence = item.uk.split(' ').length > 2;
 
     if (!isSentence) {
-      // 1. Show static swipe grid
       gridEl.style.display = 'grid';
       interactiveEl.style.display = 'none';
       hintEl.textContent = 'Swipe, click, or use arrow keys to answer. Tap words for definitions.';
@@ -230,7 +226,8 @@ export function renderDrill(container, { onExit } = {}) {
       const tiles = {};
       positions.forEach((pos, i) => { tiles[pos] = options[i]; });
 
-      currentRound = { correctItem: item, direction, tiles, locked: false, type: 'swipe', card };
+      // Record high-resolution start time
+      currentRound = { correctItem: item, direction, tiles, locked: false, type: 'swipe', card, startTime: Date.now() };
 
       const prompt = getPromptText(item, direction);
       cardEl.innerHTML = `
@@ -253,7 +250,6 @@ export function renderDrill(container, { onExit } = {}) {
         `;
       }
     } else {
-      // 2. Hide swipe grid, render custom interactive advanced layout
       gridEl.style.display = 'none';
       interactiveEl.style.display = 'block';
 
@@ -298,7 +294,8 @@ export function renderDrill(container, { onExit } = {}) {
     const feedbackEl = interactiveEl.querySelector('#semantic-feedback');
     addTokenEventListeners(interactiveEl);
 
-    currentRound = { correctItem: item, direction, locked: false, type: 'semantic', card };
+    // Record high-resolution start time
+    currentRound = { correctItem: item, direction, locked: false, type: 'semantic', card, startTime: Date.now() };
 
     function checkAnswer() {
       if (currentRound.locked) return;
@@ -308,11 +305,15 @@ export function renderDrill(container, { onExit } = {}) {
       currentRound.locked = true;
       inputField.disabled = true;
 
+      const timeTaken = (Date.now() - currentRound.startTime) / 1000;
+      const wordsCount = item.uk.split(/\s+/).length;
+      const threshold = 3 + wordsCount * 1.5;
+      const isFluent = timeTaken <= threshold;
+
       const targetTranslation = getAnswerText(item, direction);
       const score = getFuzzyRatio(userText, targetTranslation);
-      const isCorrect = score >= 0.72; // highly lenient semantic accuracy
+      const isCorrect = score >= 0.72;
 
-      // Preserve single-step undo history
       lastAnswerHistory = {
         card: card,
         isCorrect: isCorrect,
@@ -323,12 +324,16 @@ export function renderDrill(container, { onExit } = {}) {
       if (isCorrect) sessionCorrect += 1;
       updateScore();
 
-      recordAnswer(progress, item.id, direction, isCorrect);
+      recordAnswer(progress, item.id, direction, isCorrect, false, timeTaken);
       saveProgress(progress);
 
       if (isCorrect) {
         inputField.style.borderColor = 'var(--good)';
-        feedbackEl.innerHTML = `<span style="color: var(--good); font-weight: bold;">Great! Meaning match: ${(score * 100).toFixed(0)}%</span>`;
+        if (isFluent) {
+          feedbackEl.innerHTML = `<span style="color: var(--good); font-weight: bold;">🌟 Fast &amp; Fluent! (${timeTaken.toFixed(1)}s) &middot; Match: ${(score * 100).toFixed(0)}%</span>`;
+        } else {
+          feedbackEl.innerHTML = `<span style="color: var(--warn); font-weight: bold;">🧠 Worked out! Great persistence! (${timeTaken.toFixed(1)}s)</span>`;
+        }
       } else {
         inputField.style.borderColor = 'var(--bad)';
         feedbackEl.innerHTML = `
@@ -337,7 +342,7 @@ export function renderDrill(container, { onExit } = {}) {
         `;
       }
 
-      setTimeout(nextRound, isCorrect ? 1000 : 2600);
+      setTimeout(nextRound, isCorrect ? 1500 : 2800);
     }
 
     submitBtn.addEventListener('click', checkAnswer);
@@ -402,13 +407,13 @@ export function renderDrill(container, { onExit } = {}) {
     const negateBtn = interactiveEl.querySelector('#mod-negate');
 
     let currentSelection = [];
-    currentRound = { correctItem: item, direction, locked: false, type: 'builder', card };
 
-    // --- WORD-ORDER UNDO & RESET LISTENERS ---
+    // Record high-resolution start time
+    currentRound = { correctItem: item, direction, locked: false, type: 'builder', card, startTime: Date.now() };
+
     undoWordBtn.addEventListener('click', () => {
       if (currentRound.locked || currentSelection.length === 0) return;
       const popped = currentSelection.pop();
-      // Un-highlight in chip pool
       const chip = poolEl.querySelector(`.sentence-chip[data-index="${popped.index}"]`);
       if (chip) chip.classList.remove('is-active');
       renderSlots();
@@ -511,10 +516,13 @@ export function renderDrill(container, { onExit } = {}) {
       const builtPhrase = currentSelection.map(item => item.word.toLowerCase()).join(' ');
       const cleanTarget = item.uk.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()!?]/g, "").trim();
 
+      const timeTaken = (Date.now() - currentRound.startTime) / 1000;
+      const threshold = 3 + baseWords.length * 1.5;
+      const isFluent = timeTaken <= threshold;
+
       const score = getFuzzyRatio(builtPhrase, cleanTarget);
       const isCorrect = score >= 0.85;
 
-      // Preserve single-step undo history
       lastAnswerHistory = {
         card: card,
         isCorrect: isCorrect,
@@ -525,12 +533,16 @@ export function renderDrill(container, { onExit } = {}) {
       if (isCorrect) sessionCorrect += 1;
       updateScore();
 
-      recordAnswer(progress, item.id, direction, isCorrect);
+      recordAnswer(progress, item.id, direction, isCorrect, false, timeTaken);
       saveProgress(progress);
 
       if (isCorrect) {
         slotsEl.style.borderColor = 'var(--good)';
-        feedbackEl.innerHTML = `<span style="color: var(--good); font-weight: bold;">Perfect phrase construction!</span>`;
+        if (isFluent) {
+          feedbackEl.innerHTML = `<span style="color: var(--good); font-weight: bold;">🌟 Fast &amp; Fluent! (${timeTaken.toFixed(1)}s)</span>`;
+        } else {
+          feedbackEl.innerHTML = `<span style="color: var(--warn); font-weight: bold;">🧠 Worked out! Great persistence! (${timeTaken.toFixed(1)}s)</span>`;
+        }
       } else {
         slotsEl.style.borderColor = 'var(--bad)';
         feedbackEl.innerHTML = `
@@ -539,7 +551,7 @@ export function renderDrill(container, { onExit } = {}) {
         `;
       }
 
-      setTimeout(nextRound, isCorrect ? 1000 : 2600);
+      setTimeout(nextRound, isCorrect ? 1500 : 2800);
     }
 
     submitBtn.addEventListener('click', checkBuilder);
@@ -552,7 +564,11 @@ export function renderDrill(container, { onExit } = {}) {
     const chosen = currentRound.tiles[position];
     const isCorrect = chosen.id === currentRound.correctItem.id;
 
-    // Preserve single-step undo history
+    const timeTaken = (Date.now() - currentRound.startTime) / 1000;
+    const wordsCount = currentRound.correctItem.uk.split(/\s+/).length;
+    const threshold = 3 + wordsCount * 1.5;
+    const isFluent = timeTaken <= threshold;
+
     lastAnswerHistory = {
       card: currentRound.card,
       isCorrect: isCorrect,
@@ -563,11 +579,21 @@ export function renderDrill(container, { onExit } = {}) {
     if (isCorrect) sessionCorrect += 1;
     updateScore();
 
-    recordAnswer(progress, currentRound.correctItem.id, currentRound.direction, isCorrect);
+    recordAnswer(progress, currentRound.correctItem.id, currentRound.direction, isCorrect, false, timeTaken);
     saveProgress(progress);
 
     cardEl.classList.add(isCorrect ? 'is-correct' : 'is-incorrect');
     tileEls[position].classList.add(isCorrect ? 'is-correct' : 'is-incorrect');
+
+    // Encouraging feedback overlay on the card El
+    if (isCorrect) {
+      if (isFluent) {
+        cardEl.innerHTML += `<div style="color: var(--good); font-size: 11px; margin-top: 4px; font-weight: bold;">🌟 Fast &amp; Fluent! (${timeTaken.toFixed(1)}s)</div>`;
+      } else {
+        cardEl.innerHTML += `<div style="color: var(--warn); font-size: 11px; margin-top: 4px; font-weight: bold;">🧠 Worked out! Persistence! (${timeTaken.toFixed(1)}s)</div>`;
+      }
+    }
+
     if (!isCorrect) {
       for (const pos of POSITIONS) {
         if (currentRound.tiles[pos].id === currentRound.correctItem.id) {
@@ -579,22 +605,19 @@ export function renderDrill(container, { onExit } = {}) {
     setTimeout(() => {
       gestureHandle && gestureHandle.reset();
       nextRound();
-    }, isCorrect ? 450 : 1100);
+    }, isCorrect ? 1500 : 2600);
   }
 
   // --- UNDO LAST ANSWER HEADER BUTTON LISTENER ---
   undoAnswerBtn.addEventListener('click', () => {
     if (!lastAnswerHistory) return;
 
-    // 1. Revert scores
     sessionTotal -= 1;
     if (lastAnswerHistory.isCorrect) sessionCorrect -= 1;
 
-    // 2. Restore prior box state for this item
     progress.items[lastAnswerHistory.card.item.id] = lastAnswerHistory.previousBoxState;
     saveProgress(progress);
 
-    // 3. Clear history & re-render that specific card immediately
     const restoredCard = lastAnswerHistory.card;
     lastAnswerHistory = null;
     updateScore();
@@ -606,14 +629,12 @@ export function renderDrill(container, { onExit } = {}) {
     if (!currentRound || currentRound.locked) return;
     currentRound.locked = true;
 
-    // Reset box to 0 with IDK flag
     recordAnswer(progress, currentRound.correctItem.id, currentRound.direction, false, true);
     saveProgress(progress);
 
     sessionTotal += 1;
     updateScore();
 
-    // Visual feedback
     if (currentRound.type === 'swipe') {
       cardEl.classList.add('is-incorrect');
       for (const pos of POSITIONS) {
@@ -637,7 +658,6 @@ export function renderDrill(container, { onExit } = {}) {
     }
   });
 
-  // Attach persistent single-session event listeners exactly once
   gestureHandle = attachSwipeGesture(cardEl, { onCommit: (position) => submit(position) });
   removeKeyboard = attachKeyboardNav((position) => submit(position));
   for (const pos of POSITIONS) {

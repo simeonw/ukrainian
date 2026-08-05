@@ -12,8 +12,8 @@ function ensureItemEntry(progress, itemId) {
   if (!progress.items) progress.items = {};
   if (!progress.items[itemId]) {
     progress.items[itemId] = {
-      uk2en: { box: 0, seen: 0, correct: 0, lastSeen: null, consecutiveCorrect: 0, history: [] },
-      en2uk: { box: 0, seen: 0, correct: 0, lastSeen: null, consecutiveCorrect: 0, history: [] }
+      uk2en: { box: 0, seen: 0, correct: 0, lastSeen: null, consecutiveCorrect: 0, history: [], latencyHistory: [] },
+      en2uk: { box: 0, seen: 0, correct: 0, lastSeen: null, consecutiveCorrect: 0, history: [], latencyHistory: [] }
     };
   }
   return progress.items[itemId];
@@ -22,7 +22,10 @@ function ensureItemEntry(progress, itemId) {
 function ensureDirectionEntry(progress, itemId, direction) {
   const entry = ensureItemEntry(progress, itemId);
   if (!entry[direction]) {
-    entry[direction] = { box: 0, seen: 0, correct: 0, lastSeen: null, consecutiveCorrect: 0, history: [] };
+    entry[direction] = { box: 0, seen: 0, correct: 0, lastSeen: null, consecutiveCorrect: 0, history: [], latencyHistory: [] };
+  }
+  if (!entry[direction].latencyHistory) {
+    entry[direction].latencyHistory = [];
   }
   return entry[direction];
 }
@@ -58,7 +61,7 @@ export function itemConfidence(progress, itemId) {
   return Math.min(1, sumBox / 4);
 }
 
-// Track 6 distinct dimensions of ability: vocabulary, understanding, production, grammar, conditional, past
+// Track 7 distinct dimensions of ability: vocabulary, understanding, production, grammar, conditional, past, and reading speed
 export function getAbilityProfile(progress, cardPool) {
   const profile = {
     vocabulary: { score: 0, total: 0 },
@@ -67,6 +70,7 @@ export function getAbilityProfile(progress, cardPool) {
     grammar: { score: 0, total: 0 },
     conditional: { score: 0, total: 0 },
     past: { score: 0, total: 0 },
+    'Reading Speed': { score: 0, total: 0 } // tracks speed/latency score
   };
 
   const uniqueItems = new Set();
@@ -74,9 +78,12 @@ export function getAbilityProfile(progress, cardPool) {
     uniqueItems.add(card.item);
   }
 
+  let totalLatencies = 0;
+  let fluentLatencies = 0;
+
   for (const item of uniqueItems) {
     // Determine skills for this item
-    const skills = item.skills || [];
+    const skills = item.skills ? [...item.skills] : [];
     if (item.kind === 'vocab') {
       skills.push('vocabulary');
     }
@@ -94,26 +101,53 @@ export function getAbilityProfile(progress, cardPool) {
         profile[skill].total += 1;
       }
     }
+
+    // Accumulate reading speed stats from latency history
+    const statsUk = progress.items?.[item.id]?.uk2en;
+    const statsEn = progress.items?.[item.id]?.en2uk;
+
+    if (statsUk && statsUk.latencyHistory) {
+      for (const lat of statsUk.latencyHistory) {
+        totalLatencies += 1;
+        const words = item.uk.split(/\s+/).length;
+        const threshold = 3 + words * 1.5;
+        if (lat <= threshold) fluentLatencies += 1;
+      }
+    }
+    if (statsEn && statsEn.latencyHistory) {
+      for (const lat of statsEn.latencyHistory) {
+        totalLatencies += 1;
+        const words = item.uk.split(/\s+/).length;
+        const threshold = 3 + words * 1.5;
+        if (lat <= threshold) fluentLatencies += 1;
+      }
+    }
   }
 
   // Convert to percent
   const result = {};
   for (const skill in profile) {
-    const t = profile[skill].total;
-    result[skill] = t > 0 ? Math.round((profile[skill].score / t) * 100) : 0;
+    if (skill === 'Reading Speed') {
+      result[skill] = totalLatencies > 0 ? Math.round((fluentLatencies / totalLatencies) * 100) : 0;
+    } else {
+      const t = profile[skill].total;
+      result[skill] = t > 0 ? Math.round((profile[skill].score / t) * 100) : 0;
+    }
   }
   return result;
 }
 
 // Mutates progress in place; caller is responsible for persisting via storage.saveProgress.
-export function recordAnswer(progress, itemId, direction, isCorrect, isIdk = false) {
+export function recordAnswer(progress, itemId, direction, isCorrect, isIdk = false, latency = null) {
   const stats = ensureDirectionEntry(progress, itemId, direction);
   stats.seen += 1;
   stats.lastSeen = Date.now();
 
+  if (latency !== null) {
+    stats.latencyHistory.push(latency);
+  }
+
   if (isIdk) {
-    // "I don't know" is flagged. Reset box to 0 (maximum frequency).
-    // Does NOT count as a normal wrong answer (so history / consecutive correct gets reset or handled gently)
     stats.box = 0;
     stats.consecutiveCorrect = 0;
     stats.history.push('idk');
@@ -190,25 +224,19 @@ function pickFrom(candidates, avoidKey) {
 
 // ADAPTIVE FILTERING:
 // The drill engine optimizes for information gain, avoiding over-testing mastered material.
-// Select cards based on demonstrated weaknesses/boundary.
 export function drawCard(progress, cardPool, avoidKey = null) {
-  // 1. First, check if there's any completely unseen card. Uniform draw from unseen.
   const unseen = cardPool.filter((c) => !cardSeen(progress, c));
   if (unseen.length > 0) return pickFrom(unseen, avoidKey);
 
-  // 2. Separate cards into non-mastered and mastered
   const activeCandidates = cardPool.filter(c => !isCardMastered(progress, c));
 
   let poolToDraw = activeCandidates.length > 0 ? activeCandidates : cardPool;
 
-  // Filter out avoidKey if possible
   if (avoidKey && poolToDraw.length > 1) {
     const filtered = poolToDraw.filter((c) => cardKey(c) !== avoidKey);
     if (filtered.length) poolToDraw = filtered;
   }
 
-  // 3. Weighted selection based on Leitner Box
-  // We multiply the probability weight of mastered cards by 0.1 to drastically reduce frequency
   const weights = poolToDraw.map((c) => {
     let baseWeight = BOX_WEIGHTS[cardBox(progress, c)] || 1;
     if (isCardMastered(progress, c)) {
