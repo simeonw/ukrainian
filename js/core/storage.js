@@ -1,6 +1,15 @@
 const STORAGE_KEY = 'ukrainian-progress';
 const SCHEMA_VERSION = 1;
 
+export const ALL_SETTINGS_TOPICS = [
+  'vocabulary',
+  'grammar',
+  'past',
+  'conditional',
+  'understanding',
+  'production'
+];
+
 function defaultProgress() {
   return {
     version: SCHEMA_VERSION,
@@ -9,6 +18,11 @@ function defaultProgress() {
     meta: {
       createdAt: Date.now(),
       diagnosticCompletedAt: null,
+      settings: {
+        transliteration: true,
+        language: 'en',
+        topics: [...ALL_SETTINGS_TOPICS]
+      }
     },
   };
 }
@@ -27,11 +41,22 @@ export function loadProgress() {
       return defaultProgress();
     }
     const base = defaultProgress();
+
+    // Clean migration of settings schema
+    const settings = {
+      ...base.meta.settings,
+      ...(parsed.meta?.settings || {})
+    };
+
     return {
       version: SCHEMA_VERSION,
       items: parsed.items || {},
       lessons: parsed.lessons || {},
-      meta: { ...base.meta, ...(parsed.meta || {}) },
+      meta: {
+        ...base.meta,
+        ...(parsed.meta || {}),
+        settings
+      },
     };
   } catch {
     return defaultProgress();

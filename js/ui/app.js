@@ -1,7 +1,7 @@
 import { renderDrill } from './drill.js';
 import { renderLessons } from './lessons-ui.js';
 import { renderDiagnostic } from './diagnostic-ui.js';
-import { loadProgress, resetProgress } from '../core/storage.js';
+import { loadProgress, resetProgress, saveProgress, ALL_SETTINGS_TOPICS } from '../core/storage.js';
 import { getAbilityProfile } from '../core/srs.js';
 import { buildCardPool } from '../core/pool.js';
 
@@ -26,7 +26,10 @@ function renderHome() {
 
   root.innerHTML = `
     <div class="home-screen">
-      <h1>Українська</h1>
+      <header class="lessons-header" style="display: flex; justify-content: space-between; align-items: center;">
+        <h1>Українська</h1>
+        <button class="btn-primary" id="open-settings-btn" style="padding: 8px 14px; font-size: 13px;">⚙️ Settings</button>
+      </header>
       <p class="home-subtitle">A Czech-bridge course: get understandable fast, improve accuracy over time.</p>
 
       ${showDiagnosticCta ? `
@@ -90,6 +93,7 @@ function renderHome() {
 
   root.querySelector('#open-drill').addEventListener('click', renderDrillScreen);
   root.querySelector('#open-lessons').addEventListener('click', renderLessonsScreen);
+  root.querySelector('#open-settings-btn').addEventListener('click', renderSettingsScreen);
 
   // Global Progress Reset Listener
   root.querySelector('#reset-global-storage').addEventListener('click', () => {
@@ -98,6 +102,102 @@ function renderHome() {
       renderHome();
     }
   });
+}
+
+function renderSettingsScreen() {
+  teardownActive();
+  const progress = loadProgress();
+  const settings = progress.meta.settings;
+
+  root.innerHTML = `
+    <div class="settings-screen" style="display: flex; flex-direction: column; gap: 16px; padding-top: 8px;">
+      <header class="lessons-header">
+        <button class="btn-back-list" id="settings-back-btn" type="button">&larr; Home</button>
+        <h2>Settings</h2>
+      </header>
+
+      <div class="lesson-section" style="background: var(--surface); border: 1px solid var(--border); padding: 16px; border-radius: var(--radius); display: flex; flex-direction: column; gap: 16px;">
+
+        <!-- Transliteration Option -->
+        <div>
+          <label style="font-weight: bold; font-size: 15px; display: flex; align-items: center; justify-content: space-between; cursor: pointer;">
+            <span>Show Transliteration / Readings</span>
+            <input type="checkbox" id="settings-translit-chk" ${settings.transliteration ? 'checked' : ''} style="width: 20px; height: 20px; accent-color: var(--accent);" />
+          </label>
+          <p style="color: var(--text-dim); font-size: 13px; margin: 4px 0 0 0;">Toggle pronunciation helpers for Cyrillic words.</p>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid var(--border); margin: 8px 0;" />
+
+        <!-- Primary Target Translation Language Option -->
+        <div>
+          <label style="font-weight: bold; font-size: 15px; display: block; margin-bottom: 8px;">Primary Translation Language</label>
+          <div style="display: flex; gap: 16px;">
+            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 14px;">
+              <input type="radio" name="settings-lang" value="en" ${settings.language === 'en' ? 'checked' : ''} style="width: 18px; height: 18px; accent-color: var(--accent);" />
+              <span>English 🇬🇧</span>
+            </label>
+            <label style="display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 14px;">
+              <input type="radio" name="settings-lang" value="cz" ${settings.language === 'cz' ? 'checked' : ''} style="width: 18px; height: 18px; accent-color: var(--accent);" />
+              <span>Czech 🇨🇿</span>
+            </label>
+          </div>
+          <p style="color: var(--text-dim); font-size: 13px; margin: 6px 0 0 0;">Select your target translation language for drills and card hints.</p>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid var(--border); margin: 8px 0;" />
+
+        <!-- Active Topics Filters -->
+        <div>
+          <label style="font-weight: bold; font-size: 15px; display: block; margin-bottom: 8px;">Active Drill Topics &amp; Skills</label>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            ${ALL_SETTINGS_TOPICS.map(topic => {
+              const isChecked = settings.topics.includes(topic);
+              return `
+                <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; font-size: 13px; background: var(--surface-2); padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+                  <span style="text-transform: capitalize;">${topic}</span>
+                  <input type="checkbox" class="settings-topic-chk" value="${topic}" ${isChecked ? 'checked' : ''} style="width: 18px; height: 18px; accent-color: var(--accent);" />
+                </label>
+              `;
+            }).join('')}
+          </div>
+          <p style="color: var(--text-dim); font-size: 13px; margin: 8px 0 0 0;">Only draw questions in drills matching these checked active categories.</p>
+        </div>
+
+      </div>
+    </div>
+  `;
+
+  // Listeners to auto-save settings
+  const translitChk = root.querySelector('#settings-translit-chk');
+  translitChk.addEventListener('change', () => {
+    progress.meta.settings.transliteration = translitChk.checked;
+    saveProgress(progress);
+  });
+
+  root.querySelectorAll('input[name="settings-lang"]').forEach(rad => {
+    rad.addEventListener('change', () => {
+      progress.meta.settings.language = rad.value;
+      saveProgress(progress);
+    });
+  });
+
+  const topicChks = root.querySelectorAll('.settings-topic-chk');
+  topicChks.forEach(chk => {
+    chk.addEventListener('change', () => {
+      let activeTopics = Array.from(topicChks).filter(c => c.checked).map(c => c.value);
+      if (activeTopics.length === 0) {
+        // Fallback to avoid empty pool
+        activeTopics = [...ALL_SETTINGS_TOPICS];
+        topicChks.forEach(c => c.checked = true);
+        alert("At least one topic must be checked! All topics restored.");
+      }
+      progress.meta.settings.topics = activeTopics;
+      saveProgress(progress);
+    });
+  });
+
+  root.querySelector('#settings-back-btn').addEventListener('click', renderHome);
 }
 
 function renderDrillScreen() {
