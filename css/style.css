@@ -570,3 +570,842 @@ h1, h2, h3 {
     --border: #e2e8f0;
   }
 }
+
+/* ==========================================================================
+   Sentence Builder Styles
+   ========================================================================== */
+
+.sentence-builder-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding-top: 8px;
+}
+
+.sb-intro-card {
+  background: linear-gradient(135deg, var(--surface) 0%, var(--surface-2) 100%);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+
+.sb-intro-text {
+  margin: 0;
+  color: var(--text-dim);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.sb-metrics-section h3 {
+  font-size: 13px;
+  text-transform: uppercase;
+  color: var(--accent);
+  letter-spacing: 0.05em;
+  margin-bottom: 12px;
+}
+
+.sb-metric-item {
+  margin-bottom: 10px;
+}
+
+.sb-metric-label {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-bottom: 4px;
+}
+
+.sb-metric-label strong {
+  color: var(--text);
+}
+
+.sb-level-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sb-level-card.level-complete {
+  border-color: rgba(52, 211, 153, 0.4);
+}
+
+.sb-level-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sb-level-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.sb-level-status {
+  font-size: 11px;
+  background: var(--surface-2);
+  border-radius: 999px;
+  padding: 2px 8px;
+  color: var(--text-dim);
+}
+
+.level-complete .sb-level-status {
+  background: rgba(52, 211, 153, 0.12);
+  color: var(--good);
+}
+
+.sb-level-focus {
+  font-size: 12px;
+  color: var(--accent-2);
+  margin-bottom: 6px;
+}
+
+.sb-sentences-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sb-sentence-btn {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  color: var(--text);
+  text-align: left;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  transition: border-color 150ms ease, background 150ms ease;
+}
+
+.sb-sentence-btn:hover {
+  border-color: var(--accent);
+  background: var(--surface);
+}
+
+.sb-sentence-status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border);
+  flex-shrink: 0;
+}
+
+.sb-sentence-btn.is-done {
+  border-color: rgba(52, 211, 153, 0.25);
+}
+
+.sb-sentence-btn.is-done .sb-sentence-status-dot {
+  background: var(--good);
+}
+
+.sb-sentence-text {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+/* --- Wizard & Journey --- */
+.sb-journey-screen {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding-top: 8px;
+}
+
+.sb-step-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.sb-step-indicators {
+  display: flex;
+  gap: 6px;
+}
+
+.sb-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--border);
+  transition: background 150ms ease;
+}
+
+.sb-dot.active {
+  background: var(--accent);
+  transform: scale(1.2);
+}
+
+.sb-dot.passed {
+  background: var(--good);
+}
+
+.sb-step-title {
+  font-size: 18px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.sb-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sb-card-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  letter-spacing: 0.05em;
+  margin-bottom: 2px;
+}
+
+.sb-card-uk {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1.25;
+}
+
+.sb-card-translit {
+  color: var(--accent-2);
+  font-size: 14px;
+}
+
+.sb-bridge-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 0;
+}
+
+.sb-card-en, .sb-card-cz {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.4;
+}
+
+.sb-bridge-explanation {
+  background: rgba(96, 165, 250, 0.06);
+  border-left: 3px solid var(--accent);
+  padding: 10px 12px;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  font-size: 13.5px;
+  color: var(--text);
+  line-height: 1.5;
+}
+
+.sb-next-btn {
+  margin-top: 10px;
+  align-self: flex-end;
+}
+
+/* --- Exercise 1 Fuzzy Matching --- */
+.sb-instruction {
+  font-size: 14px;
+  color: var(--text-dim);
+  line-height: 1.4;
+}
+
+.sb-prompt-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  text-align: center;
+}
+
+.sb-prompt-uk {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.sb-prompt-translit {
+  color: var(--accent-2);
+  font-size: 14px;
+}
+
+.sb-textarea {
+  width: 100%;
+  height: 90px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  padding: 12px;
+  font-family: inherit;
+  font-size: 14px;
+  resize: none;
+}
+
+.sb-textarea:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.sb-input-area {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.sb-input-actions {
+  display: flex;
+  justify-content: space-between;
+}
+
+.sb-feedback-container {
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  font-size: 13.5px;
+  line-height: 1.4;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.sb-feedback-container.hidden {
+  display: none !important;
+}
+
+.sb-success-feedback {
+  background: rgba(52, 211, 153, 0.08);
+  border: 1px solid var(--good);
+  color: var(--text);
+}
+
+.sb-error-feedback {
+  background: rgba(248, 113, 113, 0.08);
+  border: 1px solid var(--bad);
+  color: var(--text);
+}
+
+.sb-info-feedback {
+  background: rgba(251, 191, 36, 0.08);
+  border: 1px solid var(--warn);
+  color: var(--text);
+}
+
+.sb-feedback-title {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.sb-feedback-reference {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  padding-top: 6px;
+  margin-top: 4px;
+  color: var(--text-dim);
+}
+
+/* --- Exercise 2 Tap Words --- */
+.sb-tappable-sentence-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+.sb-tap-word-btn {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: var(--radius-sm);
+  padding: 8px 12px;
+  font-size: 15px;
+  font-weight: 600;
+  position: relative;
+  transition: all 150ms ease;
+}
+
+.sb-tap-word-btn.is-learnable {
+  border-color: var(--accent);
+  background: rgba(96, 165, 250, 0.05);
+}
+
+.sb-tap-word-btn.active {
+  background: var(--accent);
+  color: #05101f;
+  border-color: var(--accent);
+}
+
+.sb-word-dot {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent-2);
+}
+
+.sb-tap-word-btn.active .sb-word-dot {
+  background: #05101f;
+}
+
+.sb-explanation-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  min-height: 140px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.sb-explanation-panel.empty {
+  text-align: center;
+  color: var(--text-dim);
+}
+
+.sb-empty-panel-text {
+  font-size: 13.5px;
+  line-height: 1.5;
+}
+
+.sb-simple-word-title, .sb-quiz-word-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 8px;
+}
+
+.sb-simple-word-desc {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--text-dim);
+}
+
+.sb-quiz-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.sb-quiz-opt-btn {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-size: 14px;
+  text-align: left;
+  transition: background 150ms ease;
+}
+
+.sb-quiz-opt-btn.correct {
+  background: rgba(52, 211, 153, 0.15);
+  border-color: var(--good);
+  color: var(--text);
+}
+
+.sb-quiz-opt-btn.incorrect {
+  background: rgba(248, 113, 113, 0.15);
+  border-color: var(--bad);
+}
+
+.sb-quiz-feedback {
+  margin-top: 10px;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.sb-quiz-feedback.success { color: var(--good); }
+.sb-quiz-feedback.error { color: var(--bad); }
+
+.sb-details-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 8px;
+  margin-bottom: 10px;
+}
+
+.sb-details-word {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.sb-details-meaning-badge {
+  font-size: 11px;
+  background: rgba(52, 211, 153, 0.12);
+  color: var(--good);
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-weight: 600;
+}
+
+.sb-details-section {
+  margin-bottom: 10px;
+}
+
+.sb-details-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  letter-spacing: 0.05em;
+  margin-bottom: 2px;
+}
+
+.sb-details-text {
+  margin: 0;
+  font-size: 13.5px;
+  color: var(--text);
+  line-height: 1.45;
+}
+
+.sb-details-related-list {
+  margin: 0;
+  padding-left: 16px;
+  font-size: 13.5px;
+  color: var(--text-dim);
+  line-height: 1.45;
+}
+
+/* --- Exercise 3 Sentence Builder --- */
+.sb-builder-target-en {
+  font-size: 16px;
+  font-style: italic;
+  text-align: center;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+
+.sb-constructed-sentence-box {
+  background: var(--surface);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  min-height: 80px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+}
+
+.sb-builder-placeholder {
+  font-size: 13.5px;
+  color: var(--text-dim);
+}
+
+.sb-pool-sentence-box {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  margin: 10px 0;
+}
+
+.sb-builder-chip {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  font-size: 15px;
+  font-weight: 600;
+  transition: all 120ms ease;
+}
+
+.sb-builder-chip.constructed {
+  border-color: var(--accent);
+  background: rgba(96, 165, 250, 0.08);
+}
+
+.sb-builder-chip.pool:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent-2);
+}
+
+.sb-builder-actions {
+  display: flex;
+  justify-content: space-between;
+}
+
+/* --- Phase 2 Transformations --- */
+.sb-variation-prompt-box {
+  background: rgba(251, 191, 36, 0.05);
+  border-left: 3px solid var(--warn);
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+}
+
+.sb-variation-desc {
+  font-size: 11px;
+  color: var(--warn);
+  text-transform: uppercase;
+}
+
+.sb-variation-challenge-text {
+  font-size: 14px;
+  color: var(--text);
+  font-weight: 600;
+  margin-top: 2px;
+}
+
+.sb-static-word-chip {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 6px 10px;
+  font-size: 14px;
+  color: var(--text-dim);
+}
+
+.sb-static-word-chip.highlighted {
+  border-color: var(--good);
+  background: rgba(52, 211, 153, 0.1);
+  color: var(--text);
+  font-weight: 700;
+}
+
+.sb-variation-options-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.sb-variation-option-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  text-align: left;
+  font-size: 14px;
+}
+
+.sb-variation-option-btn.correct {
+  background: rgba(52, 211, 153, 0.12);
+  border-color: var(--good);
+}
+
+.sb-variation-option-btn.incorrect {
+  background: rgba(248, 113, 113, 0.12);
+  border-color: var(--bad);
+}
+
+/* --- Exercise 4 Reverse Construction --- */
+.sb-reverse-target-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  text-align: center;
+}
+
+.sb-reverse-target-en {
+  font-size: 18px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.sb-reverse-hint-cz {
+  color: var(--text-dim);
+  font-size: 13px;
+}
+
+.sb-text-input {
+  width: 100%;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  padding: 12px;
+  font-family: inherit;
+  font-size: 16px;
+}
+
+.sb-text-input:focus {
+  border-color: var(--accent);
+  outline: none;
+}
+
+.sb-help-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+}
+
+.sb-help-panel-title {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin: 0 0 8px;
+}
+
+.sb-help-chips {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.sb-char-chip {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text);
+  padding: 6px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.sb-char-chip:hover {
+  background: var(--border);
+}
+
+.sb-help-vocabulary-hint {
+  font-size: 12px;
+  color: var(--text-dim);
+  border-top: 1px dashed var(--border);
+  padding-top: 8px;
+}
+
+.sb-vocab-mini-hint {
+  background: rgba(255, 255, 255, 0.05);
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-right: 4px;
+}
+
+/* --- 3-Tier Grader Badges --- */
+.sb-grade-badge {
+  display: inline-block;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.sb-grade-badge.grade-natural {
+  background: rgba(52, 211, 153, 0.15);
+  color: var(--good);
+  border: 1px solid var(--good);
+}
+
+.sb-grade-badge.grade-mostly {
+  background: rgba(96, 165, 250, 0.15);
+  color: var(--accent);
+  border: 1px solid var(--accent);
+}
+
+.sb-grade-badge.grade-understandable {
+  background: rgba(251, 191, 36, 0.15);
+  color: var(--warn);
+  border: 1px solid var(--warn);
+}
+
+.sb-grade-badge.grade-incorrect {
+  background: rgba(248, 113, 113, 0.15);
+  color: var(--bad);
+  border: 1px solid var(--bad);
+}
+
+.sb-diff-analysis {
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 10px;
+  margin-top: 12px;
+}
+
+.sb-diff-title {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+
+.sb-diff-words-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.sb-diff-word {
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
+.sb-diff-word.correct {
+  background: rgba(52, 211, 153, 0.12);
+  color: var(--good);
+}
+
+.sb-diff-word.missing {
+  background: rgba(248, 113, 113, 0.12);
+  color: var(--bad);
+  text-decoration: line-through;
+}
+
+/* --- Complete Screen --- */
+.sb-complete-screen {
+  text-align: center;
+  align-items: center;
+  padding: 30px 10px;
+}
+
+.sb-success-badge {
+  font-size: 48px;
+  margin-bottom: 10px;
+}
+
+.sb-complete-sub {
+  color: var(--text-dim);
+  font-size: 14px;
+  margin-bottom: 12px;
+}
+
+.sb-complete-block {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  width: 100%;
+  margin-bottom: 20px;
+}
+
+.sb-complete-uk {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+
+.sb-complete-cz {
+  color: var(--accent-2);
+  font-size: 14px;
+  margin-bottom: 4px;
+}
+
+.sb-complete-en {
+  color: var(--text-dim);
+  font-size: 14px;
+}
