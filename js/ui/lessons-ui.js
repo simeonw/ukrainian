@@ -85,15 +85,18 @@ export function renderLessons(container, { onExit, onOpenDiagnostic } = {}) {
 
     container.innerHTML = `
       <div class="lesson-detail-screen">
-        <header class="lessons-header">
+        <header class="lessons-header" style="justify-content: space-between;">
           <button class="btn-back-list" type="button">&larr; Lessons</button>
-          <span class="lesson-badge status-${p.status}">${STATUS_LABEL[p.status]}</span>
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <button id="reset-lesson-btn" class="btn-text" style="color: var(--bad); text-decoration: none; font-size: 13px; font-weight: 600;">Reset Lesson Progress</button>
+            <span class="lesson-badge status-${p.status}">${STATUS_LABEL[p.status]}</span>
+          </div>
         </header>
         <h2 class="lesson-detail-title">${lesson.order}. ${escapeHtml(lesson.title)}</h2>
         <p class="lesson-detail-summary">${escapeHtml(lesson.summary)}</p>
         <div class="lesson-detail-progress">${progressBarHtml(p)}</div>
 
-        ${content.patterns.length ? `
+        ${content.patterns && content.patterns.length ? `
           <section class="lesson-section">
             <h3>Pattern</h3>
             ${content.patterns.map((p) => `
@@ -107,7 +110,7 @@ export function renderLessons(container, { onExit, onOpenDiagnostic } = {}) {
           </section>
         ` : ''}
 
-        ${content.examples.length ? `
+        ${content.examples && content.examples.length ? `
           <section class="lesson-section">
             <h3>Examples</h3>
             ${content.examples.map((ex) => `
@@ -121,7 +124,7 @@ export function renderLessons(container, { onExit, onOpenDiagnostic } = {}) {
           </section>
         ` : ''}
 
-        ${content.substitutions.length ? `
+        ${content.substitutions && content.substitutions.length ? `
           <section class="lesson-section">
             <h3>Try substituting</h3>
             ${content.substitutions.map((sub) => `
@@ -156,6 +159,23 @@ export function renderLessons(container, { onExit, onOpenDiagnostic } = {}) {
     `;
 
     container.querySelector('.btn-back-list').addEventListener('click', renderList);
+
+    // Reset current lesson logic
+    container.querySelector('#reset-lesson-btn').addEventListener('click', () => {
+      if (confirm(`Reset your learning progress for this lesson: "${lesson.title}"?`)) {
+        const freshProgress = loadProgress();
+        for (const itemId of lesson.itemIds) {
+          if (freshProgress.items[itemId]) {
+            delete freshProgress.items[itemId];
+          }
+        }
+        if (freshProgress.lessons[lesson.id]) {
+          delete freshProgress.lessons[lesson.id];
+        }
+        saveProgress(freshProgress);
+        renderDetail(lesson.id);
+      }
+    });
   }
 
   renderList();

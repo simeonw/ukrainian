@@ -1,30 +1,35 @@
-// Leitner-box-style spaced repetition + lesson mastery calculation.
+// Leitner-box-style spaced repetition + adaptive lesson mastery calculation.
 import { LESSONS } from '../data/lessons.js';
 
 const MAX_BOX = 5;
-const BOX_WEIGHTS = [10, 7, 5, 3, 2, 1]; // indexed by box 0-5
+const BOX_WEIGHTS = [12, 10, 8, 4, 2, 1]; // Weights for drawing based on Leitner boxes
 const DIAGNOSTIC_SEED_BOX = 2;
 
-// A lesson badge is "learned" once its average item confidence crosses this bar. Confidence
-// per item is uncapped-early and reaches 100% at box-sum 4 (e.g. box 2 in each direction —
-// a handful of correct reps, not deep mastery). 65% average lets a lesson read "learned"
-// while still tolerating a few weak items, and stays honestly achievable within a normal
-// session rather than requiring hundreds of answers (see coverage/placement notes below).
+// Lesson badges: learned threshold remains at 65% average item confidence
 const LEARNED_PERCENT = 65;
 
 function ensureItemEntry(progress, itemId) {
-  if (!progress.items[itemId]) progress.items[itemId] = {};
+  if (!progress.items) progress.items = {};
+  if (!progress.items[itemId]) {
+    progress.items[itemId] = {
+      uk2en: { box: 0, seen: 0, correct: 0, lastSeen: null, consecutiveCorrect: 0, history: [] },
+      en2uk: { box: 0, seen: 0, correct: 0, lastSeen: null, consecutiveCorrect: 0, history: [] }
+    };
+  }
   return progress.items[itemId];
 }
 
 function ensureDirectionEntry(progress, itemId, direction) {
   const entry = ensureItemEntry(progress, itemId);
-  if (!entry[direction]) entry[direction] = { box: 0, seen: 0, correct: 0, lastSeen: null };
+  if (!entry[direction]) {
+    entry[direction] = { box: 0, seen: 0, correct: 0, lastSeen: null, consecutiveCorrect: 0, history: [] };
+  }
   return entry[direction];
 }
 
 export function getDirectionStats(progress, itemId, direction) {
-  return progress.items[itemId]?.[direction] || { box: 0, seen: 0, correct: 0, lastSeen: null };
+  ensureItemEntry(progress, itemId);
+  return progress.items[itemId][direction];
 }
 
 export function effectiveBox(progress, itemId) {
@@ -40,39 +45,112 @@ export function hasBeenSeen(progress, itemId) {
   );
 }
 
-// 0-1 confidence for a single item, blending both directions. Reaches 1.0 at box-sum 4 (e.g.
-// 2 correct reps net in each direction) rather than requiring deep mastery in both — moves
-// immediately on the very first correct answer instead of waiting on a hard gate.
 export function itemConfidence(progress, itemId) {
-  const uk2en = getDirectionStats(progress, itemId, 'uk2en').box;
-  const en2uk = getDirectionStats(progress, itemId, 'en2uk').box;
-  return Math.min(1, (uk2en + en2uk) / 4);
+  const uk2en = getDirectionStats(progress, itemId, 'uk2en');
+  const en2uk = getDirectionStats(progress, itemId, 'en2uk');
+
+  // If either direction is mastered (7 consecutive correct), confidence is 1.0
+  if (uk2en.consecutiveCorrect >= 7 || en2uk.consecutiveCorrect >= 7) {
+    return 1.0;
+  }
+
+  const sumBox = uk2en.box + en2uk.box;
+  return Math.min(1, sumBox / 4);
+}
+
+// Track 6 distinct dimensions of ability: vocabulary, understanding, production, grammar, conditional, past
+export function getAbilityProfile(progress, cardPool) {
+  const profile = {
+    vocabulary: { score: 0, total: 0 },
+    understanding: { score: 0, total: 0 },
+    production: { score: 0, total: 0 },
+    grammar: { score: 0, total: 0 },
+    conditional: { score: 0, total: 0 },
+    past: { score: 0, total: 0 },
+  };
+
+  const uniqueItems = new Set();
+  for (const card of cardPool) {
+    uniqueItems.add(card.item);
+  }
+
+  for (const item of uniqueItems) {
+    // Determine skills for this item
+    const skills = item.skills || [];
+    if (item.kind === 'vocab') {
+      skills.push('vocabulary');
+    }
+    if (item.id.includes('past') || item.id.includes('p_b1_done') || item.id.includes('p_b1_never') || item.id.includes('p_b1_when') || item.id.includes('p_c1_time')) {
+      skills.push('past');
+    }
+    if (item.id.includes('cond') || item.id.includes('hypo') || item.id.includes('challenge_1')) {
+      skills.push('conditional');
+    }
+
+    const confidence = itemConfidence(progress, item.id);
+    for (const skill of skills) {
+      if (profile[skill] !== undefined) {
+        profile[skill].score += confidence;
+        profile[skill].total += 1;
+      }
+    }
+  }
+
+  // Convert to percent
+  const result = {};
+  for (const skill in profile) {
+    const t = profile[skill].total;
+    result[skill] = t > 0 ? Math.round((profile[skill].score / t) * 100) : 0;
+  }
+  return result;
 }
 
 // Mutates progress in place; caller is responsible for persisting via storage.saveProgress.
-export function recordAnswer(progress, itemId, direction, isCorrect) {
+export function recordAnswer(progress, itemId, direction, isCorrect, isIdk = false) {
   const stats = ensureDirectionEntry(progress, itemId, direction);
   stats.seen += 1;
   stats.lastSeen = Date.now();
-  if (isCorrect) {
+
+  if (isIdk) {
+    // "I don't know" is flagged. Reset box to 0 (maximum frequency).
+    // Does NOT count as a normal wrong answer (so history / consecutive correct gets reset or handled gently)
+    stats.box = 0;
+    stats.consecutiveCorrect = 0;
+    stats.history.push('idk');
+  } else if (isCorrect) {
     stats.correct += 1;
+    stats.consecutiveCorrect = (stats.consecutiveCorrect || 0) + 1;
     stats.box = Math.min(stats.box + 1, MAX_BOX);
+    stats.history.push('correct');
   } else {
+    stats.consecutiveCorrect = 0;
     stats.box = Math.max(stats.box - 1, 0);
+    stats.history.push('wrong');
   }
   return progress;
 }
 
-// Diagnostic answers only ever raise a floor — never overwrite/regress real drill progress,
-// and only seed the direction actually tested.
-export function seedFromDiagnostic(progress, itemId, direction) {
+// Diagnostic answers only ever raise a floor — never overwrite/regress real drill progress
+export function seedFromDiagnostic(progress, itemId, direction, levelCode = 'beginner') {
   const stats = ensureDirectionEntry(progress, itemId, direction);
   if (stats.seen === 0) {
     stats.seen = 1;
     stats.correct = 1;
     stats.lastSeen = Date.now();
   }
-  stats.box = Math.max(stats.box, DIAGNOSTIC_SEED_BOX);
+
+  let boxToSeed = DIAGNOSTIC_SEED_BOX;
+  let consec = 1;
+  if (levelCode === 'advanced') {
+    boxToSeed = MAX_BOX; // fully master basic components
+    consec = 7;
+  } else if (levelCode === 'intermediate') {
+    boxToSeed = 3;
+    consec = 3;
+  }
+
+  stats.box = Math.max(stats.box, boxToSeed);
+  stats.consecutiveCorrect = Math.max(stats.consecutiveCorrect || 0, consec);
   return progress;
 }
 
@@ -86,6 +164,11 @@ function cardBox(progress, card) {
 
 function cardSeen(progress, card) {
   return getDirectionStats(progress, card.item.id, card.direction).seen > 0;
+}
+
+function isCardMastered(progress, card) {
+  const stats = getDirectionStats(progress, card.item.id, card.direction);
+  return stats.consecutiveCorrect >= 7;
 }
 
 function lessonAttemptCount(progress, lesson) {
@@ -105,47 +188,45 @@ function pickFrom(candidates, avoidKey) {
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
-// Three-tier draw:
-//  1. Placement — every lesson still untouched gets a card before any lesson gets a second
-//     one. With 20 lessons this guarantees a first data point on all of them within ~20
-//     draws (fewer in practice since review lessons share items with earlier ones), so the
-//     learner sees every lesson move off "not started" almost immediately instead of a
-//     lucky handful getting all the early attention.
-//  2. Coverage — remaining never-seen cards, drawn uniformly. Prevents the "first exposure
-//     to any specific card is a coupon-collector problem across ~270 cards" issue.
-//  3. Weighted review — low-box (new/weak) cards far more likely, every card keeps nonzero
-//     weight so mastered items still resurface occasionally.
+// ADAPTIVE FILTERING:
+// The drill engine optimizes for information gain, avoiding over-testing mastered material.
+// Select cards based on demonstrated weaknesses/boundary.
 export function drawCard(progress, cardPool, avoidKey = null) {
-  const placementLessons = LESSONS.filter((l) => l.itemIds.length > 0 && lessonAttemptCount(progress, l) === 0);
-  if (placementLessons.length > 0) {
-    const lesson = placementLessons[Math.floor(Math.random() * placementLessons.length)];
-    const lessonItemIds = new Set(lesson.itemIds);
-    const candidates = cardPool.filter((c) => lessonItemIds.has(c.item.id));
-    if (candidates.length > 0) return pickFrom(candidates, avoidKey);
-  }
-
+  // 1. First, check if there's any completely unseen card. Uniform draw from unseen.
   const unseen = cardPool.filter((c) => !cardSeen(progress, c));
   if (unseen.length > 0) return pickFrom(unseen, avoidKey);
 
-  let candidates = cardPool;
-  if (avoidKey && candidates.length > 1) {
-    const filtered = candidates.filter((c) => cardKey(c) !== avoidKey);
-    if (filtered.length) candidates = filtered;
+  // 2. Separate cards into non-mastered and mastered
+  const activeCandidates = cardPool.filter(c => !isCardMastered(progress, c));
+
+  let poolToDraw = activeCandidates.length > 0 ? activeCandidates : cardPool;
+
+  // Filter out avoidKey if possible
+  if (avoidKey && poolToDraw.length > 1) {
+    const filtered = poolToDraw.filter((c) => cardKey(c) !== avoidKey);
+    if (filtered.length) poolToDraw = filtered;
   }
-  const weights = candidates.map((c) => BOX_WEIGHTS[cardBox(progress, c)]);
+
+  // 3. Weighted selection based on Leitner Box
+  // We multiply the probability weight of mastered cards by 0.1 to drastically reduce frequency
+  const weights = poolToDraw.map((c) => {
+    let baseWeight = BOX_WEIGHTS[cardBox(progress, c)] || 1;
+    if (isCardMastered(progress, c)) {
+      baseWeight = baseWeight * 0.1; // drastically reduce repetition frequency of mastered cards
+    }
+    return baseWeight;
+  });
+
   const total = weights.reduce((a, b) => a + b, 0);
   let roll = Math.random() * total;
-  for (let i = 0; i < candidates.length; i++) {
+  for (let i = 0; i < poolToDraw.length; i++) {
     roll -= weights[i];
-    if (roll <= 0) return candidates[i];
+    if (roll <= 0) return poolToDraw[i];
   }
-  return candidates[candidates.length - 1];
+  return poolToDraw[poolToDraw.length - 1];
 }
 
-// Returns { percent, attempted, total, status }. percent/attempted move continuously with
-// every relevant answer (not gated behind a threshold) so the UI can show real, incremental
-// progress from the first answer on, while status still gives a coarse at-a-glance bucket.
-// May flip progress.lessons[lesson.id].everReachedLearned true → caller should persist afterward.
+// Calculates continuous lesson progress percent/badge status
 export function computeLessonProgress(progress, lesson) {
   const items = lesson.itemIds;
   const total = items.length;
