@@ -65,26 +65,49 @@ export function renderDrill(container, { onExit } = {}) {
         <button class="btn-back" type="button">&larr; Menu</button>
         <div class="drill-score">0 / 0</div>
       </header>
-      <div class="drill-grid-container" style="flex: 1; display: flex; flex-direction: column; justify-content: center; align-items: center; min-height: 380px;">
-        <!-- Dynamic drill area populated by nextRound -->
+
+      <!-- Static Grid matching framework perfectly -->
+      <div class="drill-grid">
+        <div class="tile tile-up" data-position="up"></div>
+        <div class="tile tile-left" data-position="left"></div>
+        <div class="drill-card" tabindex="0"></div>
+        <div class="tile tile-right" data-position="right"></div>
+        <div class="tile tile-down" data-position="down"></div>
       </div>
 
-      <!-- General control elements -->
-      <div style="display: flex; gap: 8px; justify-content: center; align-items: center; margin-top: 12px;">
-        <button class="btn-idk" id="drill-idk-btn">I Don't Know</button>
+      <!-- Advanced interactive container for long sentences, toggled elegantly -->
+      <div class="drill-interactive-exercise" style="display: none; width: 100%; margin-top: 8px;"></div>
+
+      <!-- "I Don't Know" and controls -->
+      <div style="display: flex; flex-direction: column; align-items: center; margin-top: 12px; gap: 8px;">
+        <button class="btn-text" id="drill-idk-btn" style="color: var(--text-dim); text-decoration: none; font-size: 13px;">I don't know</button>
       </div>
-      <p class="drill-hint" id="drill-action-hint">Swipe, click, or use arrow keys to answer.</p>
+
+      <p class="drill-hint" id="drill-hint-msg">Swipe, click, or use arrow keys to answer.</p>
     </div>
   `;
 
   const backBtn = container.querySelector('.btn-back');
   const scoreEl = container.querySelector('.drill-score');
-  const gridContainer = container.querySelector('.drill-grid-container');
+  const gridEl = container.querySelector('.drill-grid');
+  const cardEl = container.querySelector('.drill-card');
+  const interactiveEl = container.querySelector('.drill-interactive-exercise');
   const idkBtn = container.querySelector('#drill-idk-btn');
-  const hintEl = container.querySelector('#drill-action-hint');
+  const hintEl = container.querySelector('#drill-hint-msg');
+  const tileEls = {
+    up: container.querySelector('.tile-up'),
+    down: container.querySelector('.tile-down'),
+    left: container.querySelector('.tile-left'),
+    right: container.querySelector('.tile-right'),
+  };
 
   function updateScore() {
     scoreEl.textContent = `${sessionCorrect} / ${sessionTotal}`;
+  }
+
+  function clearFeedback() {
+    cardEl.classList.remove('is-correct', 'is-incorrect');
+    for (const pos of POSITIONS) tileEls[pos].classList.remove('is-correct', 'is-incorrect');
   }
 
   // --- RENDERING MODAL ---
@@ -130,21 +153,10 @@ export function renderDrill(container, { onExit } = {}) {
       if (e.target === backdrop) backdrop.remove();
     });
 
-    // Tapping on a related form can insert it dynamically
-    backdrop.querySelectorAll('.word-modal-related-item').forEach(item => {
-      item.addEventListener('click', () => {
-        const replacementWord = item.dataset.word;
-        backdrop.remove();
-
-        // If there's a sentence builder active, let's inject or display it
-        alert(`Alternative form selected: "${replacementWord}". Try using it in your constructed phrase!`);
-      });
-    });
-
     document.body.appendChild(backdrop);
   }
 
-  // Convert raw sentence string into clickable word span tokens
+  // Convert raw sentence string into clickable word span tokens (safety propagation stops swipe)
   function tokenizeSentence(sentenceStr) {
     const tokens = sentenceStr.split(/([a-zA-Zа-яА-ЯёЁіІїЇєЄґҐ’\']+)/);
     return tokens.map(token => {
@@ -157,139 +169,81 @@ export function renderDrill(container, { onExit } = {}) {
 
   function addTokenEventListeners(element) {
     element.querySelectorAll('.interactive-word-token').forEach(tok => {
+      tok.addEventListener('pointerdown', (e) => {
+        e.stopPropagation(); // prevent swipe/drag capture
+      });
       tok.addEventListener('click', (e) => {
-        e.stopPropagation();
+        e.stopPropagation(); // prevent default trigger
         showWordModal(tok.dataset.word);
       });
     });
   }
 
   function nextRound() {
-    if (gestureHandle) {
-      gestureHandle.destroy();
-      gestureHandle = null;
-    }
-    if (removeKeyboard) {
-      removeKeyboard();
-      removeKeyboard = null;
-    }
+    clearFeedback();
 
+    // Draw card
     const card = drawCard(progress, cardPool, lastKey);
     lastKey = cardKey(card);
     const { item, direction } = card;
 
     const isSentence = item.uk.split(' ').length > 2;
 
-    // Determine exercise category:
-    // A. For short words/phrases, use 4-choice swipe drill.
-    // B. For long sentences:
-    //    - If direction is uk2en, use English Semantic Matching (with fuzzy matching & Word-Level Modals).
-    //    - If direction is en2uk, use Dynamic Sentence Builder.
     if (!isSentence) {
-      renderStandardSwipeDrill(card);
-    } else if (direction === 'uk2en') {
-      renderSemanticMatchDrill(card);
-    } else {
-      renderSentenceBuilderDrill(card);
-    }
-  }
+      // 1. Show static swipe grid
+      gridEl.style.display = 'grid';
+      interactiveEl.style.display = 'none';
+      hintEl.textContent = 'Swipe, click, or use arrow keys to answer. Tap words for definitions.';
 
-  // --- EXERCISE TYPE 1: STANDARD 4-CHOICE SWIPE ---
-  function renderStandardSwipeDrill(card) {
-    const { item, direction } = card;
-    hintEl.textContent = 'Swipe, click, or use arrow keys to answer. Tap words for definitions.';
+      const distractors = pickDistractors(item, direction, 3);
+      const options = shuffle([item, ...distractors]);
+      const positions = shuffle(POSITIONS);
+      const tiles = {};
+      positions.forEach((pos, i) => { tiles[pos] = options[i]; });
 
-    gridContainer.innerHTML = `
-      <div class="drill-grid" style="width: 100%;">
-        <div class="tile tile-up" data-position="up"></div>
-        <div class="tile tile-left" data-position="left"></div>
-        <div class="drill-card" tabindex="0"></div>
-        <div class="tile tile-right" data-position="right"></div>
-        <div class="tile tile-down" data-position="down"></div>
-      </div>
-    `;
+      currentRound = { correctItem: item, direction, tiles, locked: false, type: 'swipe' };
 
-    const cardEl = gridContainer.querySelector('.drill-card');
-    const tileEls = {
-      up: gridContainer.querySelector('.tile-up'),
-      down: gridContainer.querySelector('.tile-down'),
-      left: gridContainer.querySelector('.tile-left'),
-      right: gridContainer.querySelector('.tile-right'),
-    };
-
-    const distractors = pickDistractors(item, direction, 3);
-    const options = shuffle([item, ...distractors]);
-    const positions = shuffle(POSITIONS);
-    const tiles = {};
-    positions.forEach((pos, i) => { tiles[pos] = options[i]; });
-
-    currentRound = { correctItem: item, direction, tiles, locked: false, type: 'swipe', cardEl, tileEls };
-
-    const prompt = promptText(item, direction);
-    cardEl.innerHTML = `
-      <div class="drill-card-kind">${item.kind === 'pattern' ? 'phrase' : 'word'}</div>
-      <div class="drill-card-main">${tokenizeSentence(prompt.main)}</div>
-      ${prompt.translit ? `<div class="drill-card-translit">${escapeHtml(prompt.translit)}</div>` : ''}
-    `;
-    addTokenEventListeners(cardEl);
-
-    cardEl.style.transition = '';
-    cardEl.style.transform = 'translate(0, 0) rotate(0deg)';
-
-    for (const pos of POSITIONS) {
-      const tileItem = tiles[pos];
-      const text = answerText(tileItem, direction);
-      const showTranslit = direction === 'en2uk';
-      tileEls[pos].innerHTML = `
-        <div class="tile-text">${escapeHtml(text)}</div>
-        ${showTranslit ? `<div class="tile-translit">${escapeHtml(tileItem.translit)}</div>` : ''}
+      const prompt = promptText(item, direction);
+      cardEl.innerHTML = `
+        <div class="drill-card-kind">${item.kind === 'pattern' ? 'phrase' : 'word'}</div>
+        <div class="drill-card-main">${tokenizeSentence(prompt.main)}</div>
+        ${prompt.translit ? `<div class="drill-card-translit">${escapeHtml(prompt.translit)}</div>` : ''}
       `;
-    }
+      addTokenEventListeners(cardEl);
 
-    function submit(position) {
-      if (!currentRound || currentRound.locked || !currentRound.tiles[position]) return;
-      currentRound.locked = true;
-      const chosen = currentRound.tiles[position];
-      const isCorrect = chosen.id === currentRound.correctItem.id;
+      cardEl.style.transition = '';
+      cardEl.style.transform = 'translate(0, 0) rotate(0deg)';
 
-      sessionTotal += 1;
-      if (isCorrect) sessionCorrect += 1;
-      updateScore();
-
-      recordAnswer(progress, currentRound.correctItem.id, currentRound.direction, isCorrect);
-      saveProgress(progress);
-
-      cardEl.classList.add(isCorrect ? 'is-correct' : 'is-incorrect');
-      tileEls[position].classList.add(isCorrect ? 'is-correct' : 'is-incorrect');
-      if (!isCorrect) {
-        for (const pos of POSITIONS) {
-          if (currentRound.tiles[pos].id === currentRound.correctItem.id) {
-            tileEls[pos].classList.add('is-correct');
-          }
-        }
+      for (const pos of POSITIONS) {
+        const tileItem = tiles[pos];
+        const text = answerText(tileItem, direction);
+        const showTranslit = direction === 'en2uk';
+        tileEls[pos].innerHTML = `
+          <div class="tile-text">${escapeHtml(text)}</div>
+          ${showTranslit ? `<div class="tile-translit">${escapeHtml(tileItem.translit)}</div>` : ''}
+        `;
       }
+    } else {
+      // 2. Hide swipe grid, render custom interactive advanced layout
+      gridEl.style.display = 'none';
+      interactiveEl.style.display = 'block';
 
-      setTimeout(() => {
-        gestureHandle && gestureHandle.reset();
-        nextRound();
-      }, isCorrect ? 450 : 1100);
-    }
-
-    gestureHandle = attachSwipeGesture(cardEl, { onCommit: (position) => submit(position) });
-    removeKeyboard = attachKeyboardNav((position) => submit(position));
-    for (const pos of POSITIONS) {
-      tileEls[pos].addEventListener('click', () => submit(pos));
+      if (direction === 'uk2en') {
+        renderSemanticMatch(card);
+      } else {
+        renderSentenceBuilder(card);
+      }
     }
   }
 
-  // --- EXERCISE TYPE 2: UK2EN SEMANTIC MATCH ---
-  function renderSemanticMatchDrill(card) {
+  // --- UK2EN SEMANTIC MATCH ---
+  function renderSemanticMatch(card) {
     const { item, direction } = card;
     hintEl.textContent = 'Type the translation in English. Fuzzy meaning matching enabled! Tap words for definitions.';
 
-    gridContainer.innerHTML = `
+    interactiveEl.innerHTML = `
       <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 24px; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 12px; min-height: 280px; justify-content: center;">
-        <div class="drill-card-kind">Advanced translation</div>
+        <div class="drill-card-kind">Advanced Translation</div>
         <div class="drill-card-main" style="font-size: 20px; line-height: 1.4; text-align: center;">${tokenizeSentence(item.uk)}</div>
         <div class="drill-card-translit">${escapeHtml(item.translit)}</div>
 
@@ -299,10 +253,10 @@ export function renderDrill(container, { onExit } = {}) {
       </div>
     `;
 
-    const inputField = gridContainer.querySelector('#semantic-input');
-    const submitBtn = gridContainer.querySelector('#semantic-submit');
-    const feedbackEl = gridContainer.querySelector('#semantic-feedback');
-    addTokenEventListeners(gridContainer);
+    const inputField = interactiveEl.querySelector('#semantic-input');
+    const submitBtn = interactiveEl.querySelector('#semantic-submit');
+    const feedbackEl = interactiveEl.querySelector('#semantic-feedback');
+    addTokenEventListeners(interactiveEl);
 
     currentRound = { correctItem: item, direction, locked: false, type: 'semantic' };
 
@@ -314,13 +268,8 @@ export function renderDrill(container, { onExit } = {}) {
       currentRound.locked = true;
       inputField.disabled = true;
 
-      // Accepted semantic variants array
-      const targetEn = item.en.toLowerCase();
-      const rawUser = userText.toLowerCase();
-
-      // Fuzzy score metric
-      const score = getFuzzyRatio(rawUser, targetEn);
-      const isCorrect = score >= 0.72; // highly lenient, accepts close matches
+      const score = getFuzzyRatio(userText, item.en);
+      const isCorrect = score >= 0.72; // highly lenient semantic accuracy
 
       sessionTotal += 1;
       if (isCorrect) sessionCorrect += 1;
@@ -331,7 +280,7 @@ export function renderDrill(container, { onExit } = {}) {
 
       if (isCorrect) {
         inputField.style.borderColor = 'var(--good)';
-        feedbackEl.innerHTML = `<span style="color: var(--good); font-weight: bold;">Great! Meaning match: ${(score * 100).toFixed(0)}%</span>`;
+        feedbackEl.innerHTML = `<span style="color: var(--good); font-weight: bold;">Great! Semantic meaning match: ${(score * 100).toFixed(0)}%</span>`;
       } else {
         inputField.style.borderColor = 'var(--bad)';
         feedbackEl.innerHTML = `
@@ -340,7 +289,7 @@ export function renderDrill(container, { onExit } = {}) {
         `;
       }
 
-      setTimeout(nextRound, isCorrect ? 900 : 2500);
+      setTimeout(nextRound, isCorrect ? 1000 : 2600);
     }
 
     submitBtn.addEventListener('click', checkAnswer);
@@ -349,36 +298,30 @@ export function renderDrill(container, { onExit } = {}) {
     });
   }
 
-  // --- EXERCISE TYPE 3: EN2UK DYNAMIC SENTENCE BUILDER ---
-  function renderSentenceBuilderDrill(card) {
+  // --- EN2UK DYNAMIC SENTENCE BUILDER ---
+  function renderSentenceBuilder(card) {
     const { item, direction } = card;
     hintEl.textContent = 'Tap words to construct the Ukrainian phrase. Use modifiers to toggle forms!';
 
-    // Break Ukrainian sentence into individual word chips
     const baseWords = item.uk.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()!?]/g, "").split(/\s+/).filter(Boolean);
     const poolWords = shuffle([...baseWords]);
 
-    // Track dynamic modifier variations (Gender, Formality, Negation)
     let currentGender = 'masculine';
     let currentFormality = 'informal';
     let currentNegated = false;
 
-    gridContainer.innerHTML = `
+    interactiveEl.innerHTML = `
       <div style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; width: 100%; display: flex; flex-direction: column; align-items: center; gap: 12px; min-height: 280px; justify-content: center;">
         <div class="drill-card-kind" style="margin-bottom: 4px;">Sentence Builder</div>
         <div class="drill-card-main" style="font-size: 18px; line-height: 1.4; text-align: center; color: var(--accent);">${escapeHtml(item.en)}</div>
 
         <!-- Builder Slots -->
-        <div class="sentence-builder-slots" id="builder-slots">
-          <!-- Populated dynamically -->
-        </div>
+        <div class="sentence-builder-slots" id="builder-slots"></div>
 
         <!-- Word Pool -->
-        <div class="sentence-builder-pool" id="builder-pool">
-          <!-- Populated dynamically -->
-        </div>
+        <div class="sentence-builder-pool" id="builder-pool"></div>
 
-        <!-- Dynamic Modifiers (allow learners to toggle variations) -->
+        <!-- Dynamic Modifiers -->
         <div class="modifiers-container">
           <button class="modifier-btn is-active" id="mod-gender">Male Speaker ♂️</button>
           <button class="modifier-btn" id="mod-formality">Informal 👥</button>
@@ -390,28 +333,25 @@ export function renderDrill(container, { onExit } = {}) {
       </div>
     `;
 
-    const slotsEl = gridContainer.querySelector('#builder-slots');
-    const poolEl = gridContainer.querySelector('#builder-pool');
-    const submitBtn = gridContainer.querySelector('#builder-submit');
-    const feedbackEl = gridContainer.querySelector('#builder-feedback');
+    const slotsEl = interactiveEl.querySelector('#builder-slots');
+    const poolEl = interactiveEl.querySelector('#builder-pool');
+    const submitBtn = interactiveEl.querySelector('#builder-submit');
+    const feedbackEl = interactiveEl.querySelector('#builder-feedback');
 
-    const genderBtn = gridContainer.querySelector('#mod-gender');
-    const formalityBtn = gridContainer.querySelector('#mod-formality');
-    const negateBtn = gridContainer.querySelector('#mod-negate');
+    const genderBtn = interactiveEl.querySelector('#mod-gender');
+    const formalityBtn = interactiveEl.querySelector('#mod-formality');
+    const negateBtn = interactiveEl.querySelector('#mod-negate');
 
     let currentSelection = [];
     currentRound = { correctItem: item, direction, locked: false, type: 'builder' };
 
-    // Toggle dynamic modifiers and alter pool/correct strings
     genderBtn.addEventListener('click', () => {
       if (currentGender === 'masculine') {
         currentGender = 'feminine';
         genderBtn.textContent = 'Female Speaker ♀️';
-        genderBtn.classList.add('is-active');
       } else {
         currentGender = 'masculine';
         genderBtn.textContent = 'Male Speaker ♂️';
-        genderBtn.classList.add('is-active');
       }
       regenerateBuilderText();
     });
@@ -420,11 +360,9 @@ export function renderDrill(container, { onExit } = {}) {
       if (currentFormality === 'informal') {
         currentFormality = 'formal';
         formalityBtn.textContent = 'Formal/Plural 👔';
-        formalityBtn.classList.add('is-active');
       } else {
         currentFormality = 'informal';
         formalityBtn.textContent = 'Informal 👥';
-        formalityBtn.classList.add('is-active');
       }
       regenerateBuilderText();
     });
@@ -436,15 +374,11 @@ export function renderDrill(container, { onExit } = {}) {
       regenerateBuilderText();
     });
 
-    // Automatically adapt word chips based on chosen modifier variants
     function regenerateBuilderText() {
-      // Clear selection
       currentSelection = [];
       slotsEl.innerHTML = '';
 
       let modifiedWords = [...poolWords];
-
-      // Adapt words depending on filters
       modifiedWords = modifiedWords.map(w => {
         let wrd = w.toLowerCase();
         if (currentGender === 'feminine') {
@@ -465,7 +399,6 @@ export function renderDrill(container, { onExit } = {}) {
         return w;
       });
 
-      // Inject negation element if requested
       if (currentNegated && !modifiedWords.includes('не')) {
         modifiedWords.push('не');
       }
@@ -478,11 +411,9 @@ export function renderDrill(container, { onExit } = {}) {
         chip.addEventListener('click', () => {
           if (currentRound.locked) return;
           if (chip.classList.contains('is-active')) {
-            // Remove from slots
             chip.classList.remove('is-active');
             currentSelection = currentSelection.filter(item => item.index !== chip.dataset.index);
           } else {
-            // Add to slots
             chip.classList.add('is-active');
             currentSelection.push({ word: chip.dataset.word, index: chip.dataset.index });
           }
@@ -504,7 +435,6 @@ export function renderDrill(container, { onExit } = {}) {
       const builtPhrase = currentSelection.map(item => item.word.toLowerCase()).join(' ');
       const cleanTarget = item.uk.toLowerCase().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()!?]/g, "").trim();
 
-      // Flexible matching for modifiers and word configurations
       const score = getFuzzyRatio(builtPhrase, cleanTarget);
       const isCorrect = score >= 0.85;
 
@@ -526,14 +456,43 @@ export function renderDrill(container, { onExit } = {}) {
         `;
       }
 
-      setTimeout(nextRound, isCorrect ? 900 : 2500);
+      setTimeout(nextRound, isCorrect ? 1000 : 2600);
     }
 
     submitBtn.addEventListener('click', checkBuilder);
     regenerateBuilderText();
   }
 
-  // --- I DON'T KNOW LOGIC ---
+  function submit(position) {
+    if (!currentRound || currentRound.locked || !currentRound.tiles[position]) return;
+    currentRound.locked = true;
+    const chosen = currentRound.tiles[position];
+    const isCorrect = chosen.id === currentRound.correctItem.id;
+
+    sessionTotal += 1;
+    if (isCorrect) sessionCorrect += 1;
+    updateScore();
+
+    recordAnswer(progress, currentRound.correctItem.id, currentRound.direction, isCorrect);
+    saveProgress(progress);
+
+    cardEl.classList.add(isCorrect ? 'is-correct' : 'is-incorrect');
+    tileEls[position].classList.add(isCorrect ? 'is-correct' : 'is-incorrect');
+    if (!isCorrect) {
+      for (const pos of POSITIONS) {
+        if (currentRound.tiles[pos].id === currentRound.correctItem.id) {
+          tileEls[pos].classList.add('is-correct');
+        }
+      }
+    }
+
+    setTimeout(() => {
+      gestureHandle && gestureHandle.reset();
+      nextRound();
+    }, isCorrect ? 450 : 1100);
+  }
+
+  // --- I DON'T KNOW BUTTON EVENT ---
   idkBtn.addEventListener('click', () => {
     if (!currentRound || currentRound.locked) return;
     currentRound.locked = true;
@@ -545,26 +504,36 @@ export function renderDrill(container, { onExit } = {}) {
     sessionTotal += 1;
     updateScore();
 
-    // Feedback
+    // Visual feedback
     if (currentRound.type === 'swipe') {
-      currentRound.cardEl.classList.add('is-incorrect');
+      cardEl.classList.add('is-incorrect');
       for (const pos of POSITIONS) {
         if (currentRound.tiles[pos].id === currentRound.correctItem.id) {
-          currentRound.tileEls[pos].classList.add('is-correct');
+          tileEls[pos].classList.add('is-correct');
         }
       }
+      setTimeout(() => {
+        gestureHandle && gestureHandle.reset();
+        nextRound();
+      }, 2500);
     } else {
-      gridContainer.innerHTML = `
+      interactiveEl.innerHTML = `
         <div style="background: var(--surface); border: 2px solid var(--warn); border-radius: var(--radius); padding: 24px; text-align: center; width: 100%;">
           <div style="color: var(--warn); font-weight: bold; font-size: 18px; margin-bottom: 8px;">Let's review this together!</div>
           <div style="font-size: 16px; margin-bottom: 12px; font-weight: 600; color: var(--text);">${escapeHtml(currentRound.correctItem.uk)}</div>
           <div style="color: var(--text-dim); font-size: 14px;">Meaning: "${currentRound.correctItem.en}"</div>
         </div>
       `;
+      setTimeout(nextRound, 2500);
     }
-
-    setTimeout(nextRound, 2500);
   });
+
+  // Attach persistent single-session event listeners exactly once
+  gestureHandle = attachSwipeGesture(cardEl, { onCommit: (position) => submit(position) });
+  removeKeyboard = attachKeyboardNav((position) => submit(position));
+  for (const pos of POSITIONS) {
+    tileEls[pos].addEventListener('click', () => submit(pos));
+  }
 
   function cleanup() {
     gestureHandle && gestureHandle.destroy();
