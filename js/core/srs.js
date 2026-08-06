@@ -24,6 +24,9 @@ function ensureDirectionEntry(progress, itemId, direction) {
   if (!entry[direction]) {
     entry[direction] = { box: 0, seen: 0, correct: 0, lastSeen: null, consecutiveCorrect: 0, history: [], latencyHistory: [] };
   }
+  if (!entry[direction].history) {
+    entry[direction].history = [];
+  }
   if (!entry[direction].latencyHistory) {
     entry[direction].latencyHistory = [];
   }
@@ -137,6 +140,43 @@ export function getAbilityProfile(progress, cardPool) {
   return result;
 }
 
+// Ensure unlocked lessons are initialized correctly
+function getUnlockedLessons(progress) {
+  if (!progress.meta.unlockedLessons) {
+    // Default unlock Lesson 1 (Diagnostic) and Lesson 2 (Phonetics) chronologically
+    progress.meta.unlockedLessons = ['l01', 'l02'];
+  }
+  return new Set(progress.meta.unlockedLessons);
+}
+
+export function isLessonUnlocked(progress, lessonId) {
+  const unlocked = getUnlockedLessons(progress);
+  return unlocked.has(lessonId);
+}
+
+// Sequential chronological unlocking logic: if an active lesson is learned, unlock the next one!
+export function checkSequentialUnlocks(progress) {
+  const unlocked = getUnlockedLessons(progress);
+  const sorted = [...LESSONS].sort((a, b) => a.order - b.order);
+
+  let mutated = false;
+  for (let i = 0; i < sorted.length; i++) {
+    const lesson = sorted[i];
+    if (unlocked.has(lesson.id)) {
+      const stats = computeLessonProgress(progress, lesson);
+      if (stats.status === 'learned' && i + 1 < sorted.length) {
+        const nextLesson = sorted[i + 1];
+        if (!unlocked.has(nextLesson.id)) {
+          progress.meta.unlockedLessons.push(nextLesson.id);
+          unlocked.add(nextLesson.id);
+          mutated = true;
+        }
+      }
+    }
+  }
+  return mutated;
+}
+
 // Mutates progress in place; caller is responsible for persisting via storage.saveProgress.
 export function recordAnswer(progress, itemId, direction, isCorrect, isIdk = false, latency = null) {
   const stats = ensureDirectionEntry(progress, itemId, direction);
@@ -161,10 +201,15 @@ export function recordAnswer(progress, itemId, direction, isCorrect, isIdk = fal
     stats.box = Math.max(stats.box - 1, 0);
     stats.history.push('wrong');
   }
+
+  // Recalculate learning-layer unlocks sequentially on answers!
+  checkSequentialUnlocks(progress);
+
   return progress;
 }
 
 // Diagnostic answers only ever raise a floor — never overwrite/regress real drill progress
+// Seeding diagnostic also unlocks lessons up to their mapped baseline difficulty band!
 export function seedFromDiagnostic(progress, itemId, direction, levelCode = 'beginner') {
   const stats = ensureDirectionEntry(progress, itemId, direction);
   if (stats.seen === 0) {
@@ -185,6 +230,35 @@ export function seedFromDiagnostic(progress, itemId, direction, levelCode = 'beg
 
   stats.box = Math.max(stats.box, boxToSeed);
   stats.consecutiveCorrect = Math.max(stats.consecutiveCorrect || 0, consec);
+
+  // Initialize and unlock adaptive baseline tiers dynamically:
+  const unlocked = getUnlockedLessons(progress);
+  if (levelCode === 'advanced') {
+    // Unlock up to lesson 32 (all A1-A2, B1, B2, and C1 abstract topics)
+    LESSONS.forEach((l, idx) => {
+      if (idx <= 31 && !unlocked.has(l.id)) {
+        progress.meta.unlockedLessons.push(l.id);
+        unlocked.add(l.id);
+      }
+    });
+  } else if (levelCode === 'intermediate') {
+    // Unlock up to lesson 23 (B1 comparing)
+    LESSONS.forEach((l, idx) => {
+      if (idx <= 22 && !unlocked.has(l.id)) {
+        progress.meta.unlockedLessons.push(l.id);
+        unlocked.add(l.id);
+      }
+    });
+  } else {
+    // Beginner: unlock up to lesson 12 (first review checkpoint)
+    LESSONS.forEach((l, idx) => {
+      if (idx <= 11 && !unlocked.has(l.id)) {
+        progress.meta.unlockedLessons.push(l.id);
+        unlocked.add(l.id);
+      }
+    });
+  }
+
   return progress;
 }
 
@@ -222,21 +296,38 @@ function pickFrom(candidates, avoidKey) {
   return pool[Math.floor(Math.random() * pool.length)];
 }
 
-// ADAPTIVE FILTERING:
-// The drill engine optimizes for information gain, avoiding over-testing mastered material.
+// ADAPTIVE FILTERING & PROGRESSIVE LAYERING:
+// The drawing pool is restricted to items belonging to lessons that are officially unlocked.
 export function drawCard(progress, cardPool, avoidKey = null) {
-  const unseen = cardPool.filter((c) => !cardSeen(progress, c));
+  const unlocked = getUnlockedLessons(progress);
+
+  // Collect all unique item IDs belonging to currently unlocked lessons
+  const unlockedItemIds = new Set();
+  LESSONS.forEach(l => {
+    if (unlocked.has(l.id)) {
+      l.itemIds.forEach(id => unlockedItemIds.add(id));
+    }
+  });
+
+  // Filter full card pool to only draw from unlocked active lessons!
+  let activePool = cardPool.filter(c => unlockedItemIds.has(c.item.id));
+  if (activePool.length === 0) activePool = cardPool; // fallback to avoid empty pools
+
+  // 1. First, check if there's any completely unseen card. Uniform draw from unseen.
+  const unseen = activePool.filter((c) => !cardSeen(progress, c));
   if (unseen.length > 0) return pickFrom(unseen, avoidKey);
 
-  const activeCandidates = cardPool.filter(c => !isCardMastered(progress, c));
+  // 2. Separate cards into non-mastered and mastered
+  const activeCandidates = activePool.filter(c => !isCardMastered(progress, c));
 
-  let poolToDraw = activeCandidates.length > 0 ? activeCandidates : cardPool;
+  let poolToDraw = activeCandidates.length > 0 ? activeCandidates : activePool;
 
   if (avoidKey && poolToDraw.length > 1) {
     const filtered = poolToDraw.filter((c) => cardKey(c) !== avoidKey);
     if (filtered.length) poolToDraw = filtered;
   }
 
+  // 3. Weighted selection based on Leitner Box
   const weights = poolToDraw.map((c) => {
     let baseWeight = BOX_WEIGHTS[cardBox(progress, c)] || 1;
     if (isCardMastered(progress, c)) {
