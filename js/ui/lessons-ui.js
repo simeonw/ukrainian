@@ -1,6 +1,6 @@
 import { LESSONS } from '../data/lessons.js';
 import { getItemById } from '../core/pool.js';
-import { computeLessonProgress } from '../core/srs.js';
+import { computeLessonProgress, isLessonUnlocked } from '../core/srs.js';
 import { loadProgress, saveProgress } from '../core/storage.js';
 
 function escapeHtml(str) {
@@ -14,18 +14,21 @@ const STATUS_LABEL = {
   learning: 'Learning',
   learned: 'Learned',
   'needs-review': 'Needs review',
+  locked: 'Locked 🔒'
 };
 
-function progressLine(p) {
+function progressLine(p, isLocked) {
+  if (isLocked) return 'Complete previous lessons to unlock';
   if (p.attempted === 0) return 'Not started yet';
   const word = p.attempted === 1 ? 'word/phrase' : 'words/phrases';
   return `${p.attempted}/${p.total} ${word} practiced &middot; ${p.percent}%`;
 }
 
-function progressBarHtml(p) {
+function progressBarHtml(p, isLocked) {
+  const percent = isLocked ? 0 : p.percent;
   return `
-    <div class="progress-bar"><div class="progress-bar-fill" style="width:${p.percent}%"></div></div>
-    <div class="progress-line">${progressLine(p)}</div>
+    <div class="progress-bar"><div class="progress-bar-fill" style="width:${percent}%"></div></div>
+    <div class="progress-line">${progressLine(p, isLocked)}</div>
   `;
 }
 
@@ -47,17 +50,23 @@ export function renderLessons(container, { onExit, onOpenDiagnostic } = {}) {
         </header>
         <div class="lesson-list">
           ${sorted
-            .map((lesson) => `
-              <button class="lesson-card status-${stats[lesson.id].status}" data-id="${lesson.id}">
-                <div class="lesson-card-top">
-                  <span class="lesson-order">${lesson.order}</span>
-                  <span class="lesson-badge">${STATUS_LABEL[stats[lesson.id].status]}</span>
-                </div>
-                <div class="lesson-title">${escapeHtml(lesson.title)}</div>
-                <div class="lesson-summary">${escapeHtml(lesson.summary)}</div>
-                ${progressBarHtml(stats[lesson.id])}
-              </button>
-            `)
+            .map((lesson) => {
+              const unlocked = isLessonUnlocked(progress, lesson.id);
+              const cardStatus = unlocked ? stats[lesson.id].status : 'locked';
+              const badgeLabel = unlocked ? STATUS_LABEL[stats[lesson.id].status] : 'Locked 🔒';
+
+              return `
+                <button class="lesson-card status-${cardStatus}" data-id="${lesson.id}" style="${!unlocked ? 'opacity: 0.55; cursor: not-allowed; border-left-color: var(--border);' : ''}">
+                  <div class="lesson-card-top">
+                    <span class="lesson-order">${lesson.order}</span>
+                    <span class="lesson-badge ${!unlocked ? '' : 'status-' + stats[lesson.id].status}">${badgeLabel}</span>
+                  </div>
+                  <div class="lesson-title">${escapeHtml(lesson.title)}</div>
+                  <div class="lesson-summary">${escapeHtml(lesson.summary)}</div>
+                  ${progressBarHtml(stats[lesson.id], !unlocked)}
+                </button>
+              `;
+            })
             .join('')}
         </div>
       </div>
@@ -67,6 +76,13 @@ export function renderLessons(container, { onExit, onOpenDiagnostic } = {}) {
     container.querySelectorAll('.lesson-card').forEach((card) => {
       card.addEventListener('click', () => {
         const lesson = LESSONS.find((l) => l.id === card.dataset.id);
+        const unlocked = isLessonUnlocked(progress, lesson.id);
+
+        if (!unlocked) {
+          alert(`"Lesson ${lesson.order}: ${lesson.title}" is currently locked! Reach "Learned" (65%+) status on previous lessons to sequentially unlock this layer.`);
+          return;
+        }
+
         if (lesson.kind === 'diagnostic') {
           onOpenDiagnostic && onOpenDiagnostic();
         } else {
@@ -99,7 +115,7 @@ export function renderLessons(container, { onExit, onOpenDiagnostic } = {}) {
         </header>
         <h2 class="lesson-detail-title">${lesson.order}. ${escapeHtml(lesson.title)}</h2>
         <p class="lesson-detail-summary">${escapeHtml(lesson.summary)}</p>
-        <div class="lesson-detail-progress">${progressBarHtml(p)}</div>
+        <div class="lesson-detail-progress">${progressBarHtml(p, false)}</div>
 
         ${content.patterns && content.patterns.length ? `
           <section class="lesson-section">

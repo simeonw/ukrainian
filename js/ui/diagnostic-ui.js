@@ -109,7 +109,7 @@ const QUESTION_POOLS = {
       itemsToSeed: ['p_c1_challenge_1']
     },
     {
-      uk: 'Незважаючи на те, щосітуація була складною, нам вдалося знайти рішення.',
+      uk: 'Незважаючи на те, що ситуація була складною, нам вдалося знайти рішення.',
       translit: 'Nezvazhayuchy na te, shcho sytuatsiya bula skladnoyu, nam vdalosya znayty rishennya.',
       en: 'Despite the situation being difficult, we managed to find a solution.',
       distractors: ['It seems to me that the main problem is not the situation.', 'This led to the fact that we were late for the meeting.', 'By the time I arrived, they already finished.'],
