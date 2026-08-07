@@ -1,5 +1,7 @@
 // Leitner-box-style spaced repetition + adaptive lesson mastery calculation.
 import { LESSONS } from '../data/lessons.js';
+import { getSkillsForItem } from './skills.js';
+import { isLessonCompleted } from './completion.js';
 
 const MAX_BOX = 5;
 const BOX_WEIGHTS = [12, 10, 8, 4, 2, 1]; // Weights for drawing based on Leitner boxes
@@ -85,18 +87,7 @@ export function getAbilityProfile(progress, cardPool) {
   let fluentLatencies = 0;
 
   for (const item of uniqueItems) {
-    // Determine skills for this item
-    const skills = item.skills ? [...item.skills] : [];
-    if (item.kind === 'vocab') {
-      skills.push('vocabulary');
-    }
-    if (item.id.includes('past') || item.id.includes('p_b1_done') || item.id.includes('p_b1_never') || item.id.includes('p_b1_when') || item.id.includes('p_c1_time')) {
-      skills.push('past');
-    }
-    if (item.id.includes('cond') || item.id.includes('hypo') || item.id.includes('challenge_1')) {
-      skills.push('conditional');
-    }
-
+    const skills = getSkillsForItem(item);
     const confidence = itemConfidence(progress, item.id);
     for (const skill of skills) {
       if (profile[skill] !== undefined) {
@@ -140,41 +131,29 @@ export function getAbilityProfile(progress, cardPool) {
   return result;
 }
 
-// Ensure unlocked lessons are initialized correctly
+// Derived, not stored: lesson N+1 is unlocked the moment lesson N is Completed
+// (see core/completion.js). No meta.unlockedLessons list to default or migrate —
+// a returning user's real Completion history (or lack of it) is correct the
+// instant this function runs, including on their very first load after this
+// shipped, with no separate migration step.
+const SORTED_LESSONS = [...LESSONS].sort((a, b) => a.order - b.order);
+
 function getUnlockedLessons(progress) {
-  if (!progress.meta.unlockedLessons) {
-    // Default unlock Lesson 1 (Diagnostic) and Lesson 2 (Phonetics) chronologically
-    progress.meta.unlockedLessons = ['l01', 'l02'];
+  const unlocked = new Set();
+  for (let i = 0; i < SORTED_LESSONS.length; i++) {
+    const lesson = SORTED_LESSONS[i];
+    if (i < 2 || isLessonCompleted(progress, SORTED_LESSONS[i - 1].id)) {
+      unlocked.add(lesson.id);
+    } else {
+      break;
+    }
   }
-  return new Set(progress.meta.unlockedLessons);
+  return unlocked;
 }
 
 export function isLessonUnlocked(progress, lessonId) {
   const unlocked = getUnlockedLessons(progress);
   return unlocked.has(lessonId);
-}
-
-// Sequential chronological unlocking logic: if an active lesson is learned, unlock the next one!
-export function checkSequentialUnlocks(progress) {
-  const unlocked = getUnlockedLessons(progress);
-  const sorted = [...LESSONS].sort((a, b) => a.order - b.order);
-
-  let mutated = false;
-  for (let i = 0; i < sorted.length; i++) {
-    const lesson = sorted[i];
-    if (unlocked.has(lesson.id)) {
-      const stats = computeLessonProgress(progress, lesson);
-      if (stats.status === 'learned' && i + 1 < sorted.length) {
-        const nextLesson = sorted[i + 1];
-        if (!unlocked.has(nextLesson.id)) {
-          progress.meta.unlockedLessons.push(nextLesson.id);
-          unlocked.add(nextLesson.id);
-          mutated = true;
-        }
-      }
-    }
-  }
-  return mutated;
 }
 
 // Mutates progress in place; caller is responsible for persisting via storage.saveProgress.
@@ -202,14 +181,17 @@ export function recordAnswer(progress, itemId, direction, isCorrect, isIdk = fal
     stats.history.push('wrong');
   }
 
-  // Recalculate learning-layer unlocks sequentially on answers!
-  checkSequentialUnlocks(progress);
-
   return progress;
 }
 
-// Diagnostic answers only ever raise a floor — never overwrite/regress real drill progress
-// Seeding diagnostic also unlocks lessons up to their mapped baseline difficulty band!
+// Diagnostic/calibration answers only ever raise a floor — never overwrite/regress
+// real drill progress. This seeds item confidence only; it deliberately does NOT
+// touch lesson unlocking. Bulk-unlocking by CEFR level here used to be a second,
+// competing writer of "what's unlocked" alongside Completion (finding 3) — that
+// mechanism is retired. Calibration's effect on unlocking now goes exclusively
+// through the same Completion currency everything else uses: see
+// data/calibration-tracks.js's applyCalibrationResults(), which pre-completes
+// lessons the calibrated level covers instead of unlocking them directly.
 export function seedFromDiagnostic(progress, itemId, direction, levelCode = 'beginner') {
   const stats = ensureDirectionEntry(progress, itemId, direction);
   if (stats.seen === 0) {
@@ -230,34 +212,6 @@ export function seedFromDiagnostic(progress, itemId, direction, levelCode = 'beg
 
   stats.box = Math.max(stats.box, boxToSeed);
   stats.consecutiveCorrect = Math.max(stats.consecutiveCorrect || 0, consec);
-
-  // Initialize and unlock adaptive baseline tiers dynamically:
-  const unlocked = getUnlockedLessons(progress);
-  if (levelCode === 'advanced') {
-    // Unlock up to lesson 32 (all A1-A2, B1, B2, and C1 abstract topics)
-    LESSONS.forEach((l, idx) => {
-      if (idx <= 31 && !unlocked.has(l.id)) {
-        progress.meta.unlockedLessons.push(l.id);
-        unlocked.add(l.id);
-      }
-    });
-  } else if (levelCode === 'intermediate') {
-    // Unlock up to lesson 23 (B1 comparing)
-    LESSONS.forEach((l, idx) => {
-      if (idx <= 22 && !unlocked.has(l.id)) {
-        progress.meta.unlockedLessons.push(l.id);
-        unlocked.add(l.id);
-      }
-    });
-  } else {
-    // Beginner: unlock up to lesson 12 (first review checkpoint)
-    LESSONS.forEach((l, idx) => {
-      if (idx <= 11 && !unlocked.has(l.id)) {
-        progress.meta.unlockedLessons.push(l.id);
-        unlocked.add(l.id);
-      }
-    });
-  }
 
   return progress;
 }
@@ -345,25 +299,22 @@ export function drawCard(progress, cardPool, avoidKey = null) {
   return poolToDraw[poolToDraw.length - 1];
 }
 
-// Calculates continuous lesson progress percent/badge status
+// percent here is a per-item-confidence average — a stand-in Retention signal
+// until Phase 3's Wilson-score rolling window replaces it. It never gates
+// anything (see core/completion.js for the actual unlock gate); it only decides
+// whether a Completed lesson's badge reads "learned" or "needs review" —
+// Completion is a ratchet (isLessonCompleted only ever becomes true), Retention
+// is allowed to dip back down without ever re-locking the lesson.
 export function computeLessonProgress(progress, lesson) {
   const items = lesson.itemIds;
   const total = items.length;
   if (!total) return { percent: 0, attempted: 0, total: 0, status: 'not-started' };
 
   const attempted = items.filter((id) => hasBeenSeen(progress, id)).length;
-  if (attempted === 0) return { percent: 0, attempted: 0, total, status: 'not-started' };
+  const percent = attempted === 0 ? 0 : Math.round((100 * items.reduce((sum, id) => sum + itemConfidence(progress, id), 0)) / total);
 
-  const percent = Math.round((100 * items.reduce((sum, id) => sum + itemConfidence(progress, id), 0)) / total);
-  const everLearned = progress.lessons[lesson.id]?.everReachedLearned === true;
-
-  if (percent >= LEARNED_PERCENT) {
-    if (!everLearned) {
-      if (!progress.lessons[lesson.id]) progress.lessons[lesson.id] = {};
-      progress.lessons[lesson.id].everReachedLearned = true;
-    }
-    return { percent, attempted, total, status: 'learned' };
+  if (!isLessonCompleted(progress, lesson.id)) {
+    return { percent, attempted, total, status: attempted === 0 ? 'not-started' : 'learning' };
   }
-  if (everLearned) return { percent, attempted, total, status: 'needs-review' };
-  return { percent, attempted, total, status: 'learning' };
+  return { percent, attempted, total, status: percent >= LEARNED_PERCENT ? 'learned' : 'needs-review' };
 }

@@ -1,5 +1,7 @@
 import { VOCAB } from '../data/vocab.js';
 import { PATTERNS } from '../data/patterns.js';
+import { itemHasAnySkill } from './skills.js';
+import { shuffle } from './random.js';
 
 const ALL_ITEMS = [...VOCAB, ...PATTERNS];
 const ITEMS_BY_ID = new Map(ALL_ITEMS.map((item) => [item.id, item]));
@@ -16,22 +18,7 @@ export function getItemById(id) {
 export function buildCardPool(activeTopics = null) {
   const cards = [];
   for (const item of ALL_ITEMS) {
-    if (activeTopics) {
-      // Determine skills for this item
-      const skills = item.skills ? [...item.skills] : [];
-      if (item.kind === 'vocab') {
-        skills.push('vocabulary');
-      }
-      if (item.id.includes('past') || item.id.includes('p_b1_done') || item.id.includes('p_b1_never') || item.id.includes('p_b1_when') || item.id.includes('p_c1_time')) {
-        skills.push('past');
-      }
-      if (item.id.includes('cond') || item.id.includes('hypo') || item.id.includes('challenge_1')) {
-        skills.push('conditional');
-      }
-
-      const hasActiveTopic = skills.some(s => activeTopics.includes(s));
-      if (!hasActiveTopic) continue; // skip item if not in checked setting topics
-    }
+    if (activeTopics && !itemHasAnySkill(item, activeTopics)) continue;
     cards.push({ item, direction: 'uk2en' });
     cards.push({ item, direction: 'en2uk' });
   }
@@ -57,15 +44,6 @@ export function answerText(item, direction) {
 
 function normalize(text) {
   return text.toLowerCase().trim().replace(/[.!?]+$/g, '');
-}
-
-function shuffle(arr) {
-  const out = [...arr];
-  for (let i = out.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [out[i], out[j]] = [out[j], out[i]];
-  }
-  return out;
 }
 
 // Returns n plausible-but-wrong items (not cards) for the given correct item+direction.

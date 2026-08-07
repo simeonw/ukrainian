@@ -1,6 +1,6 @@
 import { renderDrill } from './drill.js';
 import { renderLessons } from './lessons-ui.js';
-import { renderDiagnostic } from './diagnostic-ui.js';
+import { renderCalibration } from './calibration-ui.js';
 import { loadProgress, resetProgress, saveProgress, ALL_SETTINGS_TOPICS } from '../core/storage.js';
 import { getAbilityProfile } from '../core/srs.js';
 import { buildCardPool } from '../core/pool.js';
@@ -34,9 +34,9 @@ function renderHome() {
 
       ${showDiagnosticCta ? `
         <div class="home-cta">
-          <p>New here? Take the 2-minute diagnostic so words you already recognize from Czech get a head start.</p>
+          <p>New here? Take the 3-minute placement test — up to 20 quick questions across reading, Cyrillic decoding, and grammar to find out roughly where you're starting from.</p>
           <div class="home-cta-buttons">
-            <button class="btn-primary" id="start-diagnostic">Take diagnostic</button>
+            <button class="btn-primary" id="start-diagnostic">Take placement test</button>
             <button class="btn-text" id="dismiss-diagnostic">Skip for now</button>
           </div>
         </div>
@@ -213,7 +213,7 @@ function renderLessonsScreen() {
 
 function renderDiagnosticScreen() {
   teardownActive();
-  renderDiagnostic(root, { onDone: renderHome });
+  renderCalibration(root, { onDone: renderHome });
 }
 
 renderHome();

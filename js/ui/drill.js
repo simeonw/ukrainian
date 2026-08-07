@@ -3,21 +3,8 @@ import { drawCard, cardKey, recordAnswer } from '../core/srs.js';
 import { loadProgress, saveProgress } from '../core/storage.js';
 import { attachSwipeGesture, attachKeyboardNav } from './gesture.js';
 import { WORD_MODALS } from '../data/word-modals.js';
-
-function shuffle(arr) {
-  const out = [...arr];
-  for (let i = out.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [out[i], out[j]] = [out[j], out[i]];
-  }
-  return out;
-}
-
-function escapeHtml(str) {
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
-}
+import { shuffle } from '../core/random.js';
+import { escapeHtml } from './dom-utils.js';
 
 // Simple Levenshtein fuzzy string distance ratio
 function getFuzzyRatio(s1, s2) {
@@ -48,6 +35,12 @@ function getFuzzyRatio(s1, s2) {
 }
 
 const POSITIONS = ['up', 'down', 'left', 'right'];
+
+// The sentence builder's gender/formality modifiers only know how to re-inflect these
+// specific word forms. Sharing this list between the swap logic and the "should this
+// control even be shown" check keeps them from silently drifting apart again (finding 6).
+const GENDER_SWAP_WORDS = new Set(['робив', 'хотів', 'пішов', 'робила', 'хотіла', 'пішла']);
+const FORMALITY_SWAP_WORDS = new Set(['тобою', 'тебе', 'вас']);
 
 export function renderDrill(container, { onExit } = {}) {
   const progress = loadProgress();
@@ -359,6 +352,9 @@ export function renderDrill(container, { onExit } = {}) {
     const baseWords = item.uk.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()!?]/g, "").split(/\s+/).filter(Boolean);
     const poolWords = shuffle([...baseWords]);
 
+    const supportsGenderToggle = baseWords.some((w) => GENDER_SWAP_WORDS.has(w.toLowerCase()));
+    const supportsFormalityToggle = baseWords.some((w) => FORMALITY_SWAP_WORDS.has(w.toLowerCase()));
+
     let currentGender = 'masculine';
     let currentFormality = 'informal';
     let currentNegated = false;
@@ -382,10 +378,10 @@ export function renderDrill(container, { onExit } = {}) {
           <button class="btn-text" id="builder-reset-btn" style="color: var(--bad); text-decoration: none; font-weight: bold; font-size: 13px;">🔄 Reset Sentence</button>
         </div>
 
-        <!-- Dynamic Modifiers -->
+        <!-- Dynamic Modifiers — only shown when the swap table actually covers this sentence -->
         <div class="modifiers-container">
-          <button class="modifier-btn is-active" id="mod-gender">Male Speaker ♂️</button>
-          <button class="modifier-btn" id="mod-formality">Informal 👥</button>
+          ${supportsGenderToggle ? '<button class="modifier-btn is-active" id="mod-gender">Male Speaker ♂️</button>' : ''}
+          ${supportsFormalityToggle ? '<button class="modifier-btn" id="mod-formality">Informal 👥</button>' : ''}
           <button class="modifier-btn" id="mod-negate">Not Negated ➕</button>
         </div>
 
@@ -426,27 +422,31 @@ export function renderDrill(container, { onExit } = {}) {
       renderSlots();
     });
 
-    genderBtn.addEventListener('click', () => {
-      if (currentGender === 'masculine') {
-        currentGender = 'feminine';
-        genderBtn.textContent = 'Female Speaker ♀️';
-      } else {
-        currentGender = 'masculine';
-        genderBtn.textContent = 'Male Speaker ♂️';
-      }
-      regenerateBuilderText();
-    });
+    if (genderBtn) {
+      genderBtn.addEventListener('click', () => {
+        if (currentGender === 'masculine') {
+          currentGender = 'feminine';
+          genderBtn.textContent = 'Female Speaker ♀️';
+        } else {
+          currentGender = 'masculine';
+          genderBtn.textContent = 'Male Speaker ♂️';
+        }
+        regenerateBuilderText();
+      });
+    }
 
-    formalityBtn.addEventListener('click', () => {
-      if (currentFormality === 'informal') {
-        currentFormality = 'formal';
-        formalityBtn.textContent = 'Formal/Plural 👔';
-      } else {
-        currentFormality = 'informal';
-        formalityBtn.textContent = 'Informal 👥';
-      }
-      regenerateBuilderText();
-    });
+    if (formalityBtn) {
+      formalityBtn.addEventListener('click', () => {
+        if (currentFormality === 'informal') {
+          currentFormality = 'formal';
+          formalityBtn.textContent = 'Formal/Plural 👔';
+        } else {
+          currentFormality = 'informal';
+          formalityBtn.textContent = 'Informal 👥';
+        }
+        regenerateBuilderText();
+      });
+    }
 
     negateBtn.addEventListener('click', () => {
       currentNegated = !currentNegated;
@@ -559,7 +559,7 @@ export function renderDrill(container, { onExit } = {}) {
   }
 
   function submit(position) {
-    if (!currentRound || currentRound.locked || !currentRound.tiles[position]) return;
+    if (!currentRound || currentRound.locked || currentRound.type !== 'swipe' || !currentRound.tiles[position]) return;
     currentRound.locked = true;
     const chosen = currentRound.tiles[position];
     const isCorrect = chosen.id === currentRound.correctItem.id;

@@ -2,12 +2,9 @@ import { LESSONS } from '../data/lessons.js';
 import { getItemById } from '../core/pool.js';
 import { computeLessonProgress, isLessonUnlocked } from '../core/srs.js';
 import { loadProgress, saveProgress } from '../core/storage.js';
-
-function escapeHtml(str) {
-  const div = document.createElement('div');
-  div.textContent = str;
-  return div.innerHTML;
-}
+import { isLessonCompleted, getCompletionProgress } from '../core/completion.js';
+import { renderLessonExercise } from './lesson-exercise-ui.js';
+import { escapeHtml } from './dom-utils.js';
 
 const STATUS_LABEL = {
   'not-started': 'Not started',
@@ -40,7 +37,6 @@ export function renderLessons(container, { onExit, onOpenDiagnostic } = {}) {
     for (const lesson of sorted) {
       stats[lesson.id] = computeLessonProgress(progress, lesson);
     }
-    saveProgress(progress); // persists any everReachedLearned flips from computeLessonProgress
 
     container.innerHTML = `
       <div class="lessons-screen">
@@ -79,7 +75,8 @@ export function renderLessons(container, { onExit, onOpenDiagnostic } = {}) {
         const unlocked = isLessonUnlocked(progress, lesson.id);
 
         if (!unlocked) {
-          alert(`"Lesson ${lesson.order}: ${lesson.title}" is currently locked! Reach "Learned" (65%+) status on previous lessons to sequentially unlock this layer.`);
+          const prev = sorted[sorted.findIndex((l) => l.id === lesson.id) - 1];
+          alert(`"Lesson ${lesson.order}: ${lesson.title}" is locked. Complete "${prev.title}" to unlock it.`);
           return;
         }
 
@@ -96,7 +93,8 @@ export function renderLessons(container, { onExit, onOpenDiagnostic } = {}) {
     const lesson = LESSONS.find((l) => l.id === lessonId);
     const progress = loadProgress();
     const p = computeLessonProgress(progress, lesson);
-    saveProgress(progress);
+    const completed = isLessonCompleted(progress, lesson.id);
+    const completion = getCompletionProgress(progress, lesson);
     const { content } = lesson;
 
     // Check if transliteration is enabled and load target language setting
@@ -116,6 +114,17 @@ export function renderLessons(container, { onExit, onOpenDiagnostic } = {}) {
         <h2 class="lesson-detail-title">${lesson.order}. ${escapeHtml(lesson.title)}</h2>
         <p class="lesson-detail-summary">${escapeHtml(lesson.summary)}</p>
         <div class="lesson-detail-progress">${progressBarHtml(p, false)}</div>
+
+        <section class="lesson-section" style="background: var(--surface); border: 1px solid var(--border); padding: 14px 16px; border-radius: var(--radius);">
+          ${completed ? `
+            <span style="font-weight: 600; color: var(--good);">✓ Completed${lesson.order < LESSONS.length ? ' — next lesson unlocked' : ''}. Keep it fresh in Drill mode below.</span>
+          ` : `
+            <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+              <span style="font-size: 13px; color: var(--text-dim);">${completion.doneItemIds.length}/${completion.targetItemIds.length} exercises done</span>
+              <button class="btn-primary" id="lesson-exercise-btn" style="padding: 8px 14px; font-size: 13px;">${completion.doneItemIds.length > 0 ? 'Continue' : 'Complete this lesson'}</button>
+            </div>
+          `}
+        </section>
 
         ${content.patterns && content.patterns.length ? `
           <section class="lesson-section">
@@ -180,6 +189,8 @@ export function renderLessons(container, { onExit, onOpenDiagnostic } = {}) {
     `;
 
     container.querySelector('.btn-back-list').addEventListener('click', renderList);
+    const exerciseBtn = container.querySelector('#lesson-exercise-btn');
+    if (exerciseBtn) exerciseBtn.addEventListener('click', () => renderExercise(lesson.id));
 
     // Reset current lesson logic
     container.querySelector('#reset-lesson-btn').addEventListener('click', () => {
@@ -197,6 +208,11 @@ export function renderLessons(container, { onExit, onOpenDiagnostic } = {}) {
         renderDetail(lesson.id);
       }
     });
+  }
+
+  function renderExercise(lessonId) {
+    const lesson = LESSONS.find((l) => l.id === lessonId);
+    renderLessonExercise(container, lesson, { onDone: () => renderDetail(lessonId) });
   }
 
   renderList();
