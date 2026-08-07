@@ -4,6 +4,7 @@ import { renderCalibration } from './calibration-ui.js';
 import { loadProgress, resetProgress, saveProgress, ALL_SETTINGS_TOPICS } from '../core/storage.js';
 import { getAbilityProfile } from '../core/srs.js';
 import { buildCardPool } from '../core/pool.js';
+import { shouldOfferWeaning, markWeaningOffered, resolveWeaning } from '../core/translit-weaning.js';
 
 const root = document.getElementById('app');
 let activeCleanup = null;
@@ -24,6 +25,14 @@ function renderHome() {
   const cardPool = buildCardPool();
   const profile = getAbilityProfile(progress, cardPool);
 
+  // Finding 9: suggest, never force, turning transliteration off once the
+  // learner has demonstrably shown they can read without it.
+  const showWeaningCta = shouldOfferWeaning(progress, cardPool);
+  if (showWeaningCta) {
+    markWeaningOffered(progress);
+    saveProgress(progress);
+  }
+
   root.innerHTML = `
     <div class="home-screen">
       <header class="lessons-header" style="display: flex; justify-content: space-between; align-items: center;">
@@ -38,6 +47,16 @@ function renderHome() {
           <div class="home-cta-buttons">
             <button class="btn-primary" id="start-diagnostic">Take placement test</button>
             <button class="btn-text" id="dismiss-diagnostic">Skip for now</button>
+          </div>
+        </div>
+      ` : ''}
+
+      ${showWeaningCta ? `
+        <div class="home-cta">
+          <p>You're reading Cyrillic reliably now — want to turn off transliteration? You can always switch it back on in Settings.</p>
+          <div class="home-cta-buttons">
+            <button class="btn-primary" id="weaning-accept">Turn it off</button>
+            <button class="btn-text" id="weaning-dismiss">Keep it on</button>
           </div>
         </div>
       ` : ''}
@@ -88,6 +107,23 @@ function renderHome() {
     dismissBtn.addEventListener('click', () => {
       const cta = root.querySelector('.home-cta');
       if (cta) cta.remove();
+    });
+  }
+
+  const weaningAcceptBtn = root.querySelector('#weaning-accept');
+  if (weaningAcceptBtn) {
+    weaningAcceptBtn.addEventListener('click', () => {
+      resolveWeaning(progress, true);
+      saveProgress(progress);
+      renderHome();
+    });
+  }
+  const weaningDismissBtn = root.querySelector('#weaning-dismiss');
+  if (weaningDismissBtn) {
+    weaningDismissBtn.addEventListener('click', () => {
+      resolveWeaning(progress, false);
+      saveProgress(progress);
+      renderHome();
     });
   }
 

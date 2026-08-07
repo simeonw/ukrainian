@@ -3,16 +3,9 @@ import { getItemById } from '../core/pool.js';
 import { computeLessonProgress, isLessonUnlocked } from '../core/srs.js';
 import { loadProgress, saveProgress } from '../core/storage.js';
 import { isLessonCompleted, getCompletionProgress } from '../core/completion.js';
+import { getRetentionDeltas } from '../core/snapshot.js';
 import { renderLessonExercise } from './lesson-exercise-ui.js';
 import { escapeHtml } from './dom-utils.js';
-
-const STATUS_LABEL = {
-  'not-started': 'Not started',
-  learning: 'Learning',
-  learned: 'Learned',
-  'needs-review': 'Needs review',
-  locked: 'Locked 🔒'
-};
 
 function progressLine(p, isLocked) {
   if (isLocked) return 'Complete previous lessons to unlock';
@@ -29,6 +22,28 @@ function progressBarHtml(p, isLocked) {
   `;
 }
 
+// Two distinct signals per Phase 4, not one collapsed status: Completion (did
+// you work through it — a ratchet) and Retention (will you still get it right
+// — allowed to dip, driven by core/retention.js's Wilson score). Showing both
+// on the card itself, not just the detail page, is the point of finding 7/3's
+// "two numbers worth surfacing."
+function completionPillHtml(progress, lesson) {
+  if (isLessonCompleted(progress, lesson.id)) {
+    return `<span class="lesson-badge status-learned">✓ Completed</span>`;
+  }
+  const c = getCompletionProgress(progress, lesson);
+  if (c.doneItemIds.length === 0) return `<span class="lesson-badge">Not started</span>`;
+  return `<span class="lesson-badge status-learning">${c.doneItemIds.length}/${c.targetItemIds.length} exercises</span>`;
+}
+
+function retentionPillHtml(stats, delta) {
+  if (stats.status !== 'learned' && stats.status !== 'needs-review') return '';
+  const deltaText = typeof delta === 'number' && Math.round(delta) !== 0
+    ? ` (${delta > 0 ? '+' : ''}${Math.round(delta)}% since last time)`
+    : '';
+  return `<span class="lesson-badge status-${stats.status}">${stats.retentionPercent}% retained${deltaText}</span>`;
+}
+
 export function renderLessons(container, { onExit, onOpenDiagnostic } = {}) {
   function renderList() {
     const progress = loadProgress();
@@ -38,6 +53,17 @@ export function renderLessons(container, { onExit, onOpenDiagnostic } = {}) {
       stats[lesson.id] = computeLessonProgress(progress, lesson);
     }
 
+    // "Since last time" deltas: only meaningful for Completed lessons with a
+    // real retention read (see core/snapshot.js).
+    const currentRetentionValues = {};
+    for (const lesson of sorted) {
+      if (typeof stats[lesson.id].retentionPercent === 'number') {
+        currentRetentionValues[lesson.id] = stats[lesson.id].retentionPercent;
+      }
+    }
+    const deltas = getRetentionDeltas(progress, currentRetentionValues);
+    saveProgress(progress);
+
     container.innerHTML = `
       <div class="lessons-screen">
         <header class="lessons-header">
@@ -46,20 +72,23 @@ export function renderLessons(container, { onExit, onOpenDiagnostic } = {}) {
         </header>
         <div class="lesson-list">
           ${sorted
-            .map((lesson) => {
+            .map((lesson, i) => {
               const unlocked = isLessonUnlocked(progress, lesson.id);
               const cardStatus = unlocked ? stats[lesson.id].status : 'locked';
-              const badgeLabel = unlocked ? STATUS_LABEL[stats[lesson.id].status] : 'Locked 🔒';
+              const prevTitle = i > 0 ? sorted[i - 1].title : null;
 
               return `
-                <button class="lesson-card status-${cardStatus}" data-id="${lesson.id}" style="${!unlocked ? 'opacity: 0.55; cursor: not-allowed; border-left-color: var(--border);' : ''}">
+                <button class="lesson-card status-${cardStatus}" data-id="${lesson.id}" data-locked="${!unlocked}" style="${!unlocked ? 'opacity: 0.55; border-left-color: var(--border);' : ''}">
                   <div class="lesson-card-top">
                     <span class="lesson-order">${lesson.order}</span>
-                    <span class="lesson-badge ${!unlocked ? '' : 'status-' + stats[lesson.id].status}">${badgeLabel}</span>
+                    ${unlocked
+                      ? `<div style="display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end;">${completionPillHtml(progress, lesson)}${retentionPillHtml(stats[lesson.id], deltas[lesson.id])}</div>`
+                      : `<span class="lesson-badge">Locked 🔒</span>`}
                   </div>
                   <div class="lesson-title">${escapeHtml(lesson.title)}</div>
                   <div class="lesson-summary">${escapeHtml(lesson.summary)}</div>
                   ${progressBarHtml(stats[lesson.id], !unlocked)}
+                  ${!unlocked ? `<div class="lesson-locked-note" style="display: none; font-size: 12px; color: var(--warn); margin-top: 4px;">Complete "${escapeHtml(prevTitle || '')}" to unlock this.</div>` : ''}
                 </button>
               `;
             })
@@ -75,8 +104,9 @@ export function renderLessons(container, { onExit, onOpenDiagnostic } = {}) {
         const unlocked = isLessonUnlocked(progress, lesson.id);
 
         if (!unlocked) {
-          const prev = sorted[sorted.findIndex((l) => l.id === lesson.id) - 1];
-          alert(`"Lesson ${lesson.order}: ${lesson.title}" is locked. Complete "${prev.title}" to unlock it.`);
+          // Inline reason shown in place, not a blocking native alert().
+          const note = card.querySelector('.lesson-locked-note');
+          if (note) note.style.display = note.style.display === 'none' ? 'block' : 'none';
           return;
         }
 
@@ -106,9 +136,9 @@ export function renderLessons(container, { onExit, onOpenDiagnostic } = {}) {
       <div class="lesson-detail-screen">
         <header class="lessons-header" style="justify-content: space-between;">
           <button class="btn-back-list" type="button">&larr; Lessons</button>
-          <div style="display: flex; gap: 8px; align-items: center;">
+          <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end;">
             <button id="reset-lesson-btn" class="btn-text" style="color: var(--bad); text-decoration: none; font-size: 13px; font-weight: 600;">Reset Lesson Progress</button>
-            <span class="lesson-badge status-${p.status}">${STATUS_LABEL[p.status]}</span>
+            ${completionPillHtml(progress, lesson)}${retentionPillHtml(p, undefined)}
           </div>
         </header>
         <h2 class="lesson-detail-title">${lesson.order}. ${escapeHtml(lesson.title)}</h2>

@@ -18,6 +18,11 @@ function defaultProgress() {
     meta: {
       createdAt: Date.now(),
       diagnosticCompletedAt: null,
+      // Phase 4: one-time transliteration-weaning prompt state (never re-asks
+      // after a resolution) and a lightweight daily snapshot for "since last
+      // time" progress deltas on the lesson list.
+      translitWeaning: { offeredAt: null, resolvedAt: null, accepted: null },
+      retentionSnapshot: { takenAt: null, values: {} },
       settings: {
         transliteration: true,
         language: 'en',

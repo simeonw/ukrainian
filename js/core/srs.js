@@ -2,6 +2,8 @@
 import { LESSONS } from '../data/lessons.js';
 import { getSkillsForItem } from './skills.js';
 import { isLessonCompleted } from './completion.js';
+import { getSkillRetention } from './retention.js';
+import { getItemById } from './pool.js';
 
 const MAX_BOX = 5;
 const BOX_WEIGHTS = [12, 10, 8, 4, 2, 1]; // Weights for drawing based on Leitner boxes
@@ -66,68 +68,40 @@ export function itemConfidence(progress, itemId) {
   return Math.min(1, sumBox / 4);
 }
 
-// Track 7 distinct dimensions of ability: vocabulary, understanding, production, grammar, conditional, past, and reading speed
+// Track 7 distinct dimensions of ability: vocabulary, understanding, production, grammar, conditional, past, and reading speed.
+// The 6 skills.js categories now read straight from core/retention.js's
+// Wilson-score rolling windows — the same formula that drives a lesson's
+// needs-review flag (computeLessonProgress below) and gets its starting point
+// from Phase 1 calibration, not a separately-computed item-confidence average.
+// This directly retires finding 7/8's "three different ad hoc thresholds."
+// 'Reading Speed' isn't a skills.js category — it stays a latency read over
+// the card pool, which is still the right source for that specific signal.
 export function getAbilityProfile(progress, cardPool) {
-  const profile = {
-    vocabulary: { score: 0, total: 0 },
-    understanding: { score: 0, total: 0 },
-    production: { score: 0, total: 0 },
-    grammar: { score: 0, total: 0 },
-    conditional: { score: 0, total: 0 },
-    past: { score: 0, total: 0 },
-    'Reading Speed': { score: 0, total: 0 } // tracks speed/latency score
-  };
+  const SKILL_CATEGORIES = ['vocabulary', 'understanding', 'production', 'grammar', 'conditional', 'past'];
+  const result = {};
+  for (const skill of SKILL_CATEGORIES) {
+    result[skill] = getSkillRetention(progress, skill).percent;
+  }
 
   const uniqueItems = new Set();
-  for (const card of cardPool) {
-    uniqueItems.add(card.item);
-  }
+  for (const card of cardPool) uniqueItems.add(card.item);
 
   let totalLatencies = 0;
   let fluentLatencies = 0;
-
   for (const item of uniqueItems) {
-    const skills = getSkillsForItem(item);
-    const confidence = itemConfidence(progress, item.id);
-    for (const skill of skills) {
-      if (profile[skill] !== undefined) {
-        profile[skill].score += confidence;
-        profile[skill].total += 1;
-      }
-    }
-
-    // Accumulate reading speed stats from latency history
     const statsUk = progress.items?.[item.id]?.uk2en;
     const statsEn = progress.items?.[item.id]?.en2uk;
-
-    if (statsUk && statsUk.latencyHistory) {
-      for (const lat of statsUk.latencyHistory) {
+    for (const stats of [statsUk, statsEn]) {
+      if (!stats?.latencyHistory) continue;
+      const words = item.uk.split(/\s+/).length;
+      const threshold = 3 + words * 1.5;
+      for (const lat of stats.latencyHistory) {
         totalLatencies += 1;
-        const words = item.uk.split(/\s+/).length;
-        const threshold = 3 + words * 1.5;
-        if (lat <= threshold) fluentLatencies += 1;
-      }
-    }
-    if (statsEn && statsEn.latencyHistory) {
-      for (const lat of statsEn.latencyHistory) {
-        totalLatencies += 1;
-        const words = item.uk.split(/\s+/).length;
-        const threshold = 3 + words * 1.5;
         if (lat <= threshold) fluentLatencies += 1;
       }
     }
   }
-
-  // Convert to percent
-  const result = {};
-  for (const skill in profile) {
-    if (skill === 'Reading Speed') {
-      result[skill] = totalLatencies > 0 ? Math.round((fluentLatencies / totalLatencies) * 100) : 0;
-    } else {
-      const t = profile[skill].total;
-      result[skill] = t > 0 ? Math.round((profile[skill].score / t) * 100) : 0;
-    }
-  }
+  result['Reading Speed'] = totalLatencies > 0 ? Math.round((fluentLatencies / totalLatencies) * 100) : 0;
   return result;
 }
 
@@ -299,12 +273,37 @@ export function drawCard(progress, cardPool, avoidKey = null) {
   return poolToDraw[poolToDraw.length - 1];
 }
 
-// percent here is a per-item-confidence average — a stand-in Retention signal
-// until Phase 3's Wilson-score rolling window replaces it. It never gates
-// anything (see core/completion.js for the actual unlock gate); it only decides
-// whether a Completed lesson's badge reads "learned" or "needs review" —
-// Completion is a ratchet (isLessonCompleted only ever becomes true), Retention
+// `percent` is a per-item-confidence average — a simple "how much have you
+// practiced this" bar, independent of Retention's meaning. It never gates
+// anything (see core/completion.js for the actual unlock gate) and never
+// decides the badge either: once Completed, the badge is decided by the
+// lesson's own skills' Wilson-score Retention (core/retention.js) — the same
+// formula the Ability Map uses, not a separate item-confidence threshold.
+// Completion is a ratchet (isLessonCompleted only ever becomes true); Retention
 // is allowed to dip back down without ever re-locking the lesson.
+// A lesson can require a "needs review" read only once its skills' Retention
+// windows hold a real sample — otherwise a lesson just Completed (which
+// necessarily means only 1 correct answer per item so far) would immediately
+// read as "needs review" purely from the Wilson formula's own honesty about
+// small samples (its worked example: even 3/3 correct reads as only 44%).
+// That's not a wrong number, but flashing "needs review" the instant someone
+// finishes is a bad read of it — Retention should only pull a lesson down
+// once real subsequent evidence (more Drill attempts, right or wrong) exists.
+const MIN_RETENTION_SAMPLE = 3;
+
+function lessonRetention(progress, lesson) {
+  const skills = new Set();
+  for (const id of lesson.itemIds) {
+    const item = getItemById(id);
+    if (item) for (const skill of getSkillsForItem(item)) skills.add(skill);
+  }
+  const reads = [...skills].map((skill) => getSkillRetention(progress, skill)).filter((r) => r.total > 0);
+  if (!reads.length) return { percent: 0, minSample: 0 };
+  const percent = Math.round(reads.reduce((sum, r) => sum + r.percent, 0) / reads.length);
+  const minSample = Math.min(...reads.map((r) => r.total));
+  return { percent, minSample };
+}
+
 export function computeLessonProgress(progress, lesson) {
   const items = lesson.itemIds;
   const total = items.length;
@@ -316,5 +315,7 @@ export function computeLessonProgress(progress, lesson) {
   if (!isLessonCompleted(progress, lesson.id)) {
     return { percent, attempted, total, status: attempted === 0 ? 'not-started' : 'learning' };
   }
-  return { percent, attempted, total, status: percent >= LEARNED_PERCENT ? 'learned' : 'needs-review' };
+  const retention = lessonRetention(progress, lesson);
+  const status = retention.minSample >= MIN_RETENTION_SAMPLE && retention.percent < LEARNED_PERCENT ? 'needs-review' : 'learned';
+  return { percent, attempted, total, retentionPercent: retention.percent, status };
 }

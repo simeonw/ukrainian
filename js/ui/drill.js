@@ -5,6 +5,9 @@ import { attachSwipeGesture, attachKeyboardNav } from './gesture.js';
 import { WORD_MODALS } from '../data/word-modals.js';
 import { shuffle } from '../core/random.js';
 import { escapeHtml } from './dom-utils.js';
+import { getSkillsForItem } from '../core/skills.js';
+import { recordSkillAttempt } from '../core/retention.js';
+import { toFeminine, toMasculine, isGenderInflectable, toFormal, toInformal, isFormalityInflectable } from '../data/inflection-rules.js';
 
 // Simple Levenshtein fuzzy string distance ratio
 function getFuzzyRatio(s1, s2) {
@@ -36,11 +39,8 @@ function getFuzzyRatio(s1, s2) {
 
 const POSITIONS = ['up', 'down', 'left', 'right'];
 
-// The sentence builder's gender/formality modifiers only know how to re-inflect these
-// specific word forms. Sharing this list between the swap logic and the "should this
-// control even be shown" check keeps them from silently drifting apart again (finding 6).
-const GENDER_SWAP_WORDS = new Set(['робив', 'хотів', 'пішов', 'робила', 'хотіла', 'пішла']);
-const FORMALITY_SWAP_WORDS = new Set(['тобою', 'тебе', 'вас']);
+// Gender/formality re-inflection now goes through data/inflection-rules.js's
+// general morphological rules instead of a fixed word list — see finding 6.
 
 export function renderDrill(container, { onExit } = {}) {
   const progress = loadProgress();
@@ -318,6 +318,7 @@ export function renderDrill(container, { onExit } = {}) {
       updateScore();
 
       recordAnswer(progress, item.id, direction, isCorrect, false, timeTaken);
+      recordSkillAttempt(progress, getSkillsForItem(item), item.id, isCorrect);
       saveProgress(progress);
 
       if (isCorrect) {
@@ -352,8 +353,8 @@ export function renderDrill(container, { onExit } = {}) {
     const baseWords = item.uk.replace(/[.,\/#!$%\^&\*;:{}=\-_`~()!?]/g, "").split(/\s+/).filter(Boolean);
     const poolWords = shuffle([...baseWords]);
 
-    const supportsGenderToggle = baseWords.some((w) => GENDER_SWAP_WORDS.has(w.toLowerCase()));
-    const supportsFormalityToggle = baseWords.some((w) => FORMALITY_SWAP_WORDS.has(w.toLowerCase()));
+    const supportsGenderToggle = baseWords.some((w) => isGenderInflectable(w.toLowerCase()));
+    const supportsFormalityToggle = baseWords.some((w) => isFormalityInflectable(w.toLowerCase()));
 
     let currentGender = 'masculine';
     let currentFormality = 'informal';
@@ -461,22 +462,11 @@ export function renderDrill(container, { onExit } = {}) {
 
       let modifiedWords = [...poolWords];
       modifiedWords = modifiedWords.map(w => {
-        let wrd = w.toLowerCase();
-        if (currentGender === 'feminine') {
-          if (wrd === 'робив') return 'робила';
-          if (wrd === 'хотів') return 'хотіла';
-          if (wrd === 'пішов') return 'пішла';
-        } else {
-          if (wrd === 'робила') return 'робив';
-          if (wrd === 'хотіла') return 'хотів';
-          if (wrd === 'пішла') return 'пішов';
-        }
-        if (currentFormality === 'formal') {
-          if (wrd === 'тобою') return 'вас';
-          if (wrd === 'тебе') return 'вас';
-        } else {
-          if (wrd === 'вас' && baseWords.includes('тебе')) return 'тебе';
-        }
+        const wrd = w.toLowerCase();
+        const genderSwapped = currentGender === 'feminine' ? toFeminine(wrd) : toMasculine(wrd);
+        if (genderSwapped) return genderSwapped;
+        const formalitySwapped = currentFormality === 'formal' ? toFormal(wrd) : toInformal(wrd);
+        if (formalitySwapped) return formalitySwapped;
         return w;
       });
 
@@ -534,6 +524,7 @@ export function renderDrill(container, { onExit } = {}) {
       updateScore();
 
       recordAnswer(progress, item.id, direction, isCorrect, false, timeTaken);
+      recordSkillAttempt(progress, getSkillsForItem(item), item.id, isCorrect);
       saveProgress(progress);
 
       if (isCorrect) {
@@ -580,6 +571,7 @@ export function renderDrill(container, { onExit } = {}) {
     updateScore();
 
     recordAnswer(progress, currentRound.correctItem.id, currentRound.direction, isCorrect, false, timeTaken);
+    recordSkillAttempt(progress, getSkillsForItem(currentRound.correctItem), currentRound.correctItem.id, isCorrect);
     saveProgress(progress);
 
     cardEl.classList.add(isCorrect ? 'is-correct' : 'is-incorrect');
@@ -630,6 +622,7 @@ export function renderDrill(container, { onExit } = {}) {
     currentRound.locked = true;
 
     recordAnswer(progress, currentRound.correctItem.id, currentRound.direction, false, true);
+    recordSkillAttempt(progress, getSkillsForItem(currentRound.correctItem), currentRound.correctItem.id, false);
     saveProgress(progress);
 
     sessionTotal += 1;

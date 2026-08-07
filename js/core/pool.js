@@ -1,9 +1,16 @@
 import { VOCAB } from '../data/vocab.js';
 import { PATTERNS } from '../data/patterns.js';
+import { SUBSTITUTION_FRAMES } from '../data/substitution-fills.js';
 import { itemHasAnySkill } from './skills.js';
 import { shuffle } from './random.js';
+import { generateAllInstances } from './generate.js';
 
-const ALL_ITEMS = [...VOCAB, ...PATTERNS];
+// Generated instances are first-class items, not a bolted-on side pool — they
+// flow through the same buildCardPool/pickDistractors/getAllItems path as
+// hand-authored vocab and patterns, so nothing downstream (Drill, the Ability
+// Map, calibration) needs to special-case them.
+const GENERATED_ITEMS = generateAllInstances(SUBSTITUTION_FRAMES);
+const ALL_ITEMS = [...VOCAB, ...PATTERNS, ...GENERATED_ITEMS];
 const ITEMS_BY_ID = new Map(ALL_ITEMS.map((item) => [item.id, item]));
 
 export function getAllItems() {

@@ -7,6 +7,8 @@ import { getAllItems } from '../core/pool.js';
 import { getSkillsForItem } from '../core/skills.js';
 import { seedFromDiagnostic } from '../core/srs.js';
 import { markLessonCompleted } from '../core/completion.js';
+import { seedSkillRetention } from '../core/retention.js';
+import { TIER_MAX } from '../core/calibration.js';
 
 const CEFR_TIERS = ['beginner', 'b1', 'b2', 'c1'];
 // tier 0-1 -> beginner, 2-3 -> b1, 4-5 -> b2, 6-7 -> c1 (see calibration.js's 8-rung scale)
@@ -303,7 +305,32 @@ export function applyCalibrationResults(progress, trackResults) {
   seedSkillFromTrack(progress, trackResults.verbPerson, ['grammar', 'past']);
   seedSkillFromTrack(progress, trackResults.nounCase, ['grammar']);
 
+  // Seed core/retention.js's rolling windows so ordinary Drill practice
+  // refines an informed starting point instead of cold-starting every
+  // category at zero — one continuous signal from onboarding onward, per
+  // Phase 3. Only skills a track genuinely tests get seeded; calibration
+  // doesn't test 'production' or 'conditional' directly, so those are left
+  // for real practice to establish rather than inventing a signal.
+  seedSkillRetention(progress, 'understanding', comprehensionTier / TIER_MAX);
+  seedSkillRetention(progress, 'vocabulary', comprehensionTier / TIER_MAX);
+  const grammarTiers = [trackResults.verbPerson?.tier, trackResults.nounCase?.tier].filter((t) => t !== undefined);
+  if (grammarTiers.length) {
+    const avgGrammarTier = grammarTiers.reduce((a, b) => a + b, 0) / grammarTiers.length;
+    seedSkillRetention(progress, 'grammar', avgGrammarTier / TIER_MAX);
+  }
+
   preCompleteLessonsBelowCefr(progress, overallCefr);
+
+  // Phase 4's transliteration-weaning prompt needs a durable "can this person
+  // read without the crutch" read, not just this session's transient result —
+  // comprehensionNoTranslit tests whole-sentence reading, cyrillicDecoding
+  // tests raw grapheme decoding; both are direct without-transliteration
+  // evidence, so their average is the calibrated baseline (see
+  // core/translit-weaning.js, which blends this with ongoing Drill latency).
+  const noTranslitTiers = [trackResults.comprehensionNoTranslit?.tier, trackResults.cyrillicDecoding?.tier].filter((t) => t !== undefined);
+  if (noTranslitTiers.length) {
+    progress.meta.translitWeaning.calibratedTier = noTranslitTiers.reduce((a, b) => a + b, 0) / noTranslitTiers.length;
+  }
 
   return { overallCefr, levelCode };
 }
