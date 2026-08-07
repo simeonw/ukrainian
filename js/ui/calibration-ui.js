@@ -56,7 +56,7 @@ function questionView(track, q) {
     translitText: track.showTranslit ? q.translit : null,
     options: shuffle([q.correctAnswer, ...q.distractors]),
     correctText: q.correctAnswer,
-    usedKey: null,
+    usedKey: q.comboKey ?? null,
   };
 }
 
@@ -66,6 +66,15 @@ export function renderCalibration(container, { onDone } = {}) {
   const usedByTrack = new Map(CALIBRATION_TRACKS.map((t) => [t.id, new Set()]));
   const totalQuestions = session.maxQuestions;
   let questionsAnswered = 0;
+
+  // comprehension and comprehensionNoTranslit deliberately share one sentence
+  // pool with independent per-track dedup — the same UK sentence can
+  // legitimately reappear once, now without the translit line, which is the
+  // whole point (isolating whether the reading aid was doing the work). But
+  // to a real learner that reads as "did my last click not register?" since
+  // the primary text on screen looks unchanged. Flag it explicitly instead of
+  // letting it look like a stall.
+  const seenSentenceTexts = new Set();
 
   function shell(bodyHtml) {
     container.innerHTML = `
@@ -95,8 +104,12 @@ export function renderCalibration(container, { onDone } = {}) {
     if (view.usedKey !== null && view.usedKey !== undefined) used.add(view.usedKey);
     const startTime = Date.now();
 
+    const isRepeatSentence = track.kind === 'sentence' && seenSentenceTexts.has(view.mainText);
+    if (track.kind === 'sentence') seenSentenceTexts.add(view.mainText);
+
     shell(`
       <p class="diagnostic-prompt-label">${view.promptLabel}</p>
+      ${isRepeatSentence ? `<p style="font-size: 12px; color: var(--warn); margin: 0 0 4px;">Same sentence as before — this time without the reading aid below.</p>` : ''}
       <div class="diagnostic-word" style="font-size: 21px; line-height: 1.35; margin: 16px 0;">${escapeHtml(view.mainText)}</div>
       ${view.translitText ? `<div class="diagnostic-translit" style="margin-bottom: 24px;">${escapeHtml(view.translitText)}</div>` : '<div style="margin-bottom: 24px;"></div>'}
       <div class="diagnostic-options diagnostic-options--wide">

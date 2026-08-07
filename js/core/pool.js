@@ -29,6 +29,15 @@ export function buildCardPool(activeTopics = null) {
     cards.push({ item, direction: 'uk2en' });
     cards.push({ item, direction: 'en2uk' });
   }
+  // A topics filter that matches nothing — stale settings from before a topic
+  // was renamed, or any other way the saved list ends up not matching a
+  // single item — must never hand Drill an empty pool: drawCard() has no
+  // valid card to return from an empty array, which crashes cardKey() on the
+  // very next line and leaves the whole screen blank. Fall back to the full
+  // catalog rather than let a bad settings value break the entire mode.
+  if (cards.length === 0 && activeTopics) {
+    return buildCardPool(null);
+  }
   return cards;
 }
 

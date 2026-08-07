@@ -178,18 +178,24 @@ const VERB_POOL = {
   ],
 };
 
-function pickVerbPersonQuestion(tier) {
+// usedCombos: Set of "verb:person" strings already asked this session — unlike
+// the comprehension/decoding tracks, this one had no dedup at all before,
+// so the exact same verb+person combo could repeat within a session.
+function pickVerbPersonQuestion(tier, usedCombos) {
   const pool = VERB_POOL[cefrForTier(tier)];
-  const verb = pool[Math.floor(Math.random() * pool.length)];
-  const persons = Object.keys(verb.forms);
-  const correctPerson = persons[Math.floor(Math.random() * persons.length)];
+  const combos = pool.flatMap((verb) => Object.keys(verb.forms).map((person) => ({ verb, person })));
+  const available = usedCombos ? combos.filter((c) => !usedCombos.has(`${c.verb.verb}:${c.person}`)) : combos;
+  const source = available.length ? available : combos;
+  const { verb, person: correctPerson } = source[Math.floor(Math.random() * source.length)];
   const [uk, translit] = verb.forms[correctPerson];
+  const persons = Object.keys(verb.forms);
   const distractorPersons = persons.filter((p) => p !== correctPerson).sort(() => Math.random() - 0.5).slice(0, 3);
   return {
     uk,
     translit,
     correctAnswer: PERSON_LABELS[correctPerson],
     distractors: distractorPersons.map((p) => PERSON_LABELS[p]),
+    comboKey: `${verb.verb}:${correctPerson}`,
   };
 }
 
@@ -216,14 +222,17 @@ const NOUN_POOL = {
   c1: { case: 'vocative', nouns: [{ noun: 'рука', form: 'руко', translit: 'ruko' }, { noun: 'книга', form: 'книго', translit: 'knyho' }] },
 };
 
-function pickNounCaseQuestion(tier) {
+function pickNounCaseQuestion(tier, usedNouns) {
   const bucket = NOUN_POOL[cefrForTier(tier)];
-  const pick = bucket.nouns[Math.floor(Math.random() * bucket.nouns.length)];
+  const available = usedNouns ? bucket.nouns.filter((n) => !usedNouns.has(n.noun)) : bucket.nouns;
+  const source = available.length ? available : bucket.nouns;
+  const pick = source[Math.floor(Math.random() * source.length)];
   const distractors = ALL_CASES.filter((c) => c !== bucket.case).sort(() => Math.random() - 0.5).slice(0, 3);
   return {
     uk: pick.form,
     translit: pick.translit,
     correctAnswer: CASE_LABELS[bucket.case],
+    comboKey: pick.noun,
     distractors: distractors.map((c) => CASE_LABELS[c]),
   };
 }
@@ -233,8 +242,8 @@ export const CALIBRATION_TRACKS = [
   { id: 'comprehension', label: 'Comprehension', showTranslit: true, kind: 'sentence', pick: (tier, used) => pickComprehensionQuestion(tier, used) },
   { id: 'comprehensionNoTranslit', label: 'Reading without transliteration', showTranslit: false, kind: 'sentence', pick: (tier, used) => pickComprehensionQuestion(tier, used) },
   { id: 'cyrillicDecoding', label: 'Cyrillic decoding', showTranslit: false, kind: 'decoding', pick: (tier, used) => pickDecodingQuestion(tier, used) },
-  { id: 'verbPerson', label: 'Verb morphology', showTranslit: true, kind: 'grammar', pick: (tier) => pickVerbPersonQuestion(tier) },
-  { id: 'nounCase', label: 'Noun case', showTranslit: true, kind: 'grammar', pick: (tier) => pickNounCaseQuestion(tier) },
+  { id: 'verbPerson', label: 'Verb morphology', showTranslit: true, kind: 'grammar', pick: (tier, used) => pickVerbPersonQuestion(tier, used) },
+  { id: 'nounCase', label: 'Noun case', showTranslit: true, kind: 'grammar', pick: (tier, used) => pickNounCaseQuestion(tier, used) },
 ];
 
 // -------------------- Applying results --------------------
