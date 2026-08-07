@@ -63,7 +63,18 @@ export function recordTrackAnswer(state, tier, correct, fluent) {
     state.high = tier;
   }
 
-  if (state.rounds >= MAX_ROUNDS_PER_TRACK || state.high - state.low <= 1) {
+  // A soft (worked-out, not fluent) pass must never be trusted as a final
+  // estimate on its own — the whole point of tracking `lowWasSoft` is that a
+  // slow correct answer needs confirmation, not an instant top-tier grant.
+  // Without the `!state.lowWasSoft` guard, the round-2 ceiling probe was the
+  // one case where this silently broke: `high` sits at TIER_MAX+1 with no
+  // room to bisect above it, so `high - low` is always exactly 1 there —
+  // meaning ANY correct ceiling answer, fluent or not, satisfied the old gap
+  // check and locked in the top tier after just 2 rounds. Requiring a fluent
+  // low forces at least one more confirming round (nextProbeTier's
+  // lowWasSoft handling naturally re-probes near the same tier) before a
+  // soft pass is ever trusted as the session's actual estimate.
+  if (state.rounds >= MAX_ROUNDS_PER_TRACK || (state.high - state.low <= 1 && !state.lowWasSoft)) {
     state.estimate = state.low;
     state.done = true;
   }
