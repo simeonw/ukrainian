@@ -472,7 +472,7 @@ h1, h2, h3 {
 
 .lesson-row {
   display: grid;
-  grid-template-columns: 26px 26px minmax(0, 1fr) 44px;
+  grid-template-columns: 24px 30px minmax(0, 1fr) 44px;
   align-items: center;
   gap: 10px;
   text-align: left;
@@ -485,8 +485,11 @@ h1, h2, h3 {
 }
 
 /* Completion leans on green throughout the row, not just the medal icon —
-   a completed row is visually unmistakable at a glance while scrolling. */
-.lesson-row.status-learned { border-left-color: var(--good); background: rgba(52,211,153,0.06); }
+   a completed row is visually unmistakable at a glance while scrolling.
+   Bumped up hard (was a barely-visible 6% tint / 3px border) per direct
+   "not using enough green" feedback — this needs to read at a glance while
+   scrolling fast, not on close inspection. */
+.lesson-row.status-learned { border-left-color: var(--good); border-left-width: 5px; background: rgba(52,211,153,0.16); }
 .lesson-row.status-needs-review { border-left-color: var(--warn); }
 .lesson-row.status-learning { border-left-color: var(--accent); }
 
@@ -497,23 +500,34 @@ h1, h2, h3 {
 }
 
 .lesson-row-badge {
-  font-size: 14px;
+  font-size: 15px;
+  font-weight: 700;
   text-align: center;
   line-height: 1;
-  padding: 4px 0;
+  width: 28px;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 999px;
+  border: 2px solid transparent;
+  box-sizing: border-box;
 }
 
-/* Each badge type gets its own color, not just a different emoji shape —
-   gold and the fast-track lightning bolt read as genuinely different states
-   even at a glance/small size, never confusable with each other. */
-.lesson-row-badge.badge-gold { background: rgba(251,191,36,0.18); }
-.lesson-row-badge.badge-silver { background: rgba(148,163,184,0.18); }
-.lesson-row-badge.badge-bronze { background: rgba(217,119,6,0.16); }
-.lesson-row-badge.badge-fasttrack { background: rgba(96,165,250,0.18); }
-.lesson-row-badge.badge-progress { background: var(--surface-2); color: var(--text-dim); font-size: 10px; font-weight: 700; }
-.lesson-row-badge.badge-none { color: var(--text-dim); }
-.lesson-row-badge.badge-locked { color: var(--text-dim); }
+/* Confirmed-mastery tiers (bronze/silver/gold) are real Drill evidence, so
+   they ALL get a solid green ring — green means "confirmed," full stop,
+   with the medal color only differentiating tier within that. The
+   fast-track lightning bolt gets the opposite treatment on purpose: a
+   dashed, hollow, blue outline that reads as "pending / not yet confirmed"
+   — a structural (not just color) difference from the solid ring, so it
+   can't be mistaken for a real badge even at a glance. */
+.lesson-row-badge.badge-gold { background: rgba(251,191,36,0.35); border-color: var(--good); }
+.lesson-row-badge.badge-silver { background: rgba(148,163,184,0.35); border-color: var(--good); }
+.lesson-row-badge.badge-bronze { background: rgba(217,119,6,0.3); border-color: var(--good); }
+.lesson-row-badge.badge-fasttrack { background: transparent; border: 2px dashed var(--accent-2); color: var(--accent-2); }
+.lesson-row-badge.badge-progress { background: var(--surface-2); color: var(--text-dim); font-size: 10px; font-weight: 700; border-color: var(--border); }
+.lesson-row-badge.badge-none { color: var(--text-dim); border-color: var(--border); }
+.lesson-row-badge.badge-locked { color: var(--text-dim); border-color: var(--border); }
 
 .lesson-row-title {
   font-size: 14px;
