@@ -7,6 +7,7 @@ import { buildCardPool } from '../core/pool.js';
 import { shouldOfferWeaning, markWeaningOffered, resolveWeaning } from '../core/translit-weaning.js';
 import { getVocabBadgeProgress } from '../core/vocab-badges.js';
 import { getThemedLessons } from '../core/vocab-themes.js';
+import { LESSONS } from '../data/lessons.js';
 import { escapeHtml } from './dom-utils.js';
 
 const root = document.getElementById('app');
@@ -43,7 +44,7 @@ function renderHome() {
         <h1>Українська</h1>
         <button class="btn-primary" id="open-settings-btn" style="padding: 8px 14px; font-size: 13px;">⚙️ Settings</button>
       </header>
-      <p class="home-subtitle">A Czech-bridge course: get understandable fast, improve accuracy over time.</p>
+      <p class="home-subtitle">Learn Ukrainian: get understandable fast, improve accuracy over time.</p>
 
       ${showDiagnosticCta ? `
         <div class="home-cta">
@@ -65,17 +66,22 @@ function renderHome() {
         </div>
       ` : ''}
 
-      <!-- Ability Profile Map Display -->
+      <!-- Practice Accuracy: how often you get each category right when
+           tested (Wilson-score retention) — a looser, faster-moving signal
+           than "words mastered" below. Flat rows, not individually boxed
+           cards, and the header/subtitle name what it actually measures so
+           it doesn't read as a duplicate of the Vocabulary Mastered stat. -->
       <div class="lesson-section" style="background: var(--surface); border: 1px solid var(--border); padding: 16px; border-radius: var(--radius);">
-        <h3 style="font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-dim); margin-bottom: 12px; font-weight: 700;">Ability Profile Map</h3>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+        <h3 style="font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-dim); margin-bottom: 2px; font-weight: 700;">Practice Accuracy</h3>
+        <p style="font-size: 12px; color: var(--text-dim); margin-bottom: 12px;">How often you get each category right when tested — not the same as words fully mastered below.</p>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
           ${Object.entries(profile).map(([skill, val]) => `
-            <div style="background: var(--surface-2); padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--border);">
-              <div style="font-size: 13px; font-weight: 600; text-transform: capitalize; color: var(--text); display: flex; justify-content: space-between;">
+            <div>
+              <div style="font-size: 13px; font-weight: 600; text-transform: capitalize; color: var(--text); display: flex; justify-content: space-between; margin-bottom: 4px;">
                 <span>${skill}</span>
                 <span style="color: ${val >= 75 ? 'var(--good)' : val >= 50 ? 'var(--warn)' : 'var(--accent)'}">${val}%</span>
               </div>
-              <div class="progress-bar" style="height: 5px; margin-top: 6px;">
+              <div class="progress-bar" style="height: 5px;">
                 <div class="progress-bar-fill" style="width: ${val}%; background: ${val >= 75 ? 'var(--good)' : val >= 50 ? 'var(--warn)' : 'var(--accent)'}"></div>
               </div>
             </div>
@@ -83,12 +89,13 @@ function renderHome() {
         </div>
       </div>
 
-      <!-- Vocabulary Badges: "known" is a stricter bar than raw practice —
+      <!-- Vocabulary Mastered: "known" is a stricter bar than raw practice —
            see core/srs.js isItemKnown / core/vocab-badges.js. A word counts
            once it clears repeated multiple-choice success or one free-text
            production, never from a single guess or a calibration seed. -->
       <div class="lesson-section" style="background: var(--surface); border: 1px solid var(--border); padding: 16px; border-radius: var(--radius);">
-        <h3 style="font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-dim); margin-bottom: 12px; font-weight: 700;">Vocabulary</h3>
+        <h3 style="font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-dim); margin-bottom: 2px; font-weight: 700;">Vocabulary Mastered</h3>
+        <p style="font-size: 12px; color: var(--text-dim); margin-bottom: 12px;">Words confirmed via repeated correct answers or a typed translation — stricter than practice accuracy above.</p>
         <div style="display: flex; flex-direction: column; gap: 10px;">
           ${Object.values(vocabBadges).map((b) => {
             const pct = b.total > 0 ? Math.round((b.known / b.total) * 100) : 0;
@@ -114,7 +121,7 @@ function renderHome() {
         </button>
         <button class="mode-card" id="open-lessons">
           <div class="mode-card-title">Lessons</div>
-          <div class="mode-card-desc">37 sections: sentence frames, vocabulary, and conversation topics.</div>
+          <div class="mode-card-desc">${LESSONS.length} sections: sentence frames, vocabulary, and conversation topics.</div>
         </button>
       </div>
 

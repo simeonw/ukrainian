@@ -82,9 +82,13 @@ export function renderLessons(container, { onExit, onOpenDiagnostic } = {}) {
     const prevTitle = i > 0 ? sorted[i - 1].title : null;
     const percent = unlocked ? stats[lesson.id].percent : 0;
     const badge = unlocked ? compactBadge(progress, lesson) : { glyph: '🔒', cls: 'badge-locked' };
+    // "We think you already know this" is shown inline (greyed/highlighted,
+    // same row, same scroll position) rather than a separate duplicate
+    // section — the row itself is the only place this lesson appears.
+    const isFastTrack = unlocked && !isLessonCompleted(progress, lesson.id) && isFastTrackEligible(progress, lesson.id);
 
     return `
-      <button class="lesson-row status-${cardStatus}" data-id="${lesson.id}" data-locked="${!unlocked}" style="${!unlocked ? 'opacity: 0.55;' : ''}">
+      <button class="lesson-row status-${cardStatus}${isFastTrack ? ' is-fasttrack' : ''}" data-id="${lesson.id}" data-locked="${!unlocked}" style="${!unlocked ? 'opacity: 0.55;' : ''}">
         <span class="lesson-row-order">${lesson.order}</span>
         <span class="lesson-row-badge ${badge.cls}" title="${unlocked ? '' : 'Locked'}">${badge.glyph}</span>
         <span class="lesson-row-title">${escapeHtml(lesson.title)}</span>
@@ -143,35 +147,12 @@ export function renderLessons(container, { onExit, onOpenDiagnostic } = {}) {
 
     const firstBatch = sorted.slice(0, PAGE_SIZE);
 
-    // Surface "we think you already know this" lessons above the fold instead
-    // of leaving them buried at their normal scroll position — these are the
-    // fastest wins available (a 3-question confirm, not a full lesson).
-    const fastTrackLessons = sorted.filter(
-      (l) => isLessonUnlocked(progress, l.id) && !isLessonCompleted(progress, l.id) && isFastTrackEligible(progress, l.id)
-    );
-
     container.innerHTML = `
       <div class="lessons-screen">
         <header class="lessons-header">
           <button class="btn-back" type="button">&larr; Menu</button>
           <h2>Lessons</h2>
         </header>
-        ${fastTrackLessons.length ? `
-          <div class="fasttrack-section">
-            <div class="fasttrack-section-title">⚡ Confirm what you already know</div>
-            <div class="fasttrack-list">
-              ${fastTrackLessons.map((lesson) => {
-                const c = getCompletionProgress(progress, lesson);
-                return `
-                  <button class="fasttrack-row" data-id="${lesson.id}">
-                    <span class="fasttrack-row-title">${escapeHtml(lesson.title)}</span>
-                    <span class="fasttrack-row-cta">${c.doneItemIds.length > 0 ? `${c.doneItemIds.length}/${c.targetItemIds.length}` : 'Quick check'}</span>
-                  </button>
-                `;
-              }).join('')}
-            </div>
-          </div>
-        ` : ''}
         <div class="lesson-list lesson-list--compact" id="lesson-list-rows">
           ${firstBatch.map((lesson, i) => rowHtml(lesson, i, sorted, progress, stats)).join('')}
         </div>
@@ -181,12 +162,6 @@ export function renderLessons(container, { onExit, onOpenDiagnostic } = {}) {
 
     container.querySelector('.btn-back').addEventListener('click', () => { stopObserving(); onExit && onExit(); });
     container.querySelectorAll('.lesson-row').forEach((row) => attachRowClickHandler(row, sorted));
-    container.querySelectorAll('.fasttrack-row').forEach((row) => {
-      row.addEventListener('click', () => {
-        stopObserving();
-        renderDetail(row.dataset.id);
-      });
-    });
 
     let loadedCount = firstBatch.length;
     const listEl = container.querySelector('#lesson-list-rows');
@@ -224,6 +199,20 @@ export function renderLessons(container, { onExit, onOpenDiagnostic } = {}) {
         if (loadedCount >= sorted.length) stopObserving();
       }, { root: null, rootMargin: '400px' });
       scrollObserver.observe(sentinel);
+    }
+
+    // "Confirm what you already know" lessons live inline (greyed/highlighted
+    // via .is-fasttrack, see rowHtml) rather than in a separate duplicate
+    // section — so instead of surfacing them above the fold, bring the list's
+    // scroll position to the first one directly, loading whatever batches are
+    // needed to reach it first.
+    const firstFastTrackIndex = sorted.findIndex(
+      (l) => isLessonUnlocked(progress, l.id) && !isLessonCompleted(progress, l.id) && isFastTrackEligible(progress, l.id)
+    );
+    if (firstFastTrackIndex >= 0) {
+      while (loadedCount <= firstFastTrackIndex && loadedCount < sorted.length) loadNextBatch();
+      const targetRow = listEl.children[firstFastTrackIndex];
+      if (targetRow) targetRow.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }
   }
 

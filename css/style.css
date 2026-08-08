@@ -545,51 +545,13 @@ h1, h2, h3 {
   margin-bottom: 4px;
 }
 
-/* "Confirm what you already know" — fast-track lessons surfaced above the
-   main scroll list, per "the lessons you think i've completed should show
-   above the view" feedback. Blue to match the lightning-bolt badge color;
-   deliberately distinct from the green "confirmed" styling used elsewhere. */
-.fasttrack-section {
-  margin-bottom: 14px;
-  padding: 10px 12px;
-  border: 1px solid rgba(96,165,250,0.35);
-  background: rgba(96,165,250,0.07);
-  border-radius: var(--radius);
-}
-.fasttrack-section-title {
-  font-size: 12px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  color: var(--accent-2);
-  margin-bottom: 8px;
-}
-.fasttrack-list {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-.fasttrack-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 10px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 9px 12px;
-  text-align: left;
-  color: var(--text);
-}
-.fasttrack-row-title {
-  font-size: 14px;
-  font-weight: 600;
-}
-.fasttrack-row-cta {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--accent-2);
-  white-space: nowrap;
+/* "Confirm what you already know" lessons stay in their normal scroll
+   position — no separate duplicate section — just visually greyed/tinted
+   here, and the list auto-scrolls to the first one on open (see
+   lessons-ui.js renderList). Blue to match the lightning-bolt badge. */
+.lesson-row.is-fasttrack {
+  background: rgba(96,165,250,0.08);
+  border-left-color: var(--accent-2);
 }
 
 /* ---------- lesson detail ---------- */
