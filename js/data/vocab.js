@@ -212,4 +212,72 @@ export const VOCAB = [
   v('v_takym_chynom', 'таким чином', 'takym chynom', 'thus / in this way', 'tímto způsobem / tak', 'phrase', { topics: ['l36'] }),
   v('v_zokrema', 'зокрема', 'zokrema', 'in particular / particularly', 'zejména / konkrétně', 'adverb', { topics: ['l36'] }),
   v('v_vidpovidno', 'відповідно', 'vidpovidno', 'accordingly / respectively', 'odpovídajícím způsobem', 'adverb', { topics: ['l36'] }),
+
+  // --- l38: Numbers, Time & Dates (шість-десять added; один-п'ять already exist, tagged l19) ---
+  v('v_shist', 'шість', 'shist\'', 'six', 'šest', 'number', { topics: ['l38'] }),
+  v('v_sim', 'сім', 'sim', 'seven', 'sedm', 'number', { topics: ['l38'] }),
+  v('v_visim', 'вісім', 'visim', 'eight', 'osm', 'number', { topics: ['l38'] }),
+  v('v_devyat', 'дев\'ять', 'dev\'yat\'', 'nine', 'devět', 'number', { topics: ['l38'] }),
+  v('v_desyat', 'десять', 'desyat\'', 'ten', 'deset', 'number', { topics: ['l38'] }),
+  v('v_hodyna', 'година', 'hodyna', 'hour / o\'clock', 'hodina', 'noun', { gender: 'f', topics: ['l38'] }),
+  v('v_khvylyna', 'хвилина', 'khvylyna', 'minute', 'minuta', 'noun', { gender: 'f', topics: ['l38'] }),
+  v('v_zaraz', 'зараз', 'zaraz', 'now', 'teď', 'adverb', { topics: ['l38'] }),
+  v('v_vchora', 'вчора', 'vchora', 'yesterday', 'včera', 'adverb', { topics: ['l38'] }),
+  v('v_tyzhden', 'тиждень', 'tyzhden\'', 'week', 'týden', 'noun', { gender: 'm', topics: ['l38'] }),
+
+  // --- l39: Family in More Detail (брат/сестра/син/дочка/мама/тато already exist) ---
+  v('v_babusya', 'бабуся', 'babusya', 'grandmother', 'babička', 'noun', { gender: 'f', topics: ['l39'] }),
+  v('v_didus', 'дідусь', 'didus\'', 'grandfather', 'dědeček', 'noun', { gender: 'm', topics: ['l39'] }),
+  v('v_druzhyna', 'дружина', 'druzhyna', 'wife', 'manželka', 'noun', { gender: 'f', topics: ['l39'] }),
+  v('v_cholovik', 'чоловік', 'cholovik', 'husband / man', 'manžel / muž', 'noun', { gender: 'm', topics: ['l39'] }),
+  v('v_dytyna', 'дитина', 'dytyna', 'child', 'dítě', 'noun', { gender: 'f', topics: ['l39'] }),
+  v('v_simya', 'сім\'я', 'sim\'ya', 'family', 'rodina', 'noun', { gender: 'f', topics: ['l39'] }),
+
+  // --- l40: Colors & Describing Things ---
+  v('v_chervonyi', 'червоний', 'chervonyi', 'red', 'červený', 'adjective', { topics: ['l40'] }),
+  v('v_syniy', 'синій', 'syniy', 'blue', 'modrý', 'adjective', { topics: ['l40'] }),
+  v('v_zelenyi', 'зелений', 'zelenyi', 'green', 'zelený', 'adjective', { topics: ['l40'] }),
+  v('v_zhovtyi', 'жовтий', 'zhovtyi', 'yellow', 'žlutý', 'adjective', { topics: ['l40'] }),
+  v('v_chornyi', 'чорний', 'chornyi', 'black', 'černý', 'adjective', { topics: ['l40'] }),
+  v('v_bilyi', 'білий', 'bilyi', 'white', 'bílý', 'adjective', { topics: ['l40'] }),
+  v('v_velykyi', 'великий', 'velykyi', 'big', 'velký', 'adjective', { topics: ['l40'] }),
+  v('v_malenkyi', 'маленький', 'malen\'kyi', 'small', 'malý', 'adjective', { topics: ['l40'] }),
+
+  // --- l41: Weather & Seasons ---
+  v('v_pohoda', 'погода', 'pohoda', 'weather', 'počasí', 'noun', { gender: 'f', topics: ['l41'] }),
+  v('v_sontse', 'сонце', 'sontse', 'sun', 'slunce', 'noun', { gender: 'n', topics: ['l41'] }),
+  v('v_doshch', 'дощ', 'doshch', 'rain', 'déšť', 'noun', { gender: 'm', topics: ['l41'] }),
+  v('v_snih', 'сніг', 'snih', 'snow', 'sníh', 'noun', { gender: 'm', topics: ['l41'] }),
+  v('v_kholodno', 'холодно', 'kholodno', 'cold (it is cold)', 'zima / chladno', 'adverb', { topics: ['l41'] }),
+  v('v_teplo', 'тепло', 'teplo', 'warm (it is warm)', 'teplo', 'adverb', { topics: ['l41'] }),
+  v('v_zyma', 'зима', 'zyma', 'winter', 'zima', 'noun', { gender: 'f', topics: ['l41'] }),
+  v('v_lito', 'літо', 'lito', 'summer', 'léto', 'noun', { gender: 'n', topics: ['l41'] }),
+
+  // --- l42: Shopping & Money ---
+  v('v_hroshi', 'гроші', 'hroshi', 'money', 'peníze', 'noun', { topics: ['l42'] }),
+  v('v_mahazyn', 'магазин', 'mahazyn', 'shop / store', 'obchod', 'noun', { gender: 'm', topics: ['l42'] }),
+  v('v_tsina', 'ціна', 'tsina', 'price', 'cena', 'noun', { gender: 'f', topics: ['l42'] }),
+  v('v_deshevo', 'дешево', 'deshevo', 'cheap', 'levné', 'adverb', { topics: ['l42'] }),
+  v('v_doroho', 'дорого', 'doroho', 'expensive', 'drahé', 'adverb', { topics: ['l42'] }),
+  v('v_kupyty', 'купити', 'kupyty', 'to buy (complete)', 'koupit', 'verb', { aspect: 'perfective', topics: ['l42'] }),
+  v('v_prodavaty', 'продавати', 'prodavaty', 'to sell (ongoing)', 'prodávat', 'verb', { aspect: 'imperfective', topics: ['l42'] }),
+  v('v_kartka', 'картка', 'kartka', 'card (e.g. payment card)', 'karta', 'noun', { gender: 'f', topics: ['l42'] }),
+
+  // --- l43: The Body & Feeling Unwell ---
+  v('v_holova', 'голова', 'holova', 'head', 'hlava', 'noun', { gender: 'f', topics: ['l43'] }),
+  v('v_zhyvit', 'живіт', 'zhyvit', 'stomach', 'břicho', 'noun', { gender: 'm', topics: ['l43'] }),
+  v('v_horlo', 'горло', 'horlo', 'throat', 'krk / hrdlo', 'noun', { gender: 'n', topics: ['l43'] }),
+  v('v_khvoryi', 'хворий', 'khvoryi', 'sick / ill', 'nemocný', 'adjective', { topics: ['l43'] }),
+  v('v_bolyt', 'болить', 'bolyt\'', 'it hurts', 'to bolí', 'phrase', { topics: ['l43'] }),
+  v('v_likar', 'лікар', 'likar', 'doctor', 'lékař', 'noun', { gender: 'm', topics: ['l43'] }),
+  v('v_apteka', 'аптека', 'apteka', 'pharmacy', 'lékárna', 'noun', { gender: 'f', topics: ['l43'] }),
+  v('v_liky', 'ліки', 'liky', 'medicine', 'léky', 'noun', { topics: ['l43'] }),
+
+  // --- l44: Prepositions of Place (grammar) ---
+  v('v_u_v', 'у / в', 'u / v', 'in', 'v', 'phrase', { topics: ['l44'] }),
+  v('v_na', 'на', 'na', 'on / at', 'na', 'phrase', { topics: ['l44'] }),
+  v('v_pid', 'під', 'pid', 'under', 'pod', 'phrase', { topics: ['l44'] }),
+  v('v_za_prep', 'за', 'za', 'behind', 'za', 'phrase', { topics: ['l44'] }),
+  v('v_mizh', 'між', 'mizh', 'between', 'mezi', 'phrase', { topics: ['l44'] }),
+  v('v_bilya', 'біля', 'bilya', 'near / next to', 'blízko / u', 'phrase', { topics: ['l44'] }),
 ];
