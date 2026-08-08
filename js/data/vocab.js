@@ -54,6 +54,7 @@ export const VOCAB = [
   v('v_prykhodyty', 'приходити', 'prykhodyty', 'to come / arrive (ongoing, repeated)', 'přicházet', 'verb', { aspect: 'imperfective', pairId: 'aspect_pryyty', topics: ['l05'] }),
   v('v_dopomohty', 'допомогти', 'dopomohty', 'to help (complete)', 'pomoct', 'verb', { aspect: 'perfective', pairId: 'aspect_dopomahaty', topics: ['l05'] }),
   v('v_dopomahaty', 'допомагати', 'dopomahaty', 'to help (ongoing)', 'pomáhat', 'verb', { aspect: 'imperfective', pairId: 'aspect_dopomahaty', topics: ['l05'] }),
+  v('v_zrozumity', 'зрозуміти', 'zrozumity', 'to understand (complete)', 'pochopit', 'verb', { aspect: 'perfective', topics: ['l05'] }),
 
   // --- l07: Sentence Frame 3 — Future tense ---
   v('v_pratsyuvaty', 'працювати', 'pratsyuvaty', 'to work', 'pracovat', 'verb', { aspect: 'imperfective', topics: ['l07'] }),

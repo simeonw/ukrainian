@@ -4,6 +4,7 @@ import { SUBSTITUTION_FRAMES } from '../data/substitution-fills.js';
 import { itemHasAnySkill } from './skills.js';
 import { shuffle } from './random.js';
 import { generateAllInstances } from './generate.js';
+import { getItemTheme } from './vocab-themes.js';
 
 // Generated instances are first-class items, not a bolted-on side pool — they
 // flow through the same buildCardPool/pickDistractors/getAllItems path as
@@ -21,22 +22,30 @@ export function getItemById(id) {
   return ITEMS_BY_ID.get(id) || null;
 }
 
-// Every (item, direction) pair is one quizzable "card", optionally filtered by active settings topics
-export function buildCardPool(activeTopics = null) {
+// Every (item, direction) pair is one quizzable "card". Two independent
+// filters: activeTopics (skills.js grammatical categories — what you're
+// tested on) and activeThemes (vocab-themes.js content domains — what you're
+// interested in). An item with no theme (core grammar, or anything without
+// topics) is never theme-gated regardless of activeThemes.
+export function buildCardPool(activeTopics = null, activeThemes = null) {
   const cards = [];
   for (const item of ALL_ITEMS) {
     if (activeTopics && !itemHasAnySkill(item, activeTopics)) continue;
+    if (activeThemes) {
+      const theme = getItemTheme(item);
+      if (theme !== null && !activeThemes.includes(theme)) continue;
+    }
     cards.push({ item, direction: 'uk2en' });
     cards.push({ item, direction: 'en2uk' });
   }
-  // A topics filter that matches nothing — stale settings from before a topic
-  // was renamed, or any other way the saved list ends up not matching a
-  // single item — must never hand Drill an empty pool: drawCard() has no
-  // valid card to return from an empty array, which crashes cardKey() on the
-  // very next line and leaves the whole screen blank. Fall back to the full
-  // catalog rather than let a bad settings value break the entire mode.
-  if (cards.length === 0 && activeTopics) {
-    return buildCardPool(null);
+  // A filter combination that matches nothing — stale settings from before a
+  // topic/theme was renamed, or any other way the saved list ends up not
+  // matching a single item — must never hand Drill an empty pool: drawCard()
+  // has no valid card to return from an empty array, which crashes cardKey()
+  // on the very next line and leaves the whole screen blank. Fall back to
+  // the full catalog rather than let a bad settings value break Drill.
+  if (cards.length === 0 && (activeTopics || activeThemes)) {
+    return buildCardPool(null, null);
   }
   return cards;
 }

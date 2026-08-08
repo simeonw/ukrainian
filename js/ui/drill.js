@@ -46,8 +46,8 @@ export function renderDrill(container, { onExit } = {}) {
   const progress = loadProgress();
   const settings = progress.meta.settings;
 
-  // Filter card pool based on user selected settings topics
-  const cardPool = buildCardPool(settings.topics);
+  // Filter card pool based on user selected settings topics/themes
+  const cardPool = buildCardPool(settings.topics, settings.themes);
 
   let lastKey = null;
   let sessionCorrect = 0;

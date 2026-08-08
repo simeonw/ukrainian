@@ -77,7 +77,7 @@ export function itemConfidence(progress, itemId) {
 // 'Reading Speed' isn't a skills.js category — it stays a latency read over
 // the card pool, which is still the right source for that specific signal.
 export function getAbilityProfile(progress, cardPool) {
-  const SKILL_CATEGORIES = ['vocabulary', 'understanding', 'production', 'grammar', 'conditional', 'past'];
+  const SKILL_CATEGORIES = ['vocabulary', 'understanding', 'production', 'grammar', 'conditional', 'past', 'future', 'obligation', 'aspect'];
   const result = {};
   for (const skill of SKILL_CATEGORIES) {
     result[skill] = getSkillRetention(progress, skill).percent;

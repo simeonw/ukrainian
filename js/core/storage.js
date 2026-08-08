@@ -1,3 +1,5 @@
+import { getAllThemeIds } from './vocab-themes.js';
+
 const STORAGE_KEY = 'ukrainian-progress';
 const SCHEMA_VERSION = 1;
 
@@ -6,6 +8,9 @@ export const ALL_SETTINGS_TOPICS = [
   'grammar',
   'past',
   'conditional',
+  'future',
+  'obligation',
+  'aspect',
   'understanding',
   'production'
 ];
@@ -26,7 +31,11 @@ function defaultProgress() {
       settings: {
         transliteration: true,
         language: 'en',
-        topics: [...ALL_SETTINGS_TOPICS]
+        topics: [...ALL_SETTINGS_TOPICS],
+        // Content-domain filter (Settings' "Vocabulary Themes") — separate
+        // axis from `topics` above. Defaults to everything on, same as
+        // topics: "otherwise all are included."
+        themes: getAllThemeIds()
       }
     },
   };

@@ -6,6 +6,7 @@ import { getAbilityProfile } from '../core/srs.js';
 import { buildCardPool } from '../core/pool.js';
 import { shouldOfferWeaning, markWeaningOffered, resolveWeaning } from '../core/translit-weaning.js';
 import { getVocabBadgeProgress } from '../core/vocab-badges.js';
+import { getThemedLessons } from '../core/vocab-themes.js';
 import { escapeHtml } from './dom-utils.js';
 
 const root = document.getElementById('app');
@@ -227,6 +228,26 @@ function renderSettingsScreen() {
           <p style="color: var(--text-dim); font-size: 13px; margin: 8px 0 0 0;">Only draw questions in drills matching these checked active categories.</p>
         </div>
 
+        <hr style="border: 0; border-top: 1px solid var(--border); margin: 8px 0;" />
+
+        <!-- Vocabulary Theme Filters — content domains, separate from the skill filters above.
+             Core grammar frames are never gated by this (see core/vocab-themes.js). -->
+        <div>
+          <label style="font-weight: bold; font-size: 15px; display: block; margin-bottom: 8px;">Vocabulary Themes</label>
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px;">
+            ${getThemedLessons().map(lesson => {
+              const isChecked = settings.themes.includes(lesson.id);
+              return `
+                <label style="display: flex; align-items: center; justify-content: space-between; cursor: pointer; font-size: 13px; background: var(--surface-2); padding: 8px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border);">
+                  <span>${escapeHtml(lesson.title)}</span>
+                  <input type="checkbox" class="settings-theme-chk" value="${lesson.id}" ${isChecked ? 'checked' : ''} style="width: 18px; height: 18px; accent-color: var(--accent);" />
+                </label>
+              `;
+            }).join('')}
+          </div>
+          <p style="color: var(--text-dim); font-size: 13px; margin: 8px 0 0 0;">Only draw vocabulary from checked topics — core grammar lessons are unaffected. Leave everything checked for the full course.</p>
+        </div>
+
       </div>
     </div>
   `;
@@ -256,6 +277,21 @@ function renderSettingsScreen() {
         alert("At least one topic must be checked! All topics restored.");
       }
       progress.meta.settings.topics = activeTopics;
+      saveProgress(progress);
+    });
+  });
+
+  const themeChks = root.querySelectorAll('.settings-theme-chk');
+  themeChks.forEach(chk => {
+    chk.addEventListener('change', () => {
+      let activeThemes = Array.from(themeChks).filter(c => c.checked).map(c => c.value);
+      if (activeThemes.length === 0) {
+        // Fallback to avoid empty pool — same guard as the topics list above.
+        activeThemes = getThemedLessons().map(l => l.id);
+        themeChks.forEach(c => c.checked = true);
+        alert("At least one theme must be checked! All themes restored.");
+      }
+      progress.meta.settings.themes = activeThemes;
       saveProgress(progress);
     });
   });

@@ -19,10 +19,10 @@ export const PATTERNS = [
   p('p_can_4', 'can+inf', 'Можеш допомогти мені?', 'Mozhesh dopomohty meni?', 'Can you help me?', 'Můžeš mi pomoct?', ['l05'], ['grammar', 'production']),
 
   // --- Frame 3: Future tense (Буду + inf) — cz: "Budu + infinitiv" ---
-  p('p_future_1', 'future', 'Буду працювати.', 'Budu pratsyuvaty.', 'I will work / I will be working.', 'Budu pracovat.', ['l07'], ['grammar', 'production']),
-  p('p_future_2', 'future', 'Буду чекати.', 'Budu chekaty.', 'I will wait.', 'Budu čekat.', ['l07'], ['grammar', 'understanding']),
-  p('p_future_3', 'future', 'Буду говорити повільно.', 'Budu hovoryty povil\'no.', 'I will speak slowly.', 'Budu mluvit pomalu.', ['l07'], ['grammar', 'understanding']),
-  p('p_future_4', 'future', 'Завтра буду вдома.', 'Zavtra budu vdoma.', 'Tomorrow I will be home.', 'Zítra budu doma.', ['l07'], ['grammar', 'production']),
+  p('p_future_1', 'future', 'Буду працювати.', 'Budu pratsyuvaty.', 'I will work / I will be working.', 'Budu pracovat.', ['l07'], ['grammar', 'future', 'production']),
+  p('p_future_2', 'future', 'Буду чекати.', 'Budu chekaty.', 'I will wait.', 'Budu čekat.', ['l07'], ['grammar', 'future', 'understanding']),
+  p('p_future_3', 'future', 'Буду говорити повільно.', 'Budu hovoryty povil\'no.', 'I will speak slowly.', 'Budu mluvit pomalu.', ['l07'], ['grammar', 'future', 'understanding']),
+  p('p_future_4', 'future', 'Завтра буду вдома.', 'Zavtra budu vdoma.', 'Tomorrow I will be home.', 'Zítra budu doma.', ['l07'], ['grammar', 'future', 'production']),
 
   // --- Frame 4: Past tense & gender agreement — cz: "Dělal jsem. / Šel jsem." ---
   p('p_past_1', 'past', 'Я робив це вчора.', 'Ya robyv tse vchora.', 'I was doing this yesterday. (male speaker)', 'Dělal jsem to včera.', ['l08'], ['past', 'understanding']),
@@ -38,11 +38,11 @@ export const PATTERNS = [
   p('p_cond_4', 'conditional', 'Я хотів би поговорити з тобою.', 'Ya khotiv by pohovoryty z toboyu.', 'I would like to talk with you.', 'Chtěl bych si s tebou promluvit.', ['l10'], ['conditional', 'understanding']),
 
   // --- Frame 6: Need / should / must — cz: "Musím jít. / Měl bych jít." ---
-  p('p_need_1', 'need', 'Мушу йти.', 'Mushu yty.', 'I must go.', 'Musím jít.', ['l11'], ['grammar', 'production']),
-  p('p_need_2', 'need', 'Треба йти.', 'Treba yty.', 'One needs to go.', 'Je třeba jít.', ['l11'], ['grammar', 'understanding']),
-  p('p_need_3', 'need', 'Мені треба йти.', 'Meni treba yty.', 'I need to go.', 'Musím jít.', ['l11'], ['grammar', 'production']),
-  p('p_need_4', 'need', 'Я мав би піти.', 'Ya mav by pity.', 'I should go.', 'Měl bych jít.', ['l11'], ['grammar', 'understanding']),
-  p('p_need_5', 'need', 'Мені потрібна допомога.', 'Meni potribna dopomoha.', 'I need help.', 'Potřebuji pomoc.', ['l11'], ['grammar', 'production']),
+  p('p_need_1', 'need', 'Мушу йти.', 'Mushu yty.', 'I must go.', 'Musím jít.', ['l11'], ['grammar', 'obligation', 'production']),
+  p('p_need_2', 'need', 'Треба йти.', 'Treba yty.', 'One needs to go.', 'Je třeba jít.', ['l11'], ['grammar', 'obligation', 'understanding']),
+  p('p_need_3', 'need', 'Мені треба йти.', 'Meni treba yty.', 'I need to go.', 'Musím jít.', ['l11'], ['grammar', 'obligation', 'production']),
+  p('p_need_4', 'need', 'Я мав би піти.', 'Ya mav by pity.', 'I should go.', 'Měl bych jít.', ['l11'], ['grammar', 'obligation', 'understanding']),
+  p('p_need_5', 'need', 'Мені потрібна допомога.', 'Meni potribna dopomoha.', 'I need help.', 'Potřebuji pomoc.', ['l11'], ['grammar', 'obligation', 'production']),
 
   // --- B1 level expansion patterns ---
   p('p_b1_done_1', 'b1_narrative', 'Я вже прочитав цю книгу.', 'Ya vzhe prochytav tsyu knyhu.', 'I have already read this book.', 'Už jsem přečetl tuto knihu.', ['l21'], ['past', 'understanding']),
