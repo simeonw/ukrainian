@@ -63,9 +63,60 @@ function retentionPillHtml(stats, delta) {
 }
 
 export function renderLessons(container, { onExit, onOpenDiagnostic } = {}) {
-  let visibleCount = PAGE_SIZE;
+  let scrollObserver = null;
 
+  function stopObserving() {
+    if (scrollObserver) {
+      scrollObserver.disconnect();
+      scrollObserver = null;
+    }
+  }
+
+  function rowHtml(lesson, i, sorted, progress, stats) {
+    const unlocked = isLessonUnlocked(progress, lesson.id);
+    const cardStatus = unlocked ? stats[lesson.id].status : 'locked';
+    const prevTitle = i > 0 ? sorted[i - 1].title : null;
+    const percent = unlocked ? stats[lesson.id].percent : 0;
+
+    return `
+      <button class="lesson-row status-${cardStatus}" data-id="${lesson.id}" data-locked="${!unlocked}" style="${!unlocked ? 'opacity: 0.55;' : ''}">
+        <span class="lesson-row-order">${lesson.order}</span>
+        <span class="lesson-row-badge" title="${unlocked ? '' : 'Locked'}">${unlocked ? compactBadge(progress, lesson) : '🔒'}</span>
+        <span class="lesson-row-title">${escapeHtml(lesson.title)}</span>
+        <div class="lesson-row-bar"><div class="lesson-row-bar-fill" style="width:${percent}%"></div></div>
+        ${!unlocked ? `<div class="lesson-locked-note" style="display: none; font-size: 12px; color: var(--warn); margin-top: 4px; grid-column: 1 / -1;">Complete "${escapeHtml(prevTitle || '')}" to unlock this.</div>` : ''}
+      </button>
+    `;
+  }
+
+  function attachRowClickHandler(row, sorted) {
+    row.addEventListener('click', () => {
+      const progress = loadProgress();
+      const lesson = LESSONS.find((l) => l.id === row.dataset.id);
+      const unlocked = isLessonUnlocked(progress, lesson.id);
+
+      if (!unlocked) {
+        // Inline reason shown in place, not a blocking native alert().
+        const note = row.querySelector('.lesson-locked-note');
+        if (note) note.style.display = note.style.display === 'none' ? 'block' : 'none';
+        return;
+      }
+
+      stopObserving();
+      if (lesson.kind === 'diagnostic') {
+        onOpenDiagnostic && onOpenDiagnostic();
+      } else {
+        renderDetail(lesson.id);
+      }
+    });
+  }
+
+  // True infinite scroll: a sentinel row sits after the last loaded lesson;
+  // an IntersectionObserver appends the next PAGE_SIZE rows the moment it
+  // scrolls into view, then moves itself to the new end. Appending (rather
+  // than a full re-render) keeps scroll position stable while loading.
   function renderList() {
+    stopObserving();
     const progress = loadProgress();
     const sorted = [...LESSONS].sort((a, b) => a.order - b.order);
     const stats = {};
@@ -73,10 +124,9 @@ export function renderLessons(container, { onExit, onOpenDiagnostic } = {}) {
       stats[lesson.id] = computeLessonProgress(progress, lesson);
     }
 
-    // "Since last time" deltas computed over ALL lessons (not just the
-    // visible page) so the snapshot stays accurate regardless of scroll
-    // position — only meaningful for Completed lessons with a real
-    // retention read (see core/snapshot.js).
+    // "Since last time" deltas computed over ALL lessons regardless of how
+    // many are currently loaded — only meaningful for Completed lessons with
+    // a real retention read (see core/snapshot.js).
     const currentRetentionValues = {};
     for (const lesson of sorted) {
       if (typeof stats[lesson.id].retentionPercent === 'number') {
@@ -86,8 +136,7 @@ export function renderLessons(container, { onExit, onOpenDiagnostic } = {}) {
     getRetentionDeltas(progress, currentRetentionValues);
     saveProgress(progress);
 
-    const visible = sorted.slice(0, visibleCount);
-    const hasMore = visibleCount < sorted.length;
+    const firstBatch = sorted.slice(0, PAGE_SIZE);
 
     container.innerHTML = `
       <div class="lessons-screen">
@@ -95,57 +144,53 @@ export function renderLessons(container, { onExit, onOpenDiagnostic } = {}) {
           <button class="btn-back" type="button">&larr; Menu</button>
           <h2>Lessons</h2>
         </header>
-        <div class="lesson-list lesson-list--compact">
-          ${visible
-            .map((lesson, i) => {
-              const unlocked = isLessonUnlocked(progress, lesson.id);
-              const cardStatus = unlocked ? stats[lesson.id].status : 'locked';
-              const prevTitle = i > 0 ? sorted[i - 1].title : null;
-              const percent = unlocked ? stats[lesson.id].percent : 0;
-
-              return `
-                <button class="lesson-row status-${cardStatus}" data-id="${lesson.id}" data-locked="${!unlocked}" style="${!unlocked ? 'opacity: 0.55;' : ''}">
-                  <span class="lesson-row-order">${lesson.order}</span>
-                  <span class="lesson-row-badge" title="${unlocked ? '' : 'Locked'}">${unlocked ? compactBadge(progress, lesson) : '🔒'}</span>
-                  <span class="lesson-row-title">${escapeHtml(lesson.title)}</span>
-                  <div class="lesson-row-bar"><div class="lesson-row-bar-fill" style="width:${percent}%"></div></div>
-                  ${!unlocked ? `<div class="lesson-locked-note" style="display: none; font-size: 12px; color: var(--warn); margin-top: 4px; grid-column: 1 / -1;">Complete "${escapeHtml(prevTitle || '')}" to unlock this.</div>` : ''}
-                </button>
-              `;
-            })
-            .join('')}
+        <div class="lesson-list lesson-list--compact" id="lesson-list-rows">
+          ${firstBatch.map((lesson, i) => rowHtml(lesson, i, sorted, progress, stats)).join('')}
         </div>
-        ${hasMore ? `<button class="btn-text" id="lessons-load-more" style="width: 100%; margin-top: 10px; font-size: 13px;">Show ${Math.min(PAGE_SIZE, sorted.length - visibleCount)} more (${visibleCount}/${sorted.length})</button>` : ''}
+        <div id="lessons-scroll-sentinel" style="height: 1px;"></div>
       </div>
     `;
 
-    container.querySelector('.btn-back').addEventListener('click', () => onExit && onExit());
-    const loadMoreBtn = container.querySelector('#lessons-load-more');
-    if (loadMoreBtn) {
-      loadMoreBtn.addEventListener('click', () => {
-        visibleCount = Math.min(visibleCount + PAGE_SIZE, sorted.length);
-        renderList();
-      });
+    container.querySelector('.btn-back').addEventListener('click', () => { stopObserving(); onExit && onExit(); });
+    container.querySelectorAll('.lesson-row').forEach((row) => attachRowClickHandler(row, sorted));
+
+    let loadedCount = firstBatch.length;
+    const listEl = container.querySelector('#lesson-list-rows');
+    const sentinel = container.querySelector('#lessons-scroll-sentinel');
+
+    function loadNextBatch() {
+      const nextBatch = sorted.slice(loadedCount, loadedCount + PAGE_SIZE);
+      for (const lesson of nextBatch) {
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = rowHtml(lesson, sorted.indexOf(lesson), sorted, progress, stats).trim();
+        const row = wrapper.firstElementChild;
+        listEl.appendChild(row);
+        attachRowClickHandler(row, sorted);
+      }
+      loadedCount += nextBatch.length;
     }
-    container.querySelectorAll('.lesson-row').forEach((card) => {
-      card.addEventListener('click', () => {
-        const lesson = LESSONS.find((l) => l.id === card.dataset.id);
-        const unlocked = isLessonUnlocked(progress, lesson.id);
 
-        if (!unlocked) {
-          // Inline reason shown in place, not a blocking native alert().
-          const note = card.querySelector('.lesson-locked-note');
-          if (note) note.style.display = note.style.display === 'none' ? 'block' : 'none';
-          return;
+    if (loadedCount < sorted.length) {
+      scrollObserver = new IntersectionObserver((entries) => {
+        if (!entries[0].isIntersecting) return;
+        // IntersectionObserver only fires on intersection STATE CHANGES, not
+        // continuously while still intersecting — if a batch of short rows
+        // doesn't push the sentinel past the rootMargin, loading exactly one
+        // batch per callback would silently stall (no further transition to
+        // report). Loop within this single callback instead, re-checking the
+        // sentinel's real position after each append, until it's genuinely
+        // scrolled past the load-trigger zone or everything is loaded.
+        while (loadedCount < sorted.length) {
+          loadNextBatch();
+          if (loadedCount >= sorted.length) break;
+          const rect = sentinel.getBoundingClientRect();
+          const stillNearViewport = rect.top <= window.innerHeight + 400;
+          if (!stillNearViewport) break;
         }
-
-        if (lesson.kind === 'diagnostic') {
-          onOpenDiagnostic && onOpenDiagnostic();
-        } else {
-          renderDetail(lesson.id);
-        }
-      });
-    });
+        if (loadedCount >= sorted.length) stopObserving();
+      }, { root: null, rootMargin: '400px' });
+      scrollObserver.observe(sentinel);
+    }
   }
 
   function renderDetail(lessonId) {

@@ -462,7 +462,11 @@ h1, h2, h3 {
 /* Compact lesson list rows — one line per lesson instead of title + summary +
    two badges + a labelled progress line, per "too much info, overwhelming"
    feedback. The detail page still shows the full breakdown. */
-.lesson-list--compact {
+/* Compound selector for higher specificity than both the base .lesson-list
+   rule above AND the >=600px .lesson-list media-query override below — one
+   lesson per row at every viewport width is the whole point of this layout. */
+.lesson-list.lesson-list--compact {
+  grid-template-columns: 1fr;
   gap: 4px;
 }
 
