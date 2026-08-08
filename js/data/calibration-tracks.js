@@ -6,7 +6,7 @@ import { DIAGNOSTIC_WORD_IDS } from './diagnostic.js';
 import { getAllItems } from '../core/pool.js';
 import { getSkillsForItem } from '../core/skills.js';
 import { seedFromDiagnostic } from '../core/srs.js';
-import { markLessonCompleted } from '../core/completion.js';
+import { markLessonCompleted, markFastTrackEligible } from '../core/completion.js';
 import { seedSkillRetention } from '../core/retention.js';
 import { TIER_MAX } from '../core/calibration.js';
 
@@ -272,12 +272,19 @@ function seedSkillFromTrack(progress, trackResult, skills, count = 4) {
   }
 }
 
-// Pre-completes every lesson whose CEFR band is strictly BELOW the calibrated
-// level — i.e. only bands the learner has demonstrably cleared, not the
-// boundary band itself (that's exactly where the binary search left them
-// "shaky," per calibration.js's worked example). The boundary lesson stays
-// unlocked (its predecessor is now Completed) but still has to be earned
-// through its own exercise set — calibration gives a head start, not a grant.
+// Flags every lesson whose CEFR band is strictly BELOW the calibrated level as
+// fast-track eligible — i.e. only bands the learner has demonstrably cleared,
+// not the boundary band itself (that's exactly where the binary search left
+// them "shaky," per calibration.js's worked example). This unlocks the same
+// as full Completion (see srs.js getUnlockedLessons) but does NOT mark the
+// lesson done: a multiple-choice placement test is real evidence for
+// prioritizing what to show first, but a handful of MC questions can be
+// solved from partial word recognition without full comprehension — not
+// strong enough evidence to grant a lesson as mastered outright. The learner
+// still has to pass a short (3-item) confirm set, same principle as any other
+// lesson, just faster. The diagnostic lesson itself (l01) is the one genuine
+// exception — calibration directly replaces it, so it's marked Completed,
+// not fast-tracked; there's nothing left to separately confirm.
 function preCompleteLessonsBelowCefr(progress, achievedCefr) {
   const achievedIdx = CEFR_TIERS.indexOf(achievedCefr);
   for (const lesson of LESSONS) {
@@ -286,7 +293,7 @@ function preCompleteLessonsBelowCefr(progress, achievedCefr) {
       continue;
     }
     if (CEFR_TIERS.indexOf(cefrForLessonOrder(lesson.order)) < achievedIdx) {
-      markLessonCompleted(progress, lesson.id, 'calibration');
+      markFastTrackEligible(progress, lesson.id, 'calibration');
     }
   }
 }

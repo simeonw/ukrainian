@@ -14,12 +14,24 @@ export const TIER_MIN = 0;
 export const TIER_MAX = 7;
 export const MAX_ROUNDS_PER_TRACK = 4;
 
+// A claim in the top band (tier 6-7, i.e. "Advanced/C1") is a much bigger
+// assertion than any other tier boundary — it's what triggers weaning
+// prompts and pre-completion elsewhere — so it alone requires corroborating
+// evidence, not just one pass. This also directly answers a real failure
+// mode: on a 4-option multiple-choice question, a learner can often infer
+// the right answer from 2-3 recognized words without understanding the rest
+// of the sentence. That's fine evidence for placement, but it is NOT strong
+// enough evidence, on its own, for the strongest claim the test can make.
+const HIGH_TIER_FLOOR = 6;
+const HIGH_TIER_CONFIRMATIONS_REQUIRED = 2;
+
 export function createTrackState() {
   return {
     rounds: 0,
     low: TIER_MIN, // highest tier confirmed achieved
     high: TIER_MAX + 1, // lowest tier confirmed NOT achieved (exclusive upper bound)
     lowWasSoft: false, // was the tier at `low` passed correct-but-slow, not cleanly?
+    highTierPasses: 0, // correct answers recorded at tier >= HIGH_TIER_FLOOR
     done: false,
     estimate: null,
     history: [],
@@ -63,6 +75,10 @@ export function recordTrackAnswer(state, tier, correct, fluent) {
     state.high = tier;
   }
 
+  if (correct && tier >= HIGH_TIER_FLOOR) {
+    state.highTierPasses += 1;
+  }
+
   // A soft (worked-out, not fluent) pass must never be trusted as a final
   // estimate on its own — the whole point of tracking `lowWasSoft` is that a
   // slow correct answer needs confirmation, not an instant top-tier grant.
@@ -74,8 +90,20 @@ export function recordTrackAnswer(state, tier, correct, fluent) {
   // low forces at least one more confirming round (nextProbeTier's
   // lowWasSoft handling naturally re-probes near the same tier) before a
   // soft pass is ever trusted as the session's actual estimate.
-  if (state.rounds >= MAX_ROUNDS_PER_TRACK || (state.high - state.low <= 1 && !state.lowWasSoft)) {
-    state.estimate = state.low;
+  const converged = state.high - state.low <= 1 && !state.lowWasSoft;
+  const budgetExhausted = state.rounds >= MAX_ROUNDS_PER_TRACK;
+
+  // Same idea, one level up: even a FLUENT single pass at the top band isn't
+  // enough on its own. nextProbeTier naturally re-probes near the same tier
+  // when the track isn't done yet, so this just withholds `done` for one
+  // more round rather than needing any special-cased probing logic.
+  const needsHighTierConfirmation = state.low >= HIGH_TIER_FLOOR && state.highTierPasses < HIGH_TIER_CONFIRMATIONS_REQUIRED;
+
+  if (budgetExhausted || (converged && !needsHighTierConfirmation)) {
+    // Ran out of rounds without ever corroborating a top-band claim — report
+    // the highest tier that WAS adequately confirmed instead of a headline
+    // "Advanced" built on one uncorroborated pass.
+    state.estimate = needsHighTierConfirmation ? HIGH_TIER_FLOOR - 1 : state.low;
     state.done = true;
   }
   return state;

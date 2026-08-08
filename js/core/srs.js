@@ -1,7 +1,7 @@
 // Leitner-box-style spaced repetition + adaptive lesson mastery calculation.
 import { LESSONS } from '../data/lessons.js';
 import { getSkillsForItem } from './skills.js';
-import { isLessonCompleted } from './completion.js';
+import { isLessonCompleted, isFastTrackEligible } from './completion.js';
 import { getSkillRetention } from './retention.js';
 import { getItemById } from './pool.js';
 
@@ -110,13 +110,19 @@ export function getAbilityProfile(progress, cardPool) {
 // a returning user's real Completion history (or lack of it) is correct the
 // instant this function runs, including on their very first load after this
 // shipped, with no separate migration step.
+//
+// Fast-track-eligible also unlocks the next lesson — a strong calibration
+// placement shouldn't force wading through lessons in strict sequence just to
+// confirm them one at a time — but it does NOT count as Completed itself; see
+// core/completion.js. Unlocking and "done" are deliberately different claims.
 const SORTED_LESSONS = [...LESSONS].sort((a, b) => a.order - b.order);
 
 function getUnlockedLessons(progress) {
   const unlocked = new Set();
   for (let i = 0; i < SORTED_LESSONS.length; i++) {
     const lesson = SORTED_LESSONS[i];
-    if (i < 2 || isLessonCompleted(progress, SORTED_LESSONS[i - 1].id)) {
+    const prev = SORTED_LESSONS[i - 1];
+    if (i < 2 || isLessonCompleted(progress, prev.id) || isFastTrackEligible(progress, prev.id)) {
       unlocked.add(lesson.id);
     } else {
       break;

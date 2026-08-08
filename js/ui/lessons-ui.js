@@ -2,7 +2,7 @@ import { LESSONS } from '../data/lessons.js';
 import { getItemById } from '../core/pool.js';
 import { computeLessonProgress, isLessonUnlocked } from '../core/srs.js';
 import { loadProgress, saveProgress } from '../core/storage.js';
-import { isLessonCompleted, getCompletionProgress } from '../core/completion.js';
+import { isLessonCompleted, isFastTrackEligible, getCompletionProgress } from '../core/completion.js';
 import { getRetentionDeltas } from '../core/snapshot.js';
 import { renderLessonExercise } from './lesson-exercise-ui.js';
 import { escapeHtml } from './dom-utils.js';
@@ -32,6 +32,9 @@ function completionPillHtml(progress, lesson) {
     return `<span class="lesson-badge status-learned">✓ Completed</span>`;
   }
   const c = getCompletionProgress(progress, lesson);
+  if (c.fastTrack) {
+    return `<span class="lesson-badge status-learning">${c.doneItemIds.length > 0 ? `${c.doneItemIds.length}/${c.targetItemIds.length} quick check` : 'Quick check available'}</span>`;
+  }
   if (c.doneItemIds.length === 0) return `<span class="lesson-badge">Not started</span>`;
   return `<span class="lesson-badge status-learning">${c.doneItemIds.length}/${c.targetItemIds.length} exercises</span>`;
 }
@@ -148,6 +151,14 @@ export function renderLessons(container, { onExit, onOpenDiagnostic } = {}) {
         <section class="lesson-section" style="background: var(--surface); border: 1px solid var(--border); padding: 14px 16px; border-radius: var(--radius);">
           ${completed ? `
             <span style="font-weight: 600; color: var(--good);">✓ Completed${lesson.order < LESSONS.length ? ' — next lesson unlocked' : ''}. Keep it fresh in Drill mode below.</span>
+          ` : completion.fastTrack ? `
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+              <span style="font-size: 13px; color: var(--text-dim);">Your placement test suggests you already know this — confirm with a quick ${completion.targetItemIds.length}-question check instead of the full exercise set.</span>
+              <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
+                <span style="font-size: 13px; color: var(--text-dim);">${completion.doneItemIds.length}/${completion.targetItemIds.length} done</span>
+                <button class="btn-primary" id="lesson-exercise-btn" style="padding: 8px 14px; font-size: 13px;">${completion.doneItemIds.length > 0 ? 'Continue quick check' : 'Quick check'}</button>
+              </div>
+            </div>
           ` : `
             <div style="display: flex; align-items: center; justify-content: space-between; gap: 10px;">
               <span style="font-size: 13px; color: var(--text-dim);">${completion.doneItemIds.length}/${completion.targetItemIds.length} exercises done</span>
