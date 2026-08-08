@@ -1,11 +1,26 @@
 import { LESSONS } from '../data/lessons.js';
 import { getItemById } from '../core/pool.js';
-import { computeLessonProgress, isLessonUnlocked } from '../core/srs.js';
+import { computeLessonProgress, isLessonUnlocked, getLessonBadgeTier } from '../core/srs.js';
 import { loadProgress, saveProgress } from '../core/storage.js';
 import { isLessonCompleted, isFastTrackEligible, getCompletionProgress } from '../core/completion.js';
 import { getRetentionDeltas } from '../core/snapshot.js';
 import { renderLessonExercise } from './lesson-exercise-ui.js';
 import { escapeHtml } from './dom-utils.js';
+
+const TIER_ICON = { gold: '🥇', silver: '🥈', bronze: '🥉' };
+const PAGE_SIZE = 10;
+
+// One compact glyph instead of two verbose pills — the detail page still
+// shows the full Completion/Retention breakdown; the list's job is now just
+// "where am I, at a glance," per the "too much info, overwhelming" feedback.
+function compactBadge(progress, lesson) {
+  const tier = getLessonBadgeTier(progress, lesson);
+  if (tier) return TIER_ICON[tier];
+  const c = getCompletionProgress(progress, lesson);
+  if (c.fastTrack) return '⚡';
+  if (c.doneItemIds.length > 0) return `${c.doneItemIds.length}/${c.targetItemIds.length}`;
+  return '○';
+}
 
 function progressLine(p, isLocked) {
   if (isLocked) return 'Complete previous lessons to unlock';
@@ -48,6 +63,8 @@ function retentionPillHtml(stats, delta) {
 }
 
 export function renderLessons(container, { onExit, onOpenDiagnostic } = {}) {
+  let visibleCount = PAGE_SIZE;
+
   function renderList() {
     const progress = loadProgress();
     const sorted = [...LESSONS].sort((a, b) => a.order - b.order);
@@ -56,16 +73,21 @@ export function renderLessons(container, { onExit, onOpenDiagnostic } = {}) {
       stats[lesson.id] = computeLessonProgress(progress, lesson);
     }
 
-    // "Since last time" deltas: only meaningful for Completed lessons with a
-    // real retention read (see core/snapshot.js).
+    // "Since last time" deltas computed over ALL lessons (not just the
+    // visible page) so the snapshot stays accurate regardless of scroll
+    // position — only meaningful for Completed lessons with a real
+    // retention read (see core/snapshot.js).
     const currentRetentionValues = {};
     for (const lesson of sorted) {
       if (typeof stats[lesson.id].retentionPercent === 'number') {
         currentRetentionValues[lesson.id] = stats[lesson.id].retentionPercent;
       }
     }
-    const deltas = getRetentionDeltas(progress, currentRetentionValues);
+    getRetentionDeltas(progress, currentRetentionValues);
     saveProgress(progress);
+
+    const visible = sorted.slice(0, visibleCount);
+    const hasMore = visibleCount < sorted.length;
 
     container.innerHTML = `
       <div class="lessons-screen">
@@ -73,35 +95,39 @@ export function renderLessons(container, { onExit, onOpenDiagnostic } = {}) {
           <button class="btn-back" type="button">&larr; Menu</button>
           <h2>Lessons</h2>
         </header>
-        <div class="lesson-list">
-          ${sorted
+        <div class="lesson-list lesson-list--compact">
+          ${visible
             .map((lesson, i) => {
               const unlocked = isLessonUnlocked(progress, lesson.id);
               const cardStatus = unlocked ? stats[lesson.id].status : 'locked';
               const prevTitle = i > 0 ? sorted[i - 1].title : null;
+              const percent = unlocked ? stats[lesson.id].percent : 0;
 
               return `
-                <button class="lesson-card status-${cardStatus}" data-id="${lesson.id}" data-locked="${!unlocked}" style="${!unlocked ? 'opacity: 0.55; border-left-color: var(--border);' : ''}">
-                  <div class="lesson-card-top">
-                    <span class="lesson-order">${lesson.order}</span>
-                    ${unlocked
-                      ? `<div style="display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end;">${completionPillHtml(progress, lesson)}${retentionPillHtml(stats[lesson.id], deltas[lesson.id])}</div>`
-                      : `<span class="lesson-badge">Locked 🔒</span>`}
-                  </div>
-                  <div class="lesson-title">${escapeHtml(lesson.title)}</div>
-                  <div class="lesson-summary">${escapeHtml(lesson.summary)}</div>
-                  ${progressBarHtml(stats[lesson.id], !unlocked)}
-                  ${!unlocked ? `<div class="lesson-locked-note" style="display: none; font-size: 12px; color: var(--warn); margin-top: 4px;">Complete "${escapeHtml(prevTitle || '')}" to unlock this.</div>` : ''}
+                <button class="lesson-row status-${cardStatus}" data-id="${lesson.id}" data-locked="${!unlocked}" style="${!unlocked ? 'opacity: 0.55;' : ''}">
+                  <span class="lesson-row-order">${lesson.order}</span>
+                  <span class="lesson-row-badge" title="${unlocked ? '' : 'Locked'}">${unlocked ? compactBadge(progress, lesson) : '🔒'}</span>
+                  <span class="lesson-row-title">${escapeHtml(lesson.title)}</span>
+                  <div class="lesson-row-bar"><div class="lesson-row-bar-fill" style="width:${percent}%"></div></div>
+                  ${!unlocked ? `<div class="lesson-locked-note" style="display: none; font-size: 12px; color: var(--warn); margin-top: 4px; grid-column: 1 / -1;">Complete "${escapeHtml(prevTitle || '')}" to unlock this.</div>` : ''}
                 </button>
               `;
             })
             .join('')}
         </div>
+        ${hasMore ? `<button class="btn-text" id="lessons-load-more" style="width: 100%; margin-top: 10px; font-size: 13px;">Show ${Math.min(PAGE_SIZE, sorted.length - visibleCount)} more (${visibleCount}/${sorted.length})</button>` : ''}
       </div>
     `;
 
     container.querySelector('.btn-back').addEventListener('click', () => onExit && onExit());
-    container.querySelectorAll('.lesson-card').forEach((card) => {
+    const loadMoreBtn = container.querySelector('#lessons-load-more');
+    if (loadMoreBtn) {
+      loadMoreBtn.addEventListener('click', () => {
+        visibleCount = Math.min(visibleCount + PAGE_SIZE, sorted.length);
+        renderList();
+      });
+    }
+    container.querySelectorAll('.lesson-row').forEach((card) => {
       card.addEventListener('click', () => {
         const lesson = LESSONS.find((l) => l.id === card.dataset.id);
         const unlocked = isLessonUnlocked(progress, lesson.id);

@@ -5,6 +5,8 @@ import { loadProgress, resetProgress, saveProgress, ALL_SETTINGS_TOPICS } from '
 import { getAbilityProfile } from '../core/srs.js';
 import { buildCardPool } from '../core/pool.js';
 import { shouldOfferWeaning, markWeaningOffered, resolveWeaning } from '../core/translit-weaning.js';
+import { getVocabBadgeProgress } from '../core/vocab-badges.js';
+import { escapeHtml } from './dom-utils.js';
 
 const root = document.getElementById('app');
 let activeCleanup = null;
@@ -24,6 +26,7 @@ function renderHome() {
   // Calculate skills profile percentages
   const cardPool = buildCardPool();
   const profile = getAbilityProfile(progress, cardPool);
+  const vocabBadges = getVocabBadgeProgress(progress);
 
   // Finding 9: suggest, never force, turning transliteration off once the
   // learner has demonstrably shown they can read without it.
@@ -76,6 +79,30 @@ function renderHome() {
               </div>
             </div>
           `).join('')}
+        </div>
+      </div>
+
+      <!-- Vocabulary Badges: "known" is a stricter bar than raw practice —
+           see core/srs.js isItemKnown / core/vocab-badges.js. A word counts
+           once it clears repeated multiple-choice success or one free-text
+           production, never from a single guess or a calibration seed. -->
+      <div class="lesson-section" style="background: var(--surface); border: 1px solid var(--border); padding: 16px; border-radius: var(--radius);">
+        <h3 style="font-size: 13px; text-transform: uppercase; letter-spacing: 0.04em; color: var(--text-dim); margin-bottom: 12px; font-weight: 700;">Vocabulary</h3>
+        <div style="display: flex; flex-direction: column; gap: 10px;">
+          ${Object.values(vocabBadges).map((b) => {
+            const pct = b.total > 0 ? Math.round((b.known / b.total) * 100) : 0;
+            return `
+              <div>
+                <div style="display: flex; justify-content: space-between; font-size: 13px; margin-bottom: 4px;">
+                  <span style="font-weight: 600;">${escapeHtml(b.label)}</span>
+                  <span style="color: var(--text-dim);">${b.known}/${b.total} known${b.nextMilestone ? ` &middot; next: ${b.nextMilestone}` : ' &middot; all known!'}</span>
+                </div>
+                <div class="progress-bar" style="height: 5px; margin-top: 0;">
+                  <div class="progress-bar-fill" style="width: ${pct}%;"></div>
+                </div>
+              </div>
+            `;
+          }).join('')}
         </div>
       </div>
 

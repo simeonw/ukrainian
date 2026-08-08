@@ -317,7 +317,8 @@ export function renderDrill(container, { onExit } = {}) {
       if (isCorrect) sessionCorrect += 1;
       updateScore();
 
-      recordAnswer(progress, item.id, direction, isCorrect, false, timeTaken);
+      // Typed translation — the strongest evidence tier (see srs.js isItemKnown).
+      recordAnswer(progress, item.id, direction, isCorrect, false, timeTaken, 'freetext');
       recordSkillAttempt(progress, getSkillsForItem(item), item.id, isCorrect);
       saveProgress(progress);
 
@@ -523,7 +524,9 @@ export function renderDrill(container, { onExit } = {}) {
       if (isCorrect) sessionCorrect += 1;
       updateScore();
 
-      recordAnswer(progress, item.id, direction, isCorrect, false, timeTaken);
+      // Word-bank reconstruction — stronger than passive recognition but not
+      // free production; treated the same as MC for the "known" bar.
+      recordAnswer(progress, item.id, direction, isCorrect, false, timeTaken, 'builder');
       recordSkillAttempt(progress, getSkillsForItem(item), item.id, isCorrect);
       saveProgress(progress);
 

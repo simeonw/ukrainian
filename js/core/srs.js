@@ -137,7 +137,15 @@ export function isLessonUnlocked(progress, lessonId) {
 }
 
 // Mutates progress in place; caller is responsible for persisting via storage.saveProgress.
-export function recordAnswer(progress, itemId, direction, isCorrect, isIdk = false, latency = null) {
+// modality records HOW the answer was given — 'mc' (swipe tiles / multiple
+// choice, including calibration and lesson-exercise questions), 'builder'
+// (sentence-order reconstruction from a word bank), or 'freetext' (typed
+// translation, fuzzy-matched). This is what isItemKnown() below reads: a
+// single multiple-choice correct answer proves far less than one correct
+// free-text production, and shouldn't be trusted the same way — see the
+// user-reported case that MC can be solved from partial word recognition
+// without full comprehension.
+export function recordAnswer(progress, itemId, direction, isCorrect, isIdk = false, latency = null, modality = 'mc') {
   const stats = ensureDirectionEntry(progress, itemId, direction);
   stats.seen += 1;
   stats.lastSeen = Date.now();
@@ -155,6 +163,7 @@ export function recordAnswer(progress, itemId, direction, isCorrect, isIdk = fal
     stats.consecutiveCorrect = (stats.consecutiveCorrect || 0) + 1;
     stats.box = Math.min(stats.box + 1, MAX_BOX);
     stats.history.push('correct');
+    if (modality === 'freetext') stats.freeTextEverCorrect = true;
   } else {
     stats.consecutiveCorrect = 0;
     stats.box = Math.max(stats.box - 1, 0);
@@ -162,6 +171,20 @@ export function recordAnswer(progress, itemId, direction, isCorrect, isIdk = fal
   }
 
   return progress;
+}
+
+// "Known" is a stricter, purpose-built bar for vocabulary badges — separate
+// from itemConfidence (which drives Leitner scheduling/progress bars and
+// stays untouched here). One correct free-text production is enough; pure
+// multiple-choice recognition needs a real streak first, since a single MC
+// answer can be solved from partial word recognition rather than full
+// knowledge of the word.
+const KNOWN_MC_STREAK = 3;
+export function isItemKnown(progress, itemId) {
+  const uk2en = getDirectionStats(progress, itemId, 'uk2en');
+  const en2uk = getDirectionStats(progress, itemId, 'en2uk');
+  if (uk2en.freeTextEverCorrect || en2uk.freeTextEverCorrect) return true;
+  return uk2en.consecutiveCorrect >= KNOWN_MC_STREAK || en2uk.consecutiveCorrect >= KNOWN_MC_STREAK;
 }
 
 // Diagnostic/calibration answers only ever raise a floor — never overwrite/regress
@@ -180,18 +203,22 @@ export function seedFromDiagnostic(progress, itemId, direction, levelCode = 'beg
     stats.lastSeen = Date.now();
   }
 
+  // A calibration placement is weaker evidence than real repeated practice —
+  // same principle as calibration.js's high-tier confirmation gate, applied
+  // here so it can't fake isItemKnown()'s "known" bar either. `box` (which
+  // only affects Leitner scheduling priority — how soon this resurfaces in
+  // Drill) can still scale with the calibrated level; `consecutiveCorrect`
+  // (which isItemKnown and the "fluent" streak both key off) never seeds
+  // above 1, regardless of level, no matter how high calibration reads.
   let boxToSeed = DIAGNOSTIC_SEED_BOX;
-  let consec = 1;
   if (levelCode === 'advanced') {
-    boxToSeed = MAX_BOX; // fully master basic components
-    consec = 7;
+    boxToSeed = MAX_BOX;
   } else if (levelCode === 'intermediate') {
     boxToSeed = 3;
-    consec = 3;
   }
 
   stats.box = Math.max(stats.box, boxToSeed);
-  stats.consecutiveCorrect = Math.max(stats.consecutiveCorrect || 0, consec);
+  stats.consecutiveCorrect = Math.max(stats.consecutiveCorrect || 0, 1);
 
   return progress;
 }
@@ -324,4 +351,20 @@ export function computeLessonProgress(progress, lesson) {
   const retention = lessonRetention(progress, lesson);
   const status = retention.minSample >= MIN_RETENTION_SAMPLE && retention.percent < LEARNED_PERCENT ? 'needs-review' : 'learned';
   return { percent, attempted, total, retentionPercent: retention.percent, status };
+}
+
+// Tiered lesson badges: bronze = worked through it (Completion alone, or a
+// still-thin Retention sample); silver = a real sample of ongoing practice
+// showing decent recall; gold = a real sample showing strong recall. This is
+// the "first badge from solving it, later badge from doing it more, other
+// badges from showing real mastery" progression, built entirely from the
+// existing Completion/Retention signals rather than new tracking.
+const SILVER_RETENTION_PERCENT = 40;
+export function getLessonBadgeTier(progress, lesson) {
+  if (!isLessonCompleted(progress, lesson.id)) return null;
+  const retention = lessonRetention(progress, lesson);
+  if (retention.minSample < MIN_RETENTION_SAMPLE) return 'bronze';
+  if (retention.percent >= LEARNED_PERCENT) return 'gold';
+  if (retention.percent >= SILVER_RETENTION_PERCENT) return 'silver';
+  return 'bronze';
 }

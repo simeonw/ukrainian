@@ -5,17 +5,23 @@
 //
 // Wrong answers are never a scored miss: the correct answer is revealed, then
 // the same item comes right back around for a genuine retry. Nothing here can
-// fail — it only takes longer for a shaky item to clear. Completion is evidence
-// of engagement, not proof of retention — a correct clear here still counts as
-// one real Retention data point (see core/retention.js), same as a Drill answer.
+// fail — it only takes longer for a shaky item to clear.
+//
+// Deliberately does NOT feed core/retention.js. By construction, every item
+// here ends in a correct answer (retry-until-correct) — there is no way for
+// this exercise to ever produce a "wrong" data point, so it can only ever
+// look like a perfect track record. Feeding that into the Wilson-score
+// window would let finishing the low-stakes engagement checkbox alone spike
+// a skill's Retention read (even a "gold" badge) the instant a lesson is
+// completed — exactly the kind of thin/gamed evidence this app is trying
+// NOT to trust. Retention only comes from genuine Drill practice, where a
+// wrong answer is a real possibility and the record is honest.
 import { getItemById, promptText, answerText, pickDistractors } from '../core/pool.js';
 import { recordAnswer } from '../core/srs.js';
 import { loadProgress, saveProgress } from '../core/storage.js';
 import { getCompletionProgress, recordCompletionItemDone } from '../core/completion.js';
 import { shuffle } from '../core/random.js';
 import { escapeHtml } from './dom-utils.js';
-import { getSkillsForItem } from '../core/skills.js';
-import { recordSkillAttempt } from '../core/retention.js';
 
 export function renderLessonExercise(container, lesson, { onDone } = {}) {
   const progress = loadProgress();
@@ -67,7 +73,6 @@ export function renderLessonExercise(container, lesson, { onDone } = {}) {
 
         if (isCorrect) {
           recordAnswer(progress, item.id, direction, true);
-          recordSkillAttempt(progress, getSkillsForItem(item), item.id, true);
           recordCompletionItemDone(progress, lesson, item.id);
           saveProgress(progress);
           setTimeout(next, 550);
