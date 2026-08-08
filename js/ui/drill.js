@@ -258,14 +258,22 @@ export function renderDrill(container, { onExit } = {}) {
       currentRound = { correctItem: item, direction, tiles, locked: false, type: 'swipe', card, startTime: Date.now() };
 
       const prompt = getPromptText(item, direction);
+      // Speech is only offered up front when Ukrainian is already the given
+      // text to interpret (uk2en) — the prompt and the audio say the same
+      // thing either way, so nothing is revealed. For en2uk the prompt is
+      // English and the 4 tiles are the Ukrainian options; hearing the
+      // target pronunciation before choosing would just be the answer read
+      // aloud, so that case gets a speaker button after the round is locked
+      // in instead (see submit()) rather than here.
+      const showPreAnswerSpeaker = speechAvailable && direction === 'uk2en';
       cardEl.innerHTML = `
         <div class="drill-card-kind">${item.kind === 'pattern' ? 'phrase' : 'word'}</div>
         <div class="drill-card-main">${tokenizeSentence(prompt.main)}</div>
         ${prompt.translit ? `<div class="drill-card-translit">${escapeHtml(prompt.translit)}</div>` : ''}
-        ${speechAvailable ? SPEAKER_BTN_HTML : ''}
+        ${showPreAnswerSpeaker ? SPEAKER_BTN_HTML : ''}
       `;
       addTokenEventListeners(cardEl);
-      attachSpeakerBtn(cardEl, item.uk);
+      if (showPreAnswerSpeaker) attachSpeakerBtn(cardEl, item.uk);
 
       cardEl.style.transition = '';
       cardEl.style.transform = 'translate(0, 0) rotate(0deg)';
@@ -761,12 +769,15 @@ export function renderDrill(container, { onExit } = {}) {
     cardEl.classList.add(isCorrect ? 'is-correct' : 'is-incorrect');
     tileEls[position].classList.add(isCorrect ? 'is-correct' : 'is-incorrect');
 
-    // Encouraging feedback overlay on the card El
+    // Encouraging feedback overlay on the card El. insertAdjacentHTML, not
+    // innerHTML +=  — the latter reparses and replaces every existing child,
+    // silently destroying the pre-answer speaker button's listener (uk2en
+    // case) it it was already there.
     if (isCorrect) {
       if (isFluent) {
-        cardEl.innerHTML += `<div style="color: var(--good); font-size: 11px; margin-top: 4px; font-weight: bold;">🌟 Fast &amp; Fluent! (${timeTaken.toFixed(1)}s)</div>`;
+        cardEl.insertAdjacentHTML('beforeend', `<div style="color: var(--good); font-size: 11px; margin-top: 4px; font-weight: bold;">🌟 Fast &amp; Fluent! (${timeTaken.toFixed(1)}s)</div>`);
       } else {
-        cardEl.innerHTML += `<div style="color: var(--warn); font-size: 11px; margin-top: 4px; font-weight: bold;">🧠 Worked out! Persistence! (${timeTaken.toFixed(1)}s)</div>`;
+        cardEl.insertAdjacentHTML('beforeend', `<div style="color: var(--warn); font-size: 11px; margin-top: 4px; font-weight: bold;">🧠 Worked out! Persistence! (${timeTaken.toFixed(1)}s)</div>`);
       }
     }
 
@@ -776,6 +787,14 @@ export function renderDrill(container, { onExit } = {}) {
           tileEls[pos].classList.add('is-correct');
         }
       }
+    }
+
+    // en2uk rounds had no speaker button before answering (it would've read
+    // the correct tile aloud ahead of the choice) — offer it now instead,
+    // once the correct tile is already visually revealed either way.
+    if (speechAvailable && currentRound.direction !== 'uk2en') {
+      cardEl.insertAdjacentHTML('beforeend', SPEAKER_BTN_HTML);
+      attachSpeakerBtn(cardEl, currentRound.correctItem.uk);
     }
 
     setTimeout(() => {
