@@ -219,6 +219,25 @@ h1, h2, h3 {
   font-size: 14px;
 }
 
+/* Free pronunciation playback via the browser's built-in speechSynthesis —
+   see core/speech.js. Only rendered when a real uk-UA voice is available. */
+.speak-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 15px;
+  line-height: 1;
+  padding: 2px 4px;
+  vertical-align: middle;
+  opacity: 0.85;
+}
+.speak-btn:hover {
+  opacity: 1;
+}
+.speak-btn:active {
+  transform: scale(0.92);
+}
+
 .drill-card.is-correct {
   border-color: var(--good);
 }

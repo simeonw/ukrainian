@@ -8,6 +8,22 @@ import { escapeHtml } from './dom-utils.js';
 import { getSkillsForItem } from '../core/skills.js';
 import { recordSkillAttempt } from '../core/retention.js';
 import { toFeminine, toMasculine, isGenderInflectable, toFormal, toInformal, isFormalityInflectable } from '../data/inflection-rules.js';
+import { speakUkrainian, canSpeakUkrainian } from '../core/speech.js';
+
+const SPEAKER_BTN_HTML = `<button type="button" class="speak-btn" aria-label="Play pronunciation" title="Play pronunciation">🔊</button>`;
+
+// Wires every .speak-btn under root to speak the given Ukrainian text —
+// mirrors the existing addTokenEventListeners pattern (direct listener
+// attachment after each render) rather than a new delegation scheme.
+function attachSpeakerBtn(root, ukText) {
+  const btn = root.querySelector ? root.querySelector('.speak-btn') : null;
+  if (!btn) return;
+  btn.addEventListener('pointerdown', (e) => e.stopPropagation());
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    speakUkrainian(ukText);
+  });
+}
 
 // Simple Levenshtein fuzzy string distance ratio
 function getFuzzyRatio(s1, s2) {
@@ -68,6 +84,15 @@ export function renderDrill(container, { onExit } = {}) {
 
   // Single-step undo history state
   let lastAnswerHistory = null;
+
+  // Optimistic default (button shows immediately); corrected once the
+  // browser's voice list actually resolves — most rounds render before that
+  // promise settles, so a hard "wait for it" gate would delay every card.
+  let speechAvailable = true;
+  canSpeakUkrainian().then((ok) => {
+    speechAvailable = ok;
+    if (!ok) container.querySelectorAll('.speak-btn').forEach((b) => b.remove());
+  });
 
   container.innerHTML = `
     <div class="drill-screen">
@@ -237,8 +262,10 @@ export function renderDrill(container, { onExit } = {}) {
         <div class="drill-card-kind">${item.kind === 'pattern' ? 'phrase' : 'word'}</div>
         <div class="drill-card-main">${tokenizeSentence(prompt.main)}</div>
         ${prompt.translit ? `<div class="drill-card-translit">${escapeHtml(prompt.translit)}</div>` : ''}
+        ${speechAvailable ? SPEAKER_BTN_HTML : ''}
       `;
       addTokenEventListeners(cardEl);
+      attachSpeakerBtn(cardEl, item.uk);
 
       cardEl.style.transition = '';
       cardEl.style.transform = 'translate(0, 0) rotate(0deg)';
@@ -343,18 +370,18 @@ export function renderDrill(container, { onExit } = {}) {
         <div class="remediation-modal-summary">${escapeHtml(lesson.summary || '')}</div>
         ${patterns.length ? `
           <div class="word-modal-section-title">Patterns</div>
-          ${patterns.map(p => `
+          ${patterns.map((p, i) => `
             <div class="remediation-pattern">
-              <div class="remediation-pattern-uk">${escapeHtml(p.uk)}${p.translit ? ` <span class="remediation-translit">(${escapeHtml(p.translit)})</span>` : ''}</div>
+              <div class="remediation-pattern-uk" data-pattern-idx="${i}">${escapeHtml(p.uk)}${p.translit ? ` <span class="remediation-translit">(${escapeHtml(p.translit)})</span>` : ''} ${speechAvailable ? SPEAKER_BTN_HTML : ''}</div>
               <div class="remediation-pattern-en">${escapeHtml(p.en)}</div>
             </div>
           `).join('')}
         ` : ''}
         ${examples.length ? `
           <div class="word-modal-section-title">Examples</div>
-          ${examples.slice(0, 6).map(ex => `
-            <div class="remediation-example">
-              <span class="remediation-example-uk">${escapeHtml(ex.uk)}</span>
+          ${examples.slice(0, 6).map((ex, i) => `
+            <div class="remediation-example" data-example-idx="${i}">
+              <span class="remediation-example-uk">${escapeHtml(ex.uk)} ${speechAvailable ? SPEAKER_BTN_HTML : ''}</span>
               <span class="remediation-example-en">${escapeHtml(ex.en)}</span>
             </div>
           `).join('')}
@@ -362,6 +389,14 @@ export function renderDrill(container, { onExit } = {}) {
         <button class="btn-primary remediation-continue-btn" type="button" style="width: 100%; margin-top: 16px;">Got it — continue drilling</button>
       </div>
     `;
+    backdrop.querySelectorAll('.remediation-pattern-uk').forEach((el) => {
+      const p = patterns[Number(el.dataset.patternIdx)];
+      if (p) attachSpeakerBtn(el, p.uk);
+    });
+    backdrop.querySelectorAll('.remediation-example').forEach((el) => {
+      const ex = examples[Number(el.dataset.exampleIdx)];
+      if (ex) attachSpeakerBtn(el, ex.uk);
+    });
     backdrop.querySelector('.remediation-continue-btn').addEventListener('click', () => {
       backdrop.remove();
       onDone();
@@ -420,6 +455,7 @@ export function renderDrill(container, { onExit } = {}) {
         <div class="drill-card-kind">Advanced Translation</div>
         <div class="drill-card-main" style="font-size: 20px; line-height: 1.4; text-align: center;">${tokenizeSentence(prompt.main)}</div>
         ${prompt.translit ? `<div class="drill-card-translit">${escapeHtml(prompt.translit)}</div>` : ''}
+        ${speechAvailable ? SPEAKER_BTN_HTML : ''}
 
         <input type="text" class="drill-text-input" placeholder="${useCzech ? 'Napište český překlad...' : 'Type English translation...'}" id="semantic-input" autofocus autocomplete="off" />
         <button class="btn-primary" id="semantic-submit" style="width: 100%; margin-top: 10px;">Check Answer</button>
@@ -431,6 +467,7 @@ export function renderDrill(container, { onExit } = {}) {
     const submitBtn = interactiveEl.querySelector('#semantic-submit');
     const feedbackEl = interactiveEl.querySelector('#semantic-feedback');
     addTokenEventListeners(interactiveEl);
+    attachSpeakerBtn(interactiveEl, item.uk);
 
     // Record high-resolution start time
     currentRound = { correctItem: item, direction, locked: false, type: 'semantic', card, startTime: Date.now() };
@@ -676,17 +713,18 @@ export function renderDrill(container, { onExit } = {}) {
       if (isCorrect) {
         slotsEl.style.borderColor = 'var(--good)';
         if (isFluent) {
-          feedbackEl.innerHTML = `<span style="color: var(--good); font-weight: bold;">🌟 Fast &amp; Fluent! (${timeTaken.toFixed(1)}s)</span>`;
+          feedbackEl.innerHTML = `<span style="color: var(--good); font-weight: bold;">🌟 Fast &amp; Fluent! (${timeTaken.toFixed(1)}s)</span> ${speechAvailable ? SPEAKER_BTN_HTML : ''}`;
         } else {
-          feedbackEl.innerHTML = `<span style="color: var(--warn); font-weight: bold;">🧠 Worked out! Great persistence! (${timeTaken.toFixed(1)}s)</span>`;
+          feedbackEl.innerHTML = `<span style="color: var(--warn); font-weight: bold;">🧠 Worked out! Great persistence! (${timeTaken.toFixed(1)}s)</span> ${speechAvailable ? SPEAKER_BTN_HTML : ''}`;
         }
       } else {
         slotsEl.style.borderColor = 'var(--bad)';
         feedbackEl.innerHTML = `
           <div style="color: var(--bad); font-weight: bold; margin-bottom: 4px;">Incorrect word order or missing form.</div>
-          <div style="color: var(--text-dim); font-size: 13px;">Correct Pattern: "${item.uk}"</div>
+          <div style="color: var(--text-dim); font-size: 13px;">Correct Pattern: "${item.uk}" ${speechAvailable ? SPEAKER_BTN_HTML : ''}</div>
         `;
       }
+      attachSpeakerBtn(feedbackEl, item.uk);
 
       // Slower than before on purpose — the old delay advanced before there
       // was real time to read the revealed correct answer/word order.

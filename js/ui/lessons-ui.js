@@ -6,6 +6,9 @@ import { isLessonCompleted, isFastTrackEligible, getCompletionProgress } from '.
 import { getRetentionDeltas } from '../core/snapshot.js';
 import { renderLessonExercise } from './lesson-exercise-ui.js';
 import { escapeHtml } from './dom-utils.js';
+import { speakUkrainian, canSpeakUkrainian } from '../core/speech.js';
+
+const SPEAKER_BTN_HTML = `<button type="button" class="speak-btn" aria-label="Play pronunciation" title="Play pronunciation">🔊</button>`;
 
 const TIER_ICON = { gold: '🥇', silver: '🥈', bronze: '🥉' };
 const PAGE_SIZE = 10;
@@ -68,6 +71,13 @@ function retentionPillHtml(stats, delta) {
 
 export function renderLessons(container, { onExit, onOpenDiagnostic } = {}) {
   let scrollObserver = null;
+
+  // Checked once per Lessons-screen visit, shared across renderList/renderDetail.
+  let speechAvailable = true;
+  canSpeakUkrainian().then((ok) => {
+    speechAvailable = ok;
+    if (!ok) container.querySelectorAll('.speak-btn').forEach((b) => b.remove());
+  });
 
   function stopObserving() {
     if (scrollObserver) {
@@ -264,9 +274,9 @@ export function renderLessons(container, { onExit, onOpenDiagnostic } = {}) {
         ${content.patterns && content.patterns.length ? `
           <section class="lesson-section">
             <h3>Pattern</h3>
-            ${content.patterns.map((p) => `
-              <div class="pattern-block">
-                <div class="pattern-uk">${escapeHtml(p.uk)}</div>
+            ${content.patterns.map((p, i) => `
+              <div class="pattern-block" data-pattern-idx="${i}">
+                <div class="pattern-uk">${escapeHtml(p.uk)} ${speechAvailable ? SPEAKER_BTN_HTML : ''}</div>
                 ${(showTranslit && p.translit) ? `<div class="pattern-translit">${escapeHtml(p.translit)}</div>` : ''}
                 <div class="pattern-en" style="${useCzech ? 'color: var(--text-dim);' : ''}">${escapeHtml(p.en)}</div>
                 ${p.czNote ? `<div class="pattern-cz" style="font-weight: ${useCzech ? '600' : 'normal'}; color: ${useCzech ? 'var(--accent-2)' : 'var(--text-dim)'};">🇨🇿 ${escapeHtml(p.czNote)}</div>` : ''}
@@ -278,9 +288,9 @@ export function renderLessons(container, { onExit, onOpenDiagnostic } = {}) {
         ${content.examples && content.examples.length ? `
           <section class="lesson-section">
             <h3>Examples</h3>
-            ${content.examples.map((ex) => `
-              <div class="example-block">
-                <div class="example-uk">${escapeHtml(ex.uk)}</div>
+            ${content.examples.map((ex, i) => `
+              <div class="example-block" data-example-idx="${i}">
+                <div class="example-uk">${escapeHtml(ex.uk)} ${speechAvailable ? SPEAKER_BTN_HTML : ''}</div>
                 ${(showTranslit && ex.translit) ? `<div class="example-translit">${escapeHtml(ex.translit)}</div>` : ''}
                 <div class="example-en" style="${useCzech ? 'color: var(--text-dim);' : ''}">${escapeHtml(ex.en)}</div>
                 ${ex.cz ? `<div class="example-cz" style="font-weight: ${useCzech ? '600' : 'normal'}; color: ${useCzech ? 'var(--accent-2)' : 'var(--text-dim)'};">🇨🇿 ${escapeHtml(ex.cz)}</div>` : ''}
@@ -326,6 +336,17 @@ export function renderLessons(container, { onExit, onOpenDiagnostic } = {}) {
     container.querySelector('.btn-back-list').addEventListener('click', renderList);
     const exerciseBtn = container.querySelector('#lesson-exercise-btn');
     if (exerciseBtn) exerciseBtn.addEventListener('click', () => renderExercise(lesson.id));
+
+    container.querySelectorAll('.pattern-block').forEach((el) => {
+      const p = content.patterns[Number(el.dataset.patternIdx)];
+      const btn = el.querySelector('.speak-btn');
+      if (p && btn) btn.addEventListener('click', (e) => { e.stopPropagation(); speakUkrainian(p.uk); });
+    });
+    container.querySelectorAll('.example-block').forEach((el) => {
+      const ex = content.examples[Number(el.dataset.exampleIdx)];
+      const btn = el.querySelector('.speak-btn');
+      if (ex && btn) btn.addEventListener('click', (e) => { e.stopPropagation(); speakUkrainian(ex.uk); });
+    });
 
     // Reset current lesson logic
     container.querySelector('#reset-lesson-btn').addEventListener('click', () => {
