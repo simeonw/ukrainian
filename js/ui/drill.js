@@ -1,5 +1,5 @@
 import { buildCardPool, pickDistractors } from '../core/pool.js';
-import { drawCard, cardKey, recordAnswer } from '../core/srs.js';
+import { drawCard, cardKey, recordAnswer, getLessonBadgeTier, getLessonForItem, maybeConfirmFastTrackFromDrill } from '../core/srs.js';
 import { loadProgress, saveProgress } from '../core/storage.js';
 import { attachSwipeGesture, attachKeyboardNav } from './gesture.js';
 import { WORD_MODALS } from '../data/word-modals.js';
@@ -38,6 +38,16 @@ function getFuzzyRatio(s1, s2) {
 }
 
 const POSITIONS = ['up', 'down', 'left', 'right'];
+
+// Some English glosses carry a parenthetical grammar note — "I want to see
+// you (in general)", "I went home. (male speaker)" — that's context for the
+// learner, not part of the answer they're expected to type. Scoring against
+// the literal full string penalized a genuinely correct free-text answer
+// that (reasonably) left the clarifier out; strip it for scoring only, the
+// full text still shows in the "Correct Meaning" feedback.
+function stripParenthetical(text) {
+  return text.replace(/\s*\([^)]*\)/g, '').replace(/\s{2,}/g, ' ').trim();
+}
 
 // Gender/formality re-inflection now goes through data/inflection-rules.js's
 // general morphological rules instead of a fixed word list — see finding 6.
@@ -260,6 +270,141 @@ export function renderDrill(container, { onExit } = {}) {
     renderRound(card);
   }
 
+  // --- ADAPTIVE FEEDBACK: badge batching + remediation modal state ---
+  const consecutiveWrongByLesson = {};
+  let pendingBadgeEvents = [];
+  let answersSinceBadgeScreen = 0;
+  const TIER_RANK = { none: 0, bronze: 1, silver: 2, gold: 3 };
+
+  // Every answer-recording call site routes through here so badge detection,
+  // fast-track confirmation, and the "3 wrong in a row" remediation trigger
+  // stay in one place instead of being duplicated per exercise type.
+  function recordAndTrack(item, direction, isCorrect, isIdk, latency, modality) {
+    const lesson = getLessonForItem(item);
+    const tierBefore = lesson ? getLessonBadgeTier(progress, lesson) : null;
+
+    recordAnswer(progress, item.id, direction, isCorrect, isIdk, latency, modality);
+    recordSkillAttempt(progress, getSkillsForItem(item), item.id, isCorrect);
+    if (isCorrect) maybeConfirmFastTrackFromDrill(progress, item);
+    saveProgress(progress);
+
+    let remediateLesson = null;
+    if (lesson) {
+      if (isCorrect) {
+        consecutiveWrongByLesson[lesson.id] = 0;
+      } else {
+        consecutiveWrongByLesson[lesson.id] = (consecutiveWrongByLesson[lesson.id] || 0) + 1;
+        if (isIdk || consecutiveWrongByLesson[lesson.id] >= 3) {
+          remediateLesson = lesson;
+          consecutiveWrongByLesson[lesson.id] = 0;
+        }
+      }
+
+      const tierAfter = getLessonBadgeTier(progress, lesson);
+      if (tierAfter && TIER_RANK[tierAfter] > TIER_RANK[tierBefore || 'none']) {
+        pendingBadgeEvents.push({ lessonTitle: lesson.title, tier: tierAfter });
+      }
+    }
+
+    answersSinceBadgeScreen += 1;
+    return remediateLesson;
+  }
+
+  const BADGE_TIER_LABEL = { bronze: 'Bronze', silver: 'Silver', gold: 'Gold' };
+  const BADGE_TIER_ICON = { bronze: '🥉', silver: '🥈', gold: '🥇' };
+
+  // Decide, after the normal feedback delay has already elapsed, whether to
+  // interrupt the flow with the remediation modal or a batched badge screen
+  // before actually advancing to the next card.
+  function proceedAfterAnswer(remediateLesson) {
+    if (remediateLesson) {
+      showRemediationModal(remediateLesson, () => nextRound());
+      return;
+    }
+    if (pendingBadgeEvents.length > 0 && answersSinceBadgeScreen >= 5) {
+      const events = pendingBadgeEvents;
+      pendingBadgeEvents = [];
+      answersSinceBadgeScreen = 0;
+      showBadgeScreen(events, () => nextRound());
+      return;
+    }
+    nextRound();
+  }
+
+  function showRemediationModal(lesson, onDone) {
+    const patterns = (lesson.content && lesson.content.patterns) || [];
+    const examples = (lesson.content && lesson.content.examples) || [];
+
+    const backdrop = document.createElement('div');
+    backdrop.className = 'word-modal-backdrop';
+    backdrop.innerHTML = `
+      <div class="word-modal-content remediation-modal-content">
+        <div class="remediation-modal-title">Let's review: ${escapeHtml(lesson.title)}</div>
+        <div class="remediation-modal-summary">${escapeHtml(lesson.summary || '')}</div>
+        ${patterns.length ? `
+          <div class="word-modal-section-title">Patterns</div>
+          ${patterns.map(p => `
+            <div class="remediation-pattern">
+              <div class="remediation-pattern-uk">${escapeHtml(p.uk)}${p.translit ? ` <span class="remediation-translit">(${escapeHtml(p.translit)})</span>` : ''}</div>
+              <div class="remediation-pattern-en">${escapeHtml(p.en)}</div>
+            </div>
+          `).join('')}
+        ` : ''}
+        ${examples.length ? `
+          <div class="word-modal-section-title">Examples</div>
+          ${examples.slice(0, 6).map(ex => `
+            <div class="remediation-example">
+              <span class="remediation-example-uk">${escapeHtml(ex.uk)}</span>
+              <span class="remediation-example-en">${escapeHtml(ex.en)}</span>
+            </div>
+          `).join('')}
+        ` : ''}
+        <button class="btn-primary remediation-continue-btn" type="button" style="width: 100%; margin-top: 16px;">Got it — continue drilling</button>
+      </div>
+    `;
+    backdrop.querySelector('.remediation-continue-btn').addEventListener('click', () => {
+      backdrop.remove();
+      onDone();
+    });
+    document.body.appendChild(backdrop);
+  }
+
+  function showBadgeScreen(events, onDone) {
+    // Merge duplicate lessons (keep the highest tier reached) and cap noise.
+    const byLesson = new Map();
+    for (const ev of events) {
+      const prev = byLesson.get(ev.lessonTitle);
+      if (!prev || TIER_RANK[ev.tier] > TIER_RANK[prev.tier]) byLesson.set(ev.lessonTitle, ev);
+    }
+    const merged = [...byLesson.values()];
+
+    const backdrop = document.createElement('div');
+    backdrop.className = 'word-modal-backdrop';
+    backdrop.innerHTML = `
+      <div class="word-modal-content badge-modal-content">
+        <div class="badge-modal-title">🎉 Nice progress!</div>
+        <div class="badge-modal-subtitle">Confirmed through real drilling — not a guess.</div>
+        <div class="badge-modal-list">
+          ${merged.map(ev => `
+            <div class="badge-modal-item">
+              <span class="badge-modal-icon">${BADGE_TIER_ICON[ev.tier]}</span>
+              <div>
+                <div class="badge-modal-tier">${BADGE_TIER_LABEL[ev.tier]}</div>
+                <div class="badge-modal-lesson">${escapeHtml(ev.lessonTitle)}</div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+        <button class="btn-primary badge-modal-continue-btn" type="button" style="width: 100%; margin-top: 16px;">Keep going</button>
+      </div>
+    `;
+    backdrop.querySelector('.badge-modal-continue-btn').addEventListener('click', () => {
+      backdrop.remove();
+      onDone();
+    });
+    document.body.appendChild(backdrop);
+  }
+
   // --- UK2EN SEMANTIC MATCH ---
   function renderSemanticMatch(card) {
     const { item, direction } = card;
@@ -304,7 +449,7 @@ export function renderDrill(container, { onExit } = {}) {
       const isFluent = timeTaken <= threshold;
 
       const targetTranslation = getAnswerText(item, direction);
-      const score = getFuzzyRatio(userText, targetTranslation);
+      const score = getFuzzyRatio(userText, stripParenthetical(targetTranslation));
       const isCorrect = score >= 0.72;
 
       lastAnswerHistory = {
@@ -318,9 +463,7 @@ export function renderDrill(container, { onExit } = {}) {
       updateScore();
 
       // Typed translation — the strongest evidence tier (see srs.js isItemKnown).
-      recordAnswer(progress, item.id, direction, isCorrect, false, timeTaken, 'freetext');
-      recordSkillAttempt(progress, getSkillsForItem(item), item.id, isCorrect);
-      saveProgress(progress);
+      const remediateLesson = recordAndTrack(item, direction, isCorrect, false, timeTaken, 'freetext');
 
       if (isCorrect) {
         inputField.style.borderColor = 'var(--good)';
@@ -337,7 +480,9 @@ export function renderDrill(container, { onExit } = {}) {
         `;
       }
 
-      setTimeout(nextRound, isCorrect ? 1500 : 2800);
+      // Slower than before on purpose — the old delay advanced before there
+      // was real time to read the revealed correct answer/word order.
+      setTimeout(() => proceedAfterAnswer(remediateLesson), isCorrect ? 2200 : 3500);
     }
 
     submitBtn.addEventListener('click', checkAnswer);
@@ -526,9 +671,7 @@ export function renderDrill(container, { onExit } = {}) {
 
       // Word-bank reconstruction — stronger than passive recognition but not
       // free production; treated the same as MC for the "known" bar.
-      recordAnswer(progress, item.id, direction, isCorrect, false, timeTaken, 'builder');
-      recordSkillAttempt(progress, getSkillsForItem(item), item.id, isCorrect);
-      saveProgress(progress);
+      const remediateLesson = recordAndTrack(item, direction, isCorrect, false, timeTaken, 'builder');
 
       if (isCorrect) {
         slotsEl.style.borderColor = 'var(--good)';
@@ -545,7 +688,9 @@ export function renderDrill(container, { onExit } = {}) {
         `;
       }
 
-      setTimeout(nextRound, isCorrect ? 1500 : 2800);
+      // Slower than before on purpose — the old delay advanced before there
+      // was real time to read the revealed correct answer/word order.
+      setTimeout(() => proceedAfterAnswer(remediateLesson), isCorrect ? 2200 : 3500);
     }
 
     submitBtn.addEventListener('click', checkBuilder);
@@ -573,9 +718,7 @@ export function renderDrill(container, { onExit } = {}) {
     if (isCorrect) sessionCorrect += 1;
     updateScore();
 
-    recordAnswer(progress, currentRound.correctItem.id, currentRound.direction, isCorrect, false, timeTaken);
-    recordSkillAttempt(progress, getSkillsForItem(currentRound.correctItem), currentRound.correctItem.id, isCorrect);
-    saveProgress(progress);
+    const remediateLesson = recordAndTrack(currentRound.correctItem, currentRound.direction, isCorrect, false, timeTaken);
 
     cardEl.classList.add(isCorrect ? 'is-correct' : 'is-incorrect');
     tileEls[position].classList.add(isCorrect ? 'is-correct' : 'is-incorrect');
@@ -599,8 +742,8 @@ export function renderDrill(container, { onExit } = {}) {
 
     setTimeout(() => {
       gestureHandle && gestureHandle.reset();
-      nextRound();
-    }, isCorrect ? 1500 : 2600);
+      proceedAfterAnswer(remediateLesson);
+    }, isCorrect ? 2200 : 3500);
   }
 
   // --- UNDO LAST ANSWER HEADER BUTTON LISTENER ---
@@ -624,9 +767,7 @@ export function renderDrill(container, { onExit } = {}) {
     if (!currentRound || currentRound.locked) return;
     currentRound.locked = true;
 
-    recordAnswer(progress, currentRound.correctItem.id, currentRound.direction, false, true);
-    recordSkillAttempt(progress, getSkillsForItem(currentRound.correctItem), currentRound.correctItem.id, false);
-    saveProgress(progress);
+    const remediateLesson = recordAndTrack(currentRound.correctItem, currentRound.direction, false, true);
 
     sessionTotal += 1;
     updateScore();
@@ -640,8 +781,8 @@ export function renderDrill(container, { onExit } = {}) {
       }
       setTimeout(() => {
         gestureHandle && gestureHandle.reset();
-        nextRound();
-      }, 2500);
+        proceedAfterAnswer(remediateLesson);
+      }, 3000);
     } else {
       interactiveEl.innerHTML = `
         <div style="background: var(--surface); border: 2px solid var(--warn); border-radius: var(--radius); padding: 24px; text-align: center; width: 100%;">
@@ -650,7 +791,7 @@ export function renderDrill(container, { onExit } = {}) {
           <div style="color: var(--text-dim); font-size: 14px;">Meaning: "${getAnswerText(currentRound.correctItem, currentRound.direction)}"</div>
         </div>
       `;
-      setTimeout(nextRound, 2500);
+      setTimeout(() => proceedAfterAnswer(remediateLesson), 3000);
     }
   });
 

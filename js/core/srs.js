@@ -1,13 +1,18 @@
 // Leitner-box-style spaced repetition + adaptive lesson mastery calculation.
 import { LESSONS } from '../data/lessons.js';
 import { getSkillsForItem } from './skills.js';
-import { isLessonCompleted, isFastTrackEligible } from './completion.js';
+import { isLessonCompleted, isFastTrackEligible, markLessonCompleted } from './completion.js';
 import { getSkillRetention } from './retention.js';
 import { getItemById } from './pool.js';
 
 const MAX_BOX = 5;
 const BOX_WEIGHTS = [12, 10, 8, 4, 2, 1]; // Weights for drawing based on Leitner boxes
 const DIAGNOSTIC_SEED_BOX = 2;
+
+// Boundary content (near the edge of what's confirmed) dominates the draw;
+// stretch and easy content appear only occasionally — "intersperse
+// occasional harder things... and occasional easy ones to keep morale up."
+const PRACTICE_TIER_WEIGHT = { boundary: 6, stretch: 1.5, easy: 1 };
 
 // Lesson badges: learned threshold remains at 65% average item confidence
 const LEARNED_PERCENT = 65;
@@ -248,13 +253,22 @@ function lessonAttemptCount(progress, lesson) {
   return count;
 }
 
-function pickFrom(candidates, avoidKey) {
+function weightedPickFrom(candidates, avoidKey, weightFn) {
   let pool = candidates;
   if (avoidKey && pool.length > 1) {
     const filtered = pool.filter((c) => cardKey(c) !== avoidKey);
     if (filtered.length) pool = filtered;
   }
-  return pool[Math.floor(Math.random() * pool.length)];
+  if (!weightFn) return pool[Math.floor(Math.random() * pool.length)];
+
+  const weights = pool.map(weightFn);
+  const total = weights.reduce((a, b) => a + b, 0);
+  let roll = Math.random() * total;
+  for (let i = 0; i < pool.length; i++) {
+    roll -= weights[i];
+    if (roll <= 0) return pool[i];
+  }
+  return pool[pool.length - 1];
 }
 
 // ADAPTIVE FILTERING & PROGRESSIVE LAYERING:
@@ -274,36 +288,28 @@ export function drawCard(progress, cardPool, avoidKey = null) {
   let activePool = cardPool.filter(c => unlockedItemIds.has(c.item.id));
   if (activePool.length === 0) activePool = cardPool; // fallback to avoid empty pools
 
-  // 1. First, check if there's any completely unseen card. Uniform draw from unseen.
+  const tierWeight = (c) => PRACTICE_TIER_WEIGHT[getItemPracticeTier(progress, c.item)];
+
+  // 1. First, check if there's any completely unseen card — still tier-
+  // weighted, so introducing new content doesn't flood the queue with
+  // "stretch" material just because it's more likely to be unseen.
   const unseen = activePool.filter((c) => !cardSeen(progress, c));
-  if (unseen.length > 0) return pickFrom(unseen, avoidKey);
+  if (unseen.length > 0) return weightedPickFrom(unseen, avoidKey, tierWeight);
 
   // 2. Separate cards into non-mastered and mastered
   const activeCandidates = activePool.filter(c => !isCardMastered(progress, c));
 
   let poolToDraw = activeCandidates.length > 0 ? activeCandidates : activePool;
 
-  if (avoidKey && poolToDraw.length > 1) {
-    const filtered = poolToDraw.filter((c) => cardKey(c) !== avoidKey);
-    if (filtered.length) poolToDraw = filtered;
-  }
-
-  // 3. Weighted selection based on Leitner Box
-  const weights = poolToDraw.map((c) => {
+  // 3. Weighted selection: Leitner box weight (spaced repetition) x practice
+  // tier weight (boundary content dominates; stretch/easy stay occasional).
+  return weightedPickFrom(poolToDraw, avoidKey, (c) => {
     let baseWeight = BOX_WEIGHTS[cardBox(progress, c)] || 1;
     if (isCardMastered(progress, c)) {
       baseWeight = baseWeight * 0.1; // drastically reduce repetition frequency of mastered cards
     }
-    return baseWeight;
+    return baseWeight * tierWeight(c);
   });
-
-  const total = weights.reduce((a, b) => a + b, 0);
-  let roll = Math.random() * total;
-  for (let i = 0; i < poolToDraw.length; i++) {
-    roll -= weights[i];
-    if (roll <= 0) return poolToDraw[i];
-  }
-  return poolToDraw[poolToDraw.length - 1];
 }
 
 // `percent` is a per-item-confidence average — a simple "how much have you
@@ -367,4 +373,54 @@ export function getLessonBadgeTier(progress, lesson) {
   if (retention.percent >= LEARNED_PERCENT) return 'gold';
   if (retention.percent >= SILVER_RETENTION_PERCENT) return 'silver';
   return 'bronze';
+}
+
+// Adaptive practice queue: which items get drawn most in Drill. Not a new
+// tracking system — reads the same Completion/fast-track/badge-tier signals
+// already computed above, categorized into three practice tiers:
+//  - 'boundary': fast-track-eligible (needs confirming) or bronze/silver
+//    (real but not yet fully confirmed) — this is "near the edge of what you
+//    know," the highest-value thing to be tested on right now.
+//  - 'easy': gold tier, well-confirmed — occasional morale-boosting review.
+//  - 'stretch': unlocked but genuinely untouched content — occasional
+//    harder material from what you don't know yet.
+const LESSON_BY_ID = new Map(LESSONS.map((l) => [l.id, l]));
+function lessonForItem(item) {
+  const topicId = item.topics && item.topics[0];
+  return topicId ? LESSON_BY_ID.get(topicId) || null : null;
+}
+
+export function getLessonPracticeTier(progress, lesson) {
+  if (!lesson) return 'stretch'; // no lesson mapping (e.g. generated grammar content) — default weight
+  const tier = getLessonBadgeTier(progress, lesson);
+  if (tier === 'gold') return 'easy';
+  if (tier === 'silver' || tier === 'bronze') return 'boundary';
+  if (isFastTrackEligible(progress, lesson.id)) return 'boundary';
+  return 'stretch';
+}
+
+export function getItemPracticeTier(progress, item) {
+  return getLessonPracticeTier(progress, lessonForItem(item));
+}
+
+export function getLessonForItem(item) {
+  return lessonForItem(item);
+}
+
+// Ordinary Drill answers can confirm a fast-track-eligible lesson, not just
+// the dedicated exercise — sustained correct drilling on boundary content IS
+// real evidence, and the whole point of the boundary-weighted queue is to
+// spend practice time validating exactly this. Once a fast-tracked lesson's
+// items show a real Retention sample at a respectable confidence, it's
+// promoted from "guessed" (fast-track) to genuinely Completed. Returns true
+// exactly when that promotion just happened, so the caller can surface it.
+export function maybeConfirmFastTrackFromDrill(progress, item) {
+  const lesson = lessonForItem(item);
+  if (!lesson || !isFastTrackEligible(progress, lesson.id)) return false;
+  const retention = lessonRetention(progress, lesson);
+  if (retention.minSample >= MIN_RETENTION_SAMPLE && retention.percent >= SILVER_RETENTION_PERCENT) {
+    markLessonCompleted(progress, lesson.id, 'drill');
+    return true;
+  }
+  return false;
 }

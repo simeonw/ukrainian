@@ -11,6 +11,8 @@ export const ALL_SETTINGS_TOPICS = [
   'future',
   'obligation',
   'aspect',
+  'dative',
+  'reflexive',
   'understanding',
   'production'
 ];

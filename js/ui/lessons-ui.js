@@ -13,13 +13,17 @@ const PAGE_SIZE = 10;
 // One compact glyph instead of two verbose pills — the detail page still
 // shows the full Completion/Retention breakdown; the list's job is now just
 // "where am I, at a glance," per the "too much info, overwhelming" feedback.
+// Each badge type gets its own background color (not just a differently-
+// shaped emoji) so fast-track (⚡, still unconfirmed) can't be mistaken for
+// gold (🥇, confirmed mastery) at a glance — and completion leans on green
+// throughout, not just the medal tiers.
 function compactBadge(progress, lesson) {
   const tier = getLessonBadgeTier(progress, lesson);
-  if (tier) return TIER_ICON[tier];
+  if (tier) return { glyph: TIER_ICON[tier], cls: `badge-${tier}` };
   const c = getCompletionProgress(progress, lesson);
-  if (c.fastTrack) return '⚡';
-  if (c.doneItemIds.length > 0) return `${c.doneItemIds.length}/${c.targetItemIds.length}`;
-  return '○';
+  if (c.fastTrack) return { glyph: '⚡', cls: 'badge-fasttrack' };
+  if (c.doneItemIds.length > 0) return { glyph: `${c.doneItemIds.length}/${c.targetItemIds.length}`, cls: 'badge-progress' };
+  return { glyph: '○', cls: 'badge-none' };
 }
 
 function progressLine(p, isLocked) {
@@ -77,11 +81,12 @@ export function renderLessons(container, { onExit, onOpenDiagnostic } = {}) {
     const cardStatus = unlocked ? stats[lesson.id].status : 'locked';
     const prevTitle = i > 0 ? sorted[i - 1].title : null;
     const percent = unlocked ? stats[lesson.id].percent : 0;
+    const badge = unlocked ? compactBadge(progress, lesson) : { glyph: '🔒', cls: 'badge-locked' };
 
     return `
       <button class="lesson-row status-${cardStatus}" data-id="${lesson.id}" data-locked="${!unlocked}" style="${!unlocked ? 'opacity: 0.55;' : ''}">
         <span class="lesson-row-order">${lesson.order}</span>
-        <span class="lesson-row-badge" title="${unlocked ? '' : 'Locked'}">${unlocked ? compactBadge(progress, lesson) : '🔒'}</span>
+        <span class="lesson-row-badge ${badge.cls}" title="${unlocked ? '' : 'Locked'}">${badge.glyph}</span>
         <span class="lesson-row-title">${escapeHtml(lesson.title)}</span>
         <div class="lesson-row-bar"><div class="lesson-row-bar-fill" style="width:${percent}%"></div></div>
         ${!unlocked ? `<div class="lesson-locked-note" style="display: none; font-size: 12px; color: var(--warn); margin-top: 4px; grid-column: 1 / -1;">Complete "${escapeHtml(prevTitle || '')}" to unlock this.</div>` : ''}
@@ -138,12 +143,35 @@ export function renderLessons(container, { onExit, onOpenDiagnostic } = {}) {
 
     const firstBatch = sorted.slice(0, PAGE_SIZE);
 
+    // Surface "we think you already know this" lessons above the fold instead
+    // of leaving them buried at their normal scroll position — these are the
+    // fastest wins available (a 3-question confirm, not a full lesson).
+    const fastTrackLessons = sorted.filter(
+      (l) => isLessonUnlocked(progress, l.id) && !isLessonCompleted(progress, l.id) && isFastTrackEligible(progress, l.id)
+    );
+
     container.innerHTML = `
       <div class="lessons-screen">
         <header class="lessons-header">
           <button class="btn-back" type="button">&larr; Menu</button>
           <h2>Lessons</h2>
         </header>
+        ${fastTrackLessons.length ? `
+          <div class="fasttrack-section">
+            <div class="fasttrack-section-title">⚡ Confirm what you already know</div>
+            <div class="fasttrack-list">
+              ${fastTrackLessons.map((lesson) => {
+                const c = getCompletionProgress(progress, lesson);
+                return `
+                  <button class="fasttrack-row" data-id="${lesson.id}">
+                    <span class="fasttrack-row-title">${escapeHtml(lesson.title)}</span>
+                    <span class="fasttrack-row-cta">${c.doneItemIds.length > 0 ? `${c.doneItemIds.length}/${c.targetItemIds.length}` : 'Quick check'}</span>
+                  </button>
+                `;
+              }).join('')}
+            </div>
+          </div>
+        ` : ''}
         <div class="lesson-list lesson-list--compact" id="lesson-list-rows">
           ${firstBatch.map((lesson, i) => rowHtml(lesson, i, sorted, progress, stats)).join('')}
         </div>
@@ -153,6 +181,12 @@ export function renderLessons(container, { onExit, onOpenDiagnostic } = {}) {
 
     container.querySelector('.btn-back').addEventListener('click', () => { stopObserving(); onExit && onExit(); });
     container.querySelectorAll('.lesson-row').forEach((row) => attachRowClickHandler(row, sorted));
+    container.querySelectorAll('.fasttrack-row').forEach((row) => {
+      row.addEventListener('click', () => {
+        stopObserving();
+        renderDetail(row.dataset.id);
+      });
+    });
 
     let loadedCount = firstBatch.length;
     const listEl = container.querySelector('#lesson-list-rows');

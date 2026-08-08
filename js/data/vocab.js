@@ -281,4 +281,59 @@ export const VOCAB = [
   v('v_za_prep', 'за', 'za', 'behind', 'za', 'phrase', { topics: ['l44'] }),
   v('v_mizh', 'між', 'mizh', 'between', 'mezi', 'phrase', { topics: ['l44'] }),
   v('v_bilya', 'біля', 'bilya', 'near / next to', 'blízko / u', 'phrase', { topics: ['l44'] }),
+
+  // --- New A2/B1 lessons (wave 2 of the content-expansion request) ---
+  // --- l45: The Dative Case — Saying What You Need or Feel (grammar) ---
+  v('v_meni', 'мені', 'meni', 'to me', 'mně / mi', 'pronoun', { topics: ['l45'], skills: ['dative'] }),
+  v('v_tobi', 'тобі', 'tobi', 'to you (informal)', 'tobě / ti', 'pronoun', { topics: ['l45'], skills: ['dative'] }),
+  v('v_yomu', 'йому', 'yomu', 'to him', 'jemu / mu', 'pronoun', { topics: ['l45'], skills: ['dative'] }),
+  v('v_yiy', 'їй', 'yiy', 'to her', 'jí', 'pronoun', { topics: ['l45'], skills: ['dative'] }),
+  v('v_nam', 'нам', 'nam', 'to us', 'nám', 'pronoun', { topics: ['l45'], skills: ['dative'] }),
+  v('v_vam', 'вам', 'vam', 'to you (formal/plural)', 'vám', 'pronoun', { topics: ['l45'], skills: ['dative'] }),
+  v('v_yim', 'їм', 'yim', 'to them', 'jim', 'pronoun', { topics: ['l45'], skills: ['dative'] }),
+  v('v_mozhna', 'можна', 'mozhna', 'one may / it is allowed', 'smí se / lze', 'adverb', { topics: ['l45'], skills: ['dative'] }),
+  v('v_khochetsya', 'хочеться', 'khochet\'sya', 'feel like (doing something)', 'chce se mi', 'phrase', { topics: ['l45'], skills: ['dative'] }),
+  v('v_vazhko', 'важко', 'vazhko', 'hard / difficult (for someone)', 'těžké', 'adverb', { topics: ['l45'], skills: ['dative'] }),
+  v('v_lehko', 'легко', 'lehko', 'easy (for someone)', 'lehké', 'adverb', { topics: ['l45'], skills: ['dative'] }),
+  v('v_tsikavo', 'цікаво', 'tsikavo', 'interesting', 'zajímavé', 'adverb', { topics: ['l45'], skills: ['dative'] }),
+  v('v_sumno', 'сумно', 'sumno', 'sad', 'smutno', 'adverb', { topics: ['l45'], skills: ['dative'] }),
+
+  // --- l46: Reflexive Verbs — Actions on Yourself (grammar) ---
+  v('v_vchytysya', 'вчитися', 'vchytysya', 'to study / to learn', 'učit se', 'verb', { aspect: 'imperfective', topics: ['l46'], skills: ['reflexive'] }),
+  v('v_boyatysya', 'боятися', 'boyatysya', 'to be afraid / to fear', 'bát se', 'verb', { aspect: 'imperfective', topics: ['l46'], skills: ['reflexive'] }),
+  v('v_dyvuvatysya', 'дивуватися', 'dyvuvatysya', 'to be surprised / to wonder', 'divit se', 'verb', { aspect: 'imperfective', topics: ['l46'], skills: ['reflexive'] }),
+  v('v_spodivatysya', 'сподіватися', 'spodivatysya', 'to hope', 'doufat', 'verb', { aspect: 'imperfective', topics: ['l46'], skills: ['reflexive'] }),
+  v('v_usmikhatysya', 'усміхатися', 'usmikhatysya', 'to smile', 'usmívat se', 'verb', { aspect: 'imperfective', topics: ['l46'], skills: ['reflexive'] }),
+
+  // --- l47: Days of the Week (topic) ---
+  v('v_ponedilok', 'понеділок', 'ponedilok', 'Monday', 'pondělí', 'noun', { gender: 'm', topics: ['l47'] }),
+  v('v_vivtorok', 'вівторок', 'vivtorok', 'Tuesday', 'úterý', 'noun', { gender: 'm', topics: ['l47'] }),
+  v('v_sereda', 'середа', 'sereda', 'Wednesday', 'středa', 'noun', { gender: 'f', topics: ['l47'] }),
+  v('v_chetver', 'четвер', 'chetver', 'Thursday', 'čtvrtek', 'noun', { gender: 'm', topics: ['l47'] }),
+  v('v_pyatnytsya', 'п\'ятниця', 'p\'yatnytsya', 'Friday', 'pátek', 'noun', { gender: 'f', topics: ['l47'] }),
+  v('v_subota', 'субота', 'subota', 'Saturday', 'sobota', 'noun', { gender: 'f', topics: ['l47'] }),
+  v('v_nedilya', 'неділя', 'nedilya', 'Sunday', 'neděle', 'noun', { gender: 'f', topics: ['l47'] }),
+
+  // --- l48: More Everyday Verbs (vocab) ---
+  v('v_braty', 'брати', 'braty', 'to take', 'brát', 'verb', { aspect: 'imperfective', topics: ['l48'] }),
+  v('v_davaty', 'давати', 'davaty', 'to give', 'dávat', 'verb', { aspect: 'imperfective', topics: ['l48'] }),
+  v('v_otrymuvaty', 'отримувати', 'otrymuvaty', 'to receive', 'dostávat', 'verb', { aspect: 'imperfective', topics: ['l48'] }),
+  v('v_trymaty', 'тримати', 'trymaty', 'to hold / to keep', 'držet', 'verb', { aspect: 'imperfective', topics: ['l48'] }),
+  v('v_vidpochyvaty', 'відпочивати', 'vidpochyvaty', 'to rest', 'odpočívat', 'verb', { aspect: 'imperfective', topics: ['l48'] }),
+  v('v_podorozhuvaty', 'подорожувати', 'podorozhuvaty', 'to travel', 'cestovat', 'verb', { aspect: 'imperfective', topics: ['l48'] }),
+
+  // --- l49: Home & Everyday Objects (topic) ---
+  v('v_shkola', 'школа', 'shkola', 'school', 'škola', 'noun', { gender: 'f', topics: ['l49'] }),
+  v('v_shafa', 'шафа', 'shafa', 'wardrobe', 'skříň', 'noun', { gender: 'f', topics: ['l49'] }),
+  v('v_pralna_mashyna', 'пральна машина', 'pral\'na mashyna', 'washing machine', 'pračka', 'phrase', { topics: ['l49'] }),
+  v('v_odyah', 'одяг', 'odyah', 'clothing / clothes', 'oblečení', 'noun', { gender: 'm', topics: ['l49'] }),
+  v('v_tualet', 'туалет', 'tualet', 'toilet / restroom', 'záchod', 'noun', { gender: 'm', topics: ['l49'] }),
+  v('v_vanna_kimnata', 'ванна кімната', 'vanna kimnata', 'bathroom', 'koupelna', 'phrase', { topics: ['l49'] }),
+
+  // --- l50: Czech/Russian False Friends — A Caution (topic) ---
+  // Only the two genuinely new verbs live here; the rest of the caution
+  // (робити, мати, бути, бачити, йти, дякую) reuses items already taught in
+  // l01-l03 rather than re-declaring duplicate vocab under a new lesson.
+  v('v_yisty', 'їсти', 'yisty', 'to eat', 'jíst', 'verb', { topics: ['l50'] }),
+  v('v_dyvytysya', 'дивитися', 'dyvytysya', 'to watch', 'dívat se', 'verb', { aspect: 'imperfective', topics: ['l50'], skills: ['reflexive'] }),
 ];

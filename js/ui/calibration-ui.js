@@ -68,12 +68,23 @@ export function renderCalibration(container, { onDone } = {}) {
   let questionsAnswered = 0;
 
   // comprehension and comprehensionNoTranslit deliberately share one sentence
-  // pool with independent per-track dedup — the same UK sentence can
-  // legitimately reappear once, now without the translit line, which is the
-  // whole point (isolating whether the reading aid was doing the work). But
-  // to a real learner that reads as "did my last click not register?" since
-  // the primary text on screen looks unchanged. Flag it explicitly instead of
-  // letting it look like a stall.
+  // pool — the gap between the two IS the signal ("does this person need the
+  // crutch"). But that only measures anything if each track sees genuinely
+  // fresh sentences: if a learner gets a sentence right on comprehension,
+  // then sees the SAME sentence again on comprehensionNoTranslit a moment
+  // later, a correct answer the second time proves nothing about reading
+  // without transliteration — it just proves short-term recall of a sentence
+  // they saw 30 seconds ago. Sharing one used-set between the two tracks
+  // forces each to draw a different sentence at the same difficulty tier
+  // (there are 4 per tier, comfortably enough), so the comparison is honest.
+  const sharedComprehensionUsed = new Set();
+  usedByTrack.set('comprehension', sharedComprehensionUsed);
+  usedByTrack.set('comprehensionNoTranslit', sharedComprehensionUsed);
+
+  // Rare fallback only: if a tier's 4-sentence pool is ever genuinely
+  // exhausted by both tracks combined, pickComprehensionQuestion falls back
+  // to reusing one — flag that specific case honestly rather than let a
+  // repeat look like the app is stuck.
   const seenSentenceTexts = new Set();
 
   function shell(bodyHtml) {

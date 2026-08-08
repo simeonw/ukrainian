@@ -493,8 +493,108 @@ export const LESSONS = [
       czechNote: 'в matches Czech "v" almost sound-for-sound; на/під/за/між/біля correspond to na/pod/za/mezi/blízko-u.',
     }),
 
+  // --- New A2/B1 lessons (wave 2 of the content-expansion request, informed
+  // by "Ukrainian Czech Guide.docx" but independently verified — the doc
+  // was treated as a lead, not gospel, per the user's own caveat) ---
+  L('l45', 28, 'The Dative Case: Saying What You Need or Feel', 'grammar',
+    'мені, тобі, йому, їй, нам, вам, їм — the dative pronouns behind a whole family of impersonal constructions like "I am cold" or "it is hard for him."',
+    ['v_meni', 'v_tobi', 'v_yomu', 'v_yiy', 'v_nam', 'v_vam', 'v_yim', 'v_mozhna', 'v_khochetsya', 'v_vazhko', 'v_lehko', 'v_tsikavo', 'v_sumno', 'p_dative_1', 'p_dative_2', 'p_dative_3', 'p_dative_4'],
+    {
+      patterns: [
+        { uk: '[dative pronoun] + [adverb/predicate] (+ infinitive)', translit: '', en: 'Ukrainian expresses "I feel X" / "it is X for me" with no verb at all — just a dative pronoun and a predicate word.', czNote: 'Czech does the same thing — "Je mi zima" mirrors Мені холодно exactly, just with "je" up front. Ukrainian drops the verb entirely.' },
+      ],
+      examples: [
+        { uk: 'Мені холодно.', translit: 'Meni kholodno.', en: 'I am cold.', cz: 'Je mi zima.' },
+        { uk: 'Йому важко це зробити.', translit: 'Yomu vazhko tse zrobyty.', en: 'It is hard for him to do this.', cz: 'Je pro něj těžké to udělat.' },
+        { uk: 'Їй сумно.', translit: 'Yiy sumno.', en: 'She feels sad.', cz: 'Je jí smutno.' },
+        { uk: 'Мені хочеться кави.', translit: 'Meni khochet\'sya kavy.', en: 'I feel like having coffee.', cz: 'Mám chuť na kávu.' },
+      ],
+      substitutions: [
+        { template: 'Мені ___.', translit: 'Meni ___.', en: 'I feel ___.', slotOptions: ['холодно', 'сумно', 'цікаво'] },
+      ],
+      czechNote: 'This same pattern already showed up piecemeal — "мені потрібна" (l11/l20) and "мені болить" (l43) are both instances of it. This lesson names the pattern explicitly and extends it to the other five pronouns.',
+    }),
+
+  L('l46', 29, 'Reflexive Verbs: Actions on Yourself', 'grammar',
+    'The -ся ending turns a verb back on its own subject — вчитися (to study, lit. "to teach oneself"), боятися (to be afraid), сподіватися (to hope), and more.',
+    ['v_vchytysya', 'v_boyatysya', 'v_dyvuvatysya', 'v_spodivatysya', 'v_usmikhatysya', 'p_reflexive_1', 'p_reflexive_2', 'p_reflexive_3'],
+    {
+      patterns: [
+        { uk: '...-ся / -сь', translit: '', en: 'A reflexive suffix attached to an ordinary verb, roughly "...oneself" — вчити (to teach) vs вчитися (to study/learn).', czNote: 'Directly parallel to Czech "se/si" — učit vs. učit se works exactly the same way as вчити vs вчитися.' },
+      ],
+      examples: [
+        { uk: 'Я вчуся української.', translit: 'Ya vchusya ukrayins\'koyi.', en: 'I am learning Ukrainian.', cz: 'Učím se ukrajinsky.' },
+        { uk: 'Я боюся павуків.', translit: 'Ya boyusya pavukiv.', en: 'I am afraid of spiders.', cz: 'Bojím se pavouků.' },
+        { uk: 'Я сподіваюся, що все буде добре.', translit: 'Ya spodivayusya, shcho vse bude dobre.', en: 'I hope that everything will be fine.', cz: 'Doufám, že vše bude dobré.' },
+        { uk: 'Він усміхається.', translit: 'Vin usmikhayet\'sya.', en: 'He is smiling.', cz: 'Usmívá se.' },
+      ],
+      substitutions: [],
+      czechNote: 'боятися and сподіватися both take a genitive-case object ("боюся павуків" — "afraid of spiders", genitive) — that case ending is a later refinement; for now, just recognizing and using the -ся verb itself is the goal.',
+    }),
+
+  L('l47', 30, 'Days of the Week', 'topic',
+    'Monday through Sunday, plus how to say "on" a given day.',
+    ['v_ponedilok', 'v_vivtorok', 'v_sereda', 'v_chetver', 'v_pyatnytsya', 'v_subota', 'v_nedilya', 'p_days_1', 'p_days_2'],
+    {
+      patterns: [
+        { uk: 'у / в + [day, accusative]', translit: '', en: '"On" a day of the week uses у/в plus the accusative case — for feminine days (середа, п\'ятниця, субота, неділя) the ending changes: середа→середу, п\'ятниця→п\'ятницю, субота→суботу, неділя→неділю. Masculine days (понеділок, вівторок, четвер) look the same in accusative as in the dictionary form.', czNote: 'Czech does the same thing with its own case system — "v pondělí" vs "ve středu" shows the same masculine/feminine split.' },
+      ],
+      examples: [
+        { uk: 'Сьогодні понеділок.', translit: 'S\'ohodni ponedilok.', en: 'Today is Monday.', cz: 'Dnes je pondělí.' },
+        { uk: 'Я працюю в понеділок.', translit: 'Ya pratsyuyu v ponedilok.', en: 'I work on Monday.', cz: 'Pracuji v pondělí.' },
+        { uk: 'У суботу я відпочиваю.', translit: 'U subotu ya vidpochyvayu.', en: 'On Saturday I rest.', cz: 'V sobotu odpočívám.' },
+      ],
+      substitutions: [
+        { template: 'Сьогодні ___.', translit: 'S\'ohodni ___.', en: 'Today is ___.', slotOptions: ['понеділок', 'субота', 'неділя'] },
+      ],
+      czechNote: 'Get comfortable recognizing all seven days by sight first — the accusative endings on the feminine ones (суботу, неділю, п\'ятницю) are a small detail to absorb gradually through examples like the ones above.',
+    }),
+
+  L('l48', 31, 'More Everyday Verbs', 'vocab',
+    'брати, давати, отримувати, тримати, відпочивати, подорожувати — high-frequency verbs that round out everyday conversation.',
+    ['v_braty', 'v_davaty', 'v_otrymuvaty', 'v_trymaty', 'v_vidpochyvaty', 'v_podorozhuvaty', 'p_everyday_1', 'p_everyday_2'],
+    {
+      patterns: [],
+      examples: [
+        { uk: 'Я хочу подорожувати.', translit: 'Ya khochu podorozhuvaty.', en: 'I want to travel.', cz: 'Chci cestovat.' },
+        { uk: 'Тримай це, будь ласка.', translit: 'Trymay tse, bud\' laska.', en: 'Hold this, please.', cz: 'Podrž to, prosím.' },
+        { uk: 'Я отримую листи щодня.', translit: 'Ya otrymuyu lysty shchodnya.', en: 'I receive letters every day.', cz: 'Dostávám dopisy každý den.' },
+      ],
+      substitutions: [],
+      czechNote: 'брати/давати/тримати are close cousins of Czech "brát/dávat/držet" — the sound is close enough to lean on directly.',
+    }),
+
+  L('l49', 32, 'Home & Everyday Objects', 'topic',
+    'школа, шафа, пральна машина, одяг, туалет, ванна кімната — practical nouns for everyday life and asking where things are.',
+    ['v_shkola', 'v_shafa', 'v_pralna_mashyna', 'v_odyah', 'v_tualet', 'v_vanna_kimnata', 'p_home_1', 'p_home_2'],
+    {
+      patterns: [],
+      examples: [
+        { uk: 'Де туалет?', translit: 'De tualet?', en: 'Where is the toilet?', cz: 'Kde je záchod?' },
+        { uk: 'Мій одяг у шафі.', translit: 'Miy odyah u shafi.', en: 'My clothes are in the wardrobe.', cz: 'Moje oblečení je ve skříni.' },
+        { uk: 'Пральна машина не працює.', translit: 'Pral\'na mashyna ne pratsyuye.', en: 'The washing machine isn\'t working.', cz: 'Pračka nefunguje.' },
+      ],
+      substitutions: [
+        { template: 'Де ___?', translit: 'De ___?', en: 'Where is the ___?', slotOptions: ['туалет', 'школа', 'ванна кімната'] },
+      ],
+      czechNote: '"Де ___?" is the single most useful question-frame in this lesson — reuse it for anything, not just the nouns listed here.',
+    }),
+
+  L('l50', 33, 'Czech/Russian False Friends: A Caution', 'topic',
+    'Ukrainian, Czech, and Russian share deep roots, but that can be a trap — a handful of everyday verbs are worth double-checking rather than assuming.',
+    ['v_yisty', 'v_dyvytysya', 'p_falsefriend_1', 'p_falsefriend_2'],
+    {
+      patterns: [],
+      examples: [
+        { uk: 'Я їм борщ.', translit: 'Ya yim borshch.', en: 'I am eating borscht.', cz: 'Jím boršč.' },
+        { uk: 'Що ти дивишся?', translit: 'Shcho ty dyvyshsya?', en: 'What are you watching?', cz: 'Co se díváš?' },
+      ],
+      substitutions: [],
+      czechNote: 'Worth a deliberate pause here: робити (not "делать"), мати, бути, бачити, йти, дякувати (not "благодарить") are all already-learned Ukrainian words that can look or sound closer to Russian than to the Ukrainian you actually need. When in doubt, the Ukrainian word is usually its own thing, not a Czech-flavored guess at a Russian cognate — їсти (not "jíst"-shaped, not "есть"-shaped) and дивитися are two more worth fixing firmly as Ukrainian-first.',
+    }),
+
   // --- B1 level expansion lessons ---
-  L('l21', 28, 'Narrating Experiences', 'grammar_b1',
+  L('l21', 34, 'Narrating Experiences', 'grammar_b1',
     'Learn to talk about what you have done, what you have never done, and life when you were younger.',
     ['p_b1_done_1', 'p_b1_never_1', 'p_b1_when_1', 'v_zrobyv', 'v_nikoly', 'v_molodshyi'],
     {
@@ -510,7 +610,7 @@ export const LESSONS = [
       czechNote: 'Excellent structure maps 1:1 except Ukrainian drops the "jsem" auxiliary verb.'
     }),
 
-  L('l22', 29, 'Explaining Situations', 'grammar_b1',
+  L('l22', 35, 'Explaining Situations', 'grammar_b1',
     'Learn to specify root causes using "The thing is that..." and "The reason is that...".',
     ['p_b1_thing_1', 'p_b1_reason_1', 'v_sprava', 'v_prychyna', 'v_polyahaye'],
     {
@@ -524,7 +624,7 @@ export const LESSONS = [
       czechNote: '"Справа в тому, що" is incredibly common in spoken Ukrainian to explain why something happened.'
     }),
 
-  L('l23', 30, 'Comparing and Contrasting', 'grammar_b1',
+  L('l23', 36, 'Comparing and Contrasting', 'grammar_b1',
     'Contrast elements using "Unlike..." and "Compared with...".',
     ['p_b1_compare_1', 'p_b1_compare_2', 'v_vidminu', 'v_porivnyano'],
     {
@@ -540,7 +640,7 @@ export const LESSONS = [
     }),
 
   // --- B2 level expansion lessons ---
-  L('l24', 31, 'Complex Opinions', 'grammar_b2',
+  L('l24', 37, 'Complex Opinions', 'grammar_b2',
     'Express your viewpoint using "I believe that...", "From my point of view...", and "As far as I know...".',
     ['p_b2_opinion_1', 'p_b2_opinion_2', 'p_b2_opinion_3', 'v_vazhayu', 'v_tochka', 'v_zorun'],
     {
@@ -555,7 +655,7 @@ export const LESSONS = [
       czechNote: '"точка зору" is a literal loan-translation matching Czech "úhel pohledu" (point of view).'
     }),
 
-  L('l25', 32, 'Agreeing and Disagreeing Politely', 'grammar_b2',
+  L('l25', 38, 'Agreeing and Disagreeing Politely', 'grammar_b2',
     'Learn to navigate conversations politely and express reservations.',
     ['p_b2_agree_1', 'p_b2_agree_2', 'p_b2_agree_3', 'v_chastkovo', 'v_pohodzhuyusya', 'v_odnak'],
     {
@@ -569,7 +669,7 @@ export const LESSONS = [
       czechNote: 'Using "однак" (however) or "частково" (partially) softens disagreements.'
     }),
 
-  L('l26', 33, 'Hypothetical Situations', 'grammar_b2',
+  L('l26', 39, 'Hypothetical Situations', 'grammar_b2',
     'Master subjunctive conditionals with "If..., then..." structures.',
     ['p_b2_hypo_1', 'p_b2_hypo_2', 'v_yakby', 'v_shvydshe'],
     {
@@ -583,7 +683,7 @@ export const LESSONS = [
       czechNote: 'Ukrainian "якби" works exactly like Czech "kdyby".'
     }),
 
-  L('l27', 34, 'Reported Speech', 'grammar_b2',
+  L('l27', 40, 'Reported Speech', 'grammar_b2',
     'Describe what others said and explain reasons dynamically.',
     ['p_b2_speech_1', 'p_b2_speech_2', 'v_poyasnyla'],
     {
@@ -598,7 +698,7 @@ export const LESSONS = [
     }),
 
   // --- C1 level expansion lessons ---
-  L('l28', 35, 'Nuance and Qualification', 'grammar_c1',
+  L('l28', 41, 'Nuance and Qualification', 'grammar_c1',
     'Qualify claims using "In a certain sense...", "It cannot be denied that...", and "It is worth noting that...".',
     ['p_c1_nuance_1', 'p_c1_nuance_2', 'p_c1_nuance_3', 'p_c1_nuance_4', 'v_sensi', 'v_zaperechyty', 'v_varto', 'v_zaznachyty'],
     {
@@ -613,7 +713,7 @@ export const LESSONS = [
       czechNote: '"Варто" acts as a shorthand for "stojí za to".'
     }),
 
-  L('l29', 36, 'Complex Argumentation', 'grammar_c1',
+  L('l29', 42, 'Complex Argumentation', 'grammar_c1',
     'Argue complex viewpoints using "On one hand..., on the other hand..." and "I do not so much disagree as...".',
     ['p_c1_arg_1', 'p_c1_arg_2', 'p_c1_arg_3', 'v_odnoho', 'v_boku'],
     {
@@ -627,7 +727,7 @@ export const LESSONS = [
       czechNote: '"З одного боку" maps directly to Czech "z jedné strany".'
     }),
 
-  L('l30', 37, 'Expressing Consequences', 'grammar_c1',
+  L('l30', 43, 'Expressing Consequences', 'grammar_c1',
     'Explain outcomes using "This led to the fact that..." and "As a result...".',
     ['p_c1_cons_1', 'p_c1_cons_2', 'p_c1_cons_3', 'v_prizvelo', 'v_rezultati'],
     {
@@ -641,7 +741,7 @@ export const LESSONS = [
       czechNote: '"Призвело" is neuter past form agreeing with "Це".'
     }),
 
-  L('l31', 38, 'Complex Time Relationships', 'grammar_c1',
+  L('l31', 44, 'Complex Time Relationships', 'grammar_c1',
     'Convey sophisticated timelines using "By the time...", "After...", and "Before...".',
     ['p_c1_time_1', 'p_c1_time_2', 'p_c1_time_3', 'v_momentu'],
     {
@@ -655,7 +755,7 @@ export const LESSONS = [
       czechNote: 'Notice past-tense forms work sequentially here.'
     }),
 
-  L('l32', 39, 'Abstract Discussion', 'grammar_c1',
+  L('l32', 45, 'Abstract Discussion', 'grammar_c1',
     'Formulate opinions on complex areas like society, technology, and ecology.',
     ['p_c1_abs_1', 'p_c1_abs_2', 'v_tekhnolohiyi', 'v_suchasnoho'],
     {
@@ -669,7 +769,7 @@ export const LESSONS = [
     }),
 
   // --- C1 Vocabulary Categories (Themed) ---
-  L('l33', 40, 'C1 Vocab: Emotions and Opinions', 'vocab_c1',
+  L('l33', 46, 'C1 Vocab: Emotions and Opinions', 'vocab_c1',
     'Expand vocabulary to express nuance in reactions and personal views.',
     ['v_rozhachuvannya', 'v_zadovolennya', 'v_poboyuvannya', 'v_perekonannya', 'v_stavlennya'],
     {
@@ -682,7 +782,7 @@ export const LESSONS = [
       czechNote: 'Notice most neuter abstract nouns end in "-ння" like Czech "-ní".'
     }),
 
-  L('l34', 41, 'C1 Vocab: Work and Professional Life', 'vocab_c1',
+  L('l34', 47, 'C1 Vocab: Work and Professional Life', 'vocab_c1',
     'Communicate professionally regarding responsibilities, decisions, and requirements.',
     ['v_vidpovidalnist', 'v_mozhlyvist', 'v_rishennya', 'v_dosyahnennya', 'v_vymoha'],
     {
@@ -694,7 +794,7 @@ export const LESSONS = [
       czechNote: 'Nouns ending in "-ність" correspond to Czech "-nost".'
     }),
 
-  L('l35', 42, 'C1 Vocab: Society and Development', 'vocab_c1',
+  L('l35', 48, 'C1 Vocab: Society and Development', 'vocab_c1',
     'Discuss societal developments, changes, and influences.',
     ['v_suspilstvo', 'v_rozvytok', 'v_zminy', 'v_vplyv'],
     {
@@ -706,7 +806,7 @@ export const LESSONS = [
       czechNote: 'Excellent loanwords matching Czech cognitive structure.'
     }),
 
-  L('l36', 43, 'C1 Vocab: Abstract Connectors', 'vocab_c1',
+  L('l36', 49, 'C1 Vocab: Abstract Connectors', 'vocab_c1',
     'Structure your writing and arguments fluidly with logical transitions.',
     ['v_vodnochas', 'v_nezvazhayuchy_na', 'v_khocha', 'v_krim_toho', 'v_takym_chynom', 'v_zokrema', 'v_vidpovidno'],
     {
@@ -718,7 +818,7 @@ export const LESSONS = [
       czechNote: '"водночас" literally translates to Czech "jedním časem" or "zároveň".'
     }),
 
-  L('l37', 44, 'C1 Challenge Sentences', 'review_c1',
+  L('l37', 50, 'C1 Challenge Sentences', 'review_c1',
     'Ultimate diagnostic challenge sentences to verify absolute boundary of Ukrainian sentence-building ability.',
     ['p_c1_challenge_1', 'p_c1_challenge_2', 'p_c1_challenge_3', 'p_c1_challenge_4', 'p_c1_challenge_5'],
     {

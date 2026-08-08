@@ -21,9 +21,9 @@ const LESSON_ORDER_BY_ID = new Map(LESSONS.map((l) => [l.id, l.order]));
 // inserted before the old B1 band — each band keeps its original width
 // (b1: 3 lessons, b2: 4 lessons, c1: everything after) just moved later.
 function cefrForLessonOrder(order) {
-  if (order <= 27) return 'beginner';
-  if (order <= 30) return 'b1';
-  if (order <= 34) return 'b2';
+  if (order <= 33) return 'beginner';
+  if (order <= 36) return 'b1';
+  if (order <= 40) return 'b2';
   return 'c1';
 }
 

@@ -88,4 +88,31 @@ export const PATTERNS = [
   p('p_c1_challenge_3', 'c1_challenge', 'Мені здається, що головна проблема полягає не в самій ситуації, а в тому, як люди її сприймають.', 'Meni zdayetsya, shcho holovna problema polyahaye ne v samiy sytuatsiyi, a v tomu, yak lyudy yiyi spryymayut.', 'It seems to me that the main problem is not the situation itself, but how people perceive it.', 'Zdá se mi, že hlavní problém nespočívá v situaci samotné, ale v tom, jak ji lidé vnímají.', ['l37'], ['understanding']),
   p('p_c1_challenge_4', 'c1_challenge', 'З одного боку, технології значно спростили наше життя, однак з іншого боку вони створили нові виклики.', 'Z odnoho boku, tekhnolohiyi znachno sprostyly nashe zhyttya, odnak z inshoho boku vony stvoryly novi vyklyky.', 'On one hand technology simplified our lives, but on the other hand it created new challenges.', 'Na jednu stranu technologie výrazně zjednodušily náš život, nicméně na druhou stranu vytvořily nové výzvy.', ['l37'], ['understanding']),
   p('p_c1_challenge_5', 'c1_challenge', 'Не можна заперечувати, що мова змінюється під впливом суспільства, у якому вона використовується.', 'Ne mozhna zaperechyty, shcho mova zminyyetsya pid vplyvom suspilstva, u yakomu vona vykorystovuyetsya.', 'It cannot be denied that language changes under the influence of the society in which it is used.', 'Nelze popřít, že jazyk se mění pod vlivem společnosti, ve které se používá.', ['l37'], ['understanding']),
+
+  // --- l45: Dative case (мені/тобі/... + impersonal predicate) ---
+  p('p_dative_1', 'dative', 'Мені холодно.', 'Meni kholodno.', 'I am cold.', 'Je mi zima.', ['l45'], ['dative', 'production']),
+  p('p_dative_2', 'dative', 'Йому важко це зробити.', 'Yomu vazhko tse zrobyty.', 'It is hard for him to do this.', 'Je pro něj těžké to udělat.', ['l45'], ['dative', 'understanding']),
+  p('p_dative_3', 'dative', 'Їй сумно.', 'Yiy sumno.', 'She feels sad.', 'Je jí smutno.', ['l45'], ['dative', 'production']),
+  p('p_dative_4', 'dative', 'Мені хочеться кави.', 'Meni khochet\'sya kavy.', 'I feel like having coffee.', 'Mám chuť na kávu.', ['l45'], ['dative', 'production']),
+
+  // --- l46: Reflexive -ся verbs ---
+  p('p_reflexive_1', 'reflexive', 'Я вчуся української.', 'Ya vchusya ukrayins\'koyi.', 'I am learning Ukrainian.', 'Učím se ukrajinsky.', ['l46'], ['reflexive', 'production']),
+  p('p_reflexive_2', 'reflexive', 'Я боюся павуків.', 'Ya boyusya pavukiv.', 'I am afraid of spiders.', 'Bojím se pavouků.', ['l46'], ['reflexive', 'understanding']),
+  p('p_reflexive_3', 'reflexive', 'Я сподіваюся, що все буде добре.', 'Ya spodivayusya, shcho vse bude dobre.', 'I hope that everything will be fine.', 'Doufám, že vše bude dobré.', ['l46'], ['reflexive', 'understanding']),
+
+  // --- l47: Days of the week ---
+  p('p_days_1', 'days', 'Сьогодні понеділок.', 'S\'ohodni ponedilok.', 'Today is Monday.', 'Dnes je pondělí.', ['l47'], ['understanding']),
+  p('p_days_2', 'days', 'У суботу я відпочиваю.', 'U subotu ya vidpochyvayu.', 'On Saturday I rest.', 'V sobotu odpočívám.', ['l47'], ['production']),
+
+  // --- l48: More everyday verbs ---
+  p('p_everyday_1', 'everyday_verbs', 'Я хочу подорожувати.', 'Ya khochu podorozhuvaty.', 'I want to travel.', 'Chci cestovat.', ['l48'], ['production']),
+  p('p_everyday_2', 'everyday_verbs', 'Тримай це, будь ласка.', 'Trymay tse, bud\' laska.', 'Hold this, please.', 'Podrž to, prosím.', ['l48'], ['understanding']),
+
+  // --- l49: Home & everyday objects ---
+  p('p_home_1', 'home', 'Де туалет?', 'De tualet?', 'Where is the toilet?', 'Kde je záchod?', ['l49'], ['production']),
+  p('p_home_2', 'home', 'Мій одяг у шафі.', 'Miy odyah u shafi.', 'My clothes are in the wardrobe.', 'Moje oblečení je ve skříni.', ['l49'], ['understanding']),
+
+  // --- l50: Czech/Russian false-friend caution ---
+  p('p_falsefriend_1', 'false_friend', 'Я їм борщ.', 'Ya yim borshch.', 'I am eating borscht.', 'Jím boršč.', ['l50'], ['understanding']),
+  p('p_falsefriend_2', 'false_friend', 'Що ти дивишся?', 'Shcho ty dyvyshsya?', 'What are you watching?', 'Co se díváš?', ['l50'], ['reflexive', 'understanding']),
 ];

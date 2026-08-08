@@ -75,13 +75,14 @@ export function renderLessonExercise(container, lesson, { onDone } = {}) {
           recordAnswer(progress, item.id, direction, true);
           recordCompletionItemDone(progress, lesson, item.id);
           saveProgress(progress);
-          setTimeout(next, 550);
+          setTimeout(next, 1100);
         } else {
           container.querySelectorAll('.option-btn').forEach((b) => {
             if (b.dataset.text === correctText) b.classList.add('is-correct');
           });
           // Immediate retry, correction shown — no score recorded for the miss.
-          setTimeout(() => renderQuestion(item, direction, options, correctText, doneCount, totalCount), 1400);
+          // Slower than before: enough time to actually read the correction.
+          setTimeout(() => renderQuestion(item, direction, options, correctText, doneCount, totalCount), 2000);
         }
       });
     });

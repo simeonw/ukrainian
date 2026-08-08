@@ -478,10 +478,17 @@ h1, h2, h3 {
   text-align: left;
   background: var(--surface);
   border: 1px solid var(--border);
+  border-left: 3px solid var(--border);
   border-radius: var(--radius-sm);
   padding: 9px 12px;
   color: var(--text);
 }
+
+/* Completion leans on green throughout the row, not just the medal icon —
+   a completed row is visually unmistakable at a glance while scrolling. */
+.lesson-row.status-learned { border-left-color: var(--good); background: rgba(52,211,153,0.06); }
+.lesson-row.status-needs-review { border-left-color: var(--warn); }
+.lesson-row.status-learning { border-left-color: var(--accent); }
 
 .lesson-row-order {
   color: var(--text-dim);
@@ -490,10 +497,23 @@ h1, h2, h3 {
 }
 
 .lesson-row-badge {
-  font-size: 15px;
+  font-size: 14px;
   text-align: center;
   line-height: 1;
+  padding: 4px 0;
+  border-radius: 999px;
 }
+
+/* Each badge type gets its own color, not just a different emoji shape —
+   gold and the fast-track lightning bolt read as genuinely different states
+   even at a glance/small size, never confusable with each other. */
+.lesson-row-badge.badge-gold { background: rgba(251,191,36,0.18); }
+.lesson-row-badge.badge-silver { background: rgba(148,163,184,0.18); }
+.lesson-row-badge.badge-bronze { background: rgba(217,119,6,0.16); }
+.lesson-row-badge.badge-fasttrack { background: rgba(96,165,250,0.18); }
+.lesson-row-badge.badge-progress { background: var(--surface-2); color: var(--text-dim); font-size: 10px; font-weight: 700; }
+.lesson-row-badge.badge-none { color: var(--text-dim); }
+.lesson-row-badge.badge-locked { color: var(--text-dim); }
 
 .lesson-row-title {
   font-size: 14px;
@@ -523,6 +543,53 @@ h1, h2, h3 {
 
 .lesson-detail-progress {
   margin-bottom: 4px;
+}
+
+/* "Confirm what you already know" — fast-track lessons surfaced above the
+   main scroll list, per "the lessons you think i've completed should show
+   above the view" feedback. Blue to match the lightning-bolt badge color;
+   deliberately distinct from the green "confirmed" styling used elsewhere. */
+.fasttrack-section {
+  margin-bottom: 14px;
+  padding: 10px 12px;
+  border: 1px solid rgba(96,165,250,0.35);
+  background: rgba(96,165,250,0.07);
+  border-radius: var(--radius);
+}
+.fasttrack-section-title {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--accent-2);
+  margin-bottom: 8px;
+}
+.fasttrack-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.fasttrack-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 9px 12px;
+  text-align: left;
+  color: var(--text);
+}
+.fasttrack-row-title {
+  font-size: 14px;
+  font-weight: 600;
+}
+.fasttrack-row-cta {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--accent-2);
+  white-space: nowrap;
 }
 
 /* ---------- lesson detail ---------- */
@@ -703,6 +770,106 @@ h1, h2, h3 {
   cursor: pointer;
 }
 .word-modal-close:hover {
+  color: var(--text);
+}
+
+/* Remediation modal (3-wrong-in-a-row / "I don't know") */
+.remediation-modal-content {
+  max-width: 460px;
+  max-height: 85vh;
+  overflow-y: auto;
+  border-color: var(--warn);
+}
+.remediation-modal-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--warn);
+  margin-bottom: 8px;
+}
+.remediation-modal-summary {
+  font-size: 14px;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+.remediation-pattern {
+  background: var(--surface-2);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  margin-bottom: 8px;
+}
+.remediation-pattern-uk {
+  font-weight: 600;
+  color: var(--text);
+}
+.remediation-translit {
+  font-weight: 400;
+  color: var(--text-dim);
+  font-size: 13px;
+}
+.remediation-pattern-en {
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+.remediation-example {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 14px;
+}
+.remediation-example-uk {
+  font-weight: 600;
+}
+.remediation-example-en {
+  color: var(--text-dim);
+}
+
+/* Badge celebration screen (batched, confirmed-only) */
+.badge-modal-content {
+  max-width: 420px;
+  border-color: var(--good);
+  text-align: center;
+}
+.badge-modal-title {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--good);
+  margin-bottom: 4px;
+}
+.badge-modal-subtitle {
+  font-size: 13px;
+  color: var(--text-dim);
+  margin-bottom: 16px;
+}
+.badge-modal-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.badge-modal-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(52, 211, 153, 0.08);
+  border: 1px solid var(--good);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  text-align: left;
+}
+.badge-modal-icon {
+  font-size: 26px;
+}
+.badge-modal-tier {
+  font-weight: 700;
+  color: var(--good);
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.badge-modal-lesson {
+  font-size: 14px;
   color: var(--text);
 }
 
