@@ -531,6 +531,14 @@ export function renderDrill(container, { onExit } = {}) {
     addTokenEventListeners(interactiveEl);
     attachSpeakerBtn(interactiveEl, item.uk);
 
+    // The Ukrainian text is already the fully-visible prompt here — hearing
+    // it can't leak the English answer the way it would on an en2uk round,
+    // so this respects the same autoSpeak setting as everything else
+    // instead of always requiring a tap.
+    if (speechAvailable && settings.autoSpeak) {
+      speakUkrainian(item.uk);
+    }
+
     // Record high-resolution start time
     currentRound = { correctItem: item, direction, locked: false, type: 'semantic', card, startTime: Date.now() };
 

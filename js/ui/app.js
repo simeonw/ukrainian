@@ -234,7 +234,7 @@ function renderSettingsScreen() {
             <span>Automatically Play Pronunciation</span>
             <input type="checkbox" id="settings-autospeak-chk" ${settings.autoSpeak ? 'checked' : ''} style="width: 20px; height: 20px; accent-color: var(--accent);" />
           </label>
-          <p style="color: var(--text-dim); font-size: 13px; margin: 4px 0 0 0;">On the 4-way tile round, speak the correct pronunciation as soon as you answer instead of requiring a tap. Typed-answer rounds always stay tap-to-hear either way.</p>
+          <p style="color: var(--text-dim); font-size: 13px; margin: 4px 0 0 0;">Speaks automatically whenever it can't give away the answer: as soon as you answer a 4-way tile or word-order round, and immediately when a Ukrainian sentence is shown to translate. Stays tap-to-hear wherever hearing it first would reveal the answer (e.g. picking Ukrainian tiles from an English prompt).</p>
         </div>
 
         <hr style="border: 0; border-top: 1px solid var(--border); margin: 8px 0;" />
