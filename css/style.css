@@ -288,8 +288,15 @@ h1, h2, h3 {
   border-color: var(--accent);
   background: rgba(96,165,250,0.14);
 }
+/* 2 columns, not 3 — 3-across squeezed tiles down to ~113px wide on
+   mobile, too cramped for longer Ukrainian words at the same font size
+   used everywhere else in this screen. 3 rows of 2 instead. */
 .conjugation-haystack {
-  grid-template-columns: 1fr 1fr 1fr;
+  grid-template-columns: 1fr 1fr;
+}
+.conjugation-haystack .conjugation-test-option {
+  font-size: 15px;
+  padding: 12px 8px;
 }
 .conjugation-pronoun-hint {
   font-size: 13px;
