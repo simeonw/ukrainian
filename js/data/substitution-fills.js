@@ -32,7 +32,7 @@ const INFINITIVE_RE = /ти(ся|сь)?$/;
 // allowlist that would defeat the point of pulling from the catalog.
 const MODAL_SELF_REFERENTIAL = new Set(['бути', 'могти', 'мусити']);
 
-function bareInfinitiveEn(enField) {
+export function bareInfinitiveEn(enField) {
   return enField
     .split('/')[0]
     .replace(/^to\s+/i, '')
@@ -40,10 +40,16 @@ function bareInfinitiveEn(enField) {
     .trim();
 }
 
+// Exported so other features needing "every safely-substitutable infinitive
+// in the catalog" (e.g. js/ui/conjugation-drill.js) share this exact
+// definition instead of re-deriving their own — same reasoning either way:
+// infinitives never inflect, so pulling straight from vocab.js is safe.
+export function getInfinitiveVocabItems() {
+  return VOCAB.filter((item) => item.pos === 'verb' && INFINITIVE_RE.test(item.uk) && !MODAL_SELF_REFERENTIAL.has(item.uk));
+}
+
 function infinitiveFills() {
-  return VOCAB
-    .filter((item) => item.pos === 'verb' && INFINITIVE_RE.test(item.uk) && !MODAL_SELF_REFERENTIAL.has(item.uk))
-    .map((item) => ({ uk: item.uk, translit: item.translit, en: bareInfinitiveEn(item.en) }));
+  return getInfinitiveVocabItems().map((item) => ({ uk: item.uk, translit: item.translit, en: bareInfinitiveEn(item.en) }));
 }
 
 export const SUBSTITUTION_FRAMES = [

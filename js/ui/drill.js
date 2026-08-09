@@ -336,7 +336,13 @@ export function renderDrill(container, { onExit } = {}) {
         ${showPreAnswerSpeaker ? SPEAKER_BTN_HTML : ''}
       `;
       addTokenEventListeners(cardEl);
-      if (showPreAnswerSpeaker) attachSpeakerBtn(cardEl, item.uk);
+      if (showPreAnswerSpeaker) {
+        attachSpeakerBtn(cardEl, item.uk);
+        // Same reasoning as the semantic-match round: the Ukrainian is
+        // already the visible prompt, so hearing it can't give away which
+        // of the 4 English tiles is correct — safe to respect autoSpeak.
+        if (settings.autoSpeak) speakUkrainian(item.uk);
+      }
     }
 
     cardEl.style.transition = '';

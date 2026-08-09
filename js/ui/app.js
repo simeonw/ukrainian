@@ -1,5 +1,6 @@
 import { renderDrill } from './drill.js';
 import { renderLessons } from './lessons-ui.js';
+import { renderConjugationDrill } from './conjugation-drill.js';
 import { renderCalibration } from './calibration-ui.js';
 import { loadProgress, resetProgress, saveProgress, ALL_SETTINGS_TOPICS } from '../core/storage.js';
 import { getAbilityProfile } from '../core/srs.js';
@@ -10,9 +11,22 @@ import { getThemedLessons } from '../core/vocab-themes.js';
 import { getLevelSummary } from '../core/level-summary.js';
 import { LESSONS } from '../data/lessons.js';
 import { escapeHtml } from './dom-utils.js';
+import { initPwaInstall, canInstall, shouldShowNudge, dismissNudge, triggerInstall, onInstallAvailabilityChange } from '../core/pwa-install.js';
 
 const root = document.getElementById('app');
 let activeCleanup = null;
+
+initPwaInstall();
+// beforeinstallprompt/appinstalled can fire after Home has already
+// rendered — patch the existing button/nudge in place rather than a full
+// re-render, so it doesn't disrupt whatever screen is currently showing.
+onInstallAvailabilityChange(() => {
+  const btn = document.getElementById('pwa-install-btn');
+  if (btn) btn.style.display = canInstall() ? '' : 'none';
+  const nudge = document.getElementById('pwa-nudge');
+  if (nudge && shouldShowNudge()) nudge.style.display = 'flex';
+  else if (nudge) nudge.style.display = 'none';
+});
 
 const EXERCISE_TYPE_OPTIONS = [
   { key: 'swipe', label: '4-Way Multiple Choice', desc: 'Read the word/phrase, pick the matching option from 4 tiles.' },
@@ -49,11 +63,25 @@ function renderHome() {
 
   root.innerHTML = `
     <div class="home-screen">
-      <header class="lessons-header" style="display: flex; justify-content: space-between; align-items: center;">
+      <header class="lessons-header" style="display: flex; justify-content: space-between; align-items: center; gap: 8px;">
         <h1>Українська</h1>
-        <button class="btn-primary" id="open-settings-btn" style="padding: 8px 14px; font-size: 13px;">⚙️ Settings</button>
+        <div style="display: flex; gap: 8px; align-items: center;">
+          <button class="btn-text" id="pwa-install-btn" style="display: ${canInstall() ? '' : 'none'}; font-size: 13px; text-decoration: none; color: var(--accent-2); font-weight: 600;">📲 Install App</button>
+          <button class="btn-primary" id="open-settings-btn" style="padding: 8px 14px; font-size: 13px;">⚙️ Settings</button>
+        </div>
       </header>
       <p class="home-subtitle">Learn Ukrainian: get understandable fast, improve accuracy over time.</p>
+
+      <div id="pwa-nudge" style="display: ${shouldShowNudge() ? 'flex' : 'none'}; position: fixed; left: 12px; right: 12px; bottom: 12px; z-index: 999; background: var(--surface); border: 1px solid var(--accent); border-radius: var(--radius); padding: 12px 14px; align-items: center; justify-content: space-between; gap: 10px; box-shadow: 0 8px 24px rgba(0,0,0,0.35);">
+        <span style="font-size: 13px; color: var(--text);">Install this app for faster access</span>
+        <div style="display: flex; gap: 8px; flex-shrink: 0;">
+          <button id="pwa-nudge-install" class="btn-primary" style="padding: 6px 12px; font-size: 12px;">Install</button>
+          <button id="pwa-nudge-dismiss" class="btn-text" style="padding: 6px 8px; font-size: 12px; color: var(--text-dim); text-decoration: none;">Not now</button>
+        </div>
+      </div>
+      <div id="pwa-ios-tip" style="display: none; position: fixed; left: 50%; transform: translateX(-50%); bottom: 80px; z-index: 999; background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius); padding: 10px 16px; text-align: center; font-size: 13px; color: var(--text); max-width: 280px; box-shadow: 0 8px 24px rgba(0,0,0,0.35);">
+        Tap <strong>Share</strong> &rarr; <strong>Add to Home Screen</strong>
+      </div>
 
       ${showDiagnosticCta ? `
         <div class="home-cta">
@@ -104,6 +132,10 @@ function renderHome() {
         <button class="mode-card" id="open-lessons">
           <div class="mode-card-title">Lessons</div>
           <div class="mode-card-desc">${LESSONS.length} sections: sentence frames, vocabulary, and conversation topics.</div>
+        </button>
+        <button class="mode-card" id="open-conjugation">
+          <div class="mode-card-title">Conjugation Cycle</div>
+          <div class="mode-card-desc">Rapid-fire want/can/have to/like combined with every verb you know — I want to..., you have to..., they can....</div>
         </button>
       </div>
 
@@ -192,7 +224,33 @@ function renderHome() {
 
   root.querySelector('#open-drill').addEventListener('click', renderDrillScreen);
   root.querySelector('#open-lessons').addEventListener('click', renderLessonsScreen);
+  root.querySelector('#open-conjugation').addEventListener('click', renderConjugationScreen);
   root.querySelector('#open-settings-btn').addEventListener('click', renderSettingsScreen);
+
+  function handleInstallClick() {
+    const result = triggerInstall();
+    if (result === 'ios-tip') {
+      const tip = root.querySelector('#pwa-ios-tip');
+      if (tip) {
+        tip.style.display = 'block';
+        setTimeout(() => { tip.style.display = 'none'; }, 6000);
+      }
+    }
+    const nudge = root.querySelector('#pwa-nudge');
+    if (nudge) nudge.style.display = 'none';
+  }
+  const installBtn = root.querySelector('#pwa-install-btn');
+  if (installBtn) installBtn.addEventListener('click', handleInstallClick);
+  const nudgeInstallBtn = root.querySelector('#pwa-nudge-install');
+  if (nudgeInstallBtn) nudgeInstallBtn.addEventListener('click', handleInstallClick);
+  const nudgeDismissBtn = root.querySelector('#pwa-nudge-dismiss');
+  if (nudgeDismissBtn) {
+    nudgeDismissBtn.addEventListener('click', () => {
+      dismissNudge();
+      const nudge = root.querySelector('#pwa-nudge');
+      if (nudge) nudge.style.display = 'none';
+    });
+  }
 
   // Global Progress Reset Listener
   root.querySelector('#reset-global-storage').addEventListener('click', () => {
@@ -395,6 +453,12 @@ function renderDrillScreen() {
 function renderLessonsScreen() {
   teardownActive();
   renderLessons(root, { onExit: renderHome, onOpenDiagnostic: renderDiagnosticScreen });
+}
+
+function renderConjugationScreen() {
+  teardownActive();
+  const { cleanup } = renderConjugationDrill(root, { onExit: renderHome });
+  activeCleanup = cleanup;
 }
 
 function renderDiagnosticScreen() {
