@@ -211,9 +211,16 @@ export function renderConjugationDrill(container, { onExit } = {}) {
     updateScore();
   }
 
-  function feedbackBlockHtml(isCorrect, combo) {
+  // showEnglish: Type the Meaning shows the Ukrainian as the PROMPT already
+  // (you're reading it, not guessing it) — what you actually asked for on
+  // "I don't know" or a wrong guess there is the English answer, not the
+  // Ukrainian sentence you already saw. The other two test types blank the
+  // Ukrainian, so revealing it is the right answer for those.
+  function feedbackBlockHtml(isCorrect, combo, { showEnglish = false } = {}) {
+    const headline = showEnglish ? escapeHtml(combo.en) : `${escapeHtml(combo.uk)} ${speakerBtnHtml()}`;
     return `
-      <div class="${isCorrect ? 'conjugation-feedback-good' : 'conjugation-feedback-bad'}">${isCorrect ? '✓ Correct' : '✗ Not quite'} — ${escapeHtml(combo.uk)} ${speakerBtnHtml()}</div>
+      <div class="${isCorrect ? 'conjugation-feedback-good' : 'conjugation-feedback-bad'}">${isCorrect ? '✓ Correct' : '✗ Not quite'} — ${headline}</div>
+      ${showEnglish ? `<div class="conjugation-uk" style="font-size: 16px; margin-top: 4px;">${escapeHtml(combo.uk)} ${speakerBtnHtml()}</div>` : ''}
       <div class="conjugation-translit" style="display: ${settings.transliteration ? '' : 'none'};">${settings.transliteration ? escapeHtml(combo.translit) : ''}</div>
       <button class="btn-primary conjugation-next-btn" id="conj-next-btn" type="button">Next &rarr;</button>
     `;
@@ -365,7 +372,7 @@ export function renderConjugationDrill(container, { onExit } = {}) {
       locked = true;
       input.disabled = true;
       recordTestResult(isCorrect);
-      feedbackEl.innerHTML = feedbackBlockHtml(isCorrect, combo);
+      feedbackEl.innerHTML = feedbackBlockHtml(isCorrect, combo, { showEnglish: true });
       wireFeedbackNext(feedbackEl, combo);
     }
     function submit() {
