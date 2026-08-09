@@ -1013,4 +1013,37 @@ export const LESSONS = [
       substitutions: [],
       czechNote: 'Notice this lesson barely introduces new vocabulary — зрештою (l57) and не означає, що (l59) are both reused here. That\'s deliberate: real C2 fluency is mostly about combining a fairly small set of connectors well, not an ever-expanding vocabulary list.',
     }),
+
+  // --- Growing the general verb pool the Conjugation Cycle draws from
+  // (was capped at 44 infinitives total) — a first, quality-checked batch
+  // toward a much larger target rather than a single unverified rush. ---
+  L('l61', 61, 'Everyday Action Verbs I', 'vocab',
+    'Common household and daily-life verbs — call, listen, cook, clean, open, search, build — the kind of high-frequency words that combine with want/can/have to for endless real sentences.',
+    ['v_dzvonyty', 'v_slukhaty', 'v_dyakuvaty', 'v_spivaty', 'v_tantsyuvaty', 'v_malyuvaty', 'v_hotuvaty', 'v_myty', 'v_praty', 'v_prybyraty', 'v_vidkryvaty', 'v_zakryvaty', 'v_vmykaty', 'v_vymykaty', 'v_prynosyty', 'v_vidnosyty', 'v_nosyty', 'v_shukaty', 'v_znakhodyty', 'v_hubyty', 'v_zalyshaty', 'v_kydaty', 'v_lovyty', 'v_buduvaty', 'v_rozmovlyaty'],
+    {
+      patterns: [],
+      examples: [
+        { uk: 'Я хочу тобі подзвонити.', translit: 'Ya khochu tobi podzvonyty.', en: 'I want to call you.', cz: 'Chci ti zavolat.' },
+        { uk: 'Можеш відкрити двері?', translit: 'Mozhesh vidkryty dveri?', en: 'Can you open the door?', cz: 'Můžeš otevřít dveře?' },
+        { uk: 'Я шукаю ключі.', translit: 'Ya shukayu klyuchi.', en: 'I am looking for my keys.', cz: 'Hledám klíče.' },
+        { uk: 'Вона любить готувати.', translit: 'Vona lyubyt\' hotuvaty.', en: 'She likes to cook.', cz: 'Ráda vaří.' },
+      ],
+      substitutions: [],
+      czechNote: 'Most of these are regular -ати/-увати/-ити pattern verbs, the same shape as verbs already covered — they mainly add new roots, not new grammar to learn.',
+    }),
+
+  L('l62', 62, 'Everyday Action Verbs II', 'vocab',
+    'Body and motion verbs — sleep, wake up, sit, stand, run, fall, get dressed — the physical everyday actions that come up constantly in ordinary conversation.',
+    ['v_plakaty', 'v_smiyatysya', 'v_krychaty', 'v_movchaty', 'v_spaty', 'v_prokydatysya', 'v_lyahaty', 'v_vstavaty', 'v_sydity', 'v_stoyaty', 'v_lezhaty', 'v_bihty', 'v_strybaty', 'v_padaty', 'v_rukhatysya', 'v_zupynyatysya', 'v_povertatysya', 'v_vykhodyty', 'v_zakhodyty', 'v_hotuvatysya', 'v_odyahatysya', 'v_rozdyahatysya', 'v_mytysya', 'v_holytysya', 'v_tsiluvaty'],
+    {
+      patterns: [],
+      examples: [
+        { uk: 'Я мушу вставати рано.', translit: 'Ya mushu vstavaty rano.', en: 'I have to get up early.', cz: 'Musím vstávat brzy.' },
+        { uk: 'Діти люблять бігати і стрибати.', translit: 'Dity lyublyat\' bihaty i strybaty.', en: 'Children like to run and jump.', cz: 'Děti rády běhají a skáčou.' },
+        { uk: 'Мені треба одягатися.', translit: 'Meni treba odyahatysya.', en: 'I need to get dressed.', cz: 'Musím se obléct.' },
+        { uk: 'Він почав сміятися.', translit: 'Vin pochav smiyatysya.', en: 'He started laughing.', cz: 'Začal se smát.' },
+      ],
+      substitutions: [],
+      czechNote: 'Several of these are reflexive (-ся) — прокидатися, одягатися, роздягатися, митися, готуватися, зупинятися, повертатися, рухатися — the same -ся mechanism introduced back in l46, just new roots.',
+    }),
 ];

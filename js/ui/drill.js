@@ -9,6 +9,7 @@ import { getSkillsForItem } from '../core/skills.js';
 import { recordSkillAttempt } from '../core/retention.js';
 import { toFeminine, toMasculine, isGenderInflectable, toFormal, toInformal, isFormalityInflectable } from '../data/inflection-rules.js';
 import { speakUkrainian, canSpeakUkrainian } from '../core/speech.js';
+import { getFuzzyRatio } from '../core/fuzzy.js';
 
 const SPEAKER_BTN_HTML = `<button type="button" class="speak-btn" aria-label="Play pronunciation" title="Play pronunciation">🔊</button>`;
 
@@ -23,34 +24,6 @@ function attachSpeakerBtn(root, ukText) {
     e.stopPropagation();
     speakUkrainian(ukText);
   });
-}
-
-// Simple Levenshtein fuzzy string distance ratio
-function getFuzzyRatio(s1, s2) {
-  const a = s1.toLowerCase().trim().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()!?]/g, "");
-  const b = s2.toLowerCase().trim().replace(/[.,\/#!$%\^&\*;:{}=\-_`~()!?]/g, "");
-
-  if (a === b) return 1.0;
-
-  const m = a.length;
-  const n = b.length;
-  if (m === 0 || n === 0) return 0.0;
-
-  const d = [];
-  for (let i = 0; i <= m; i++) d[i] = [i];
-  for (let j = 0; j <= n; j++) d[0][j] = j;
-
-  for (let i = 1; i <= m; i++) {
-    for (let j = 1; j <= n; j++) {
-      const cost = (a[i - 1] === b[j - 1]) ? 0 : 1;
-      d[i][j] = Math.min(
-        d[i - 1][j] + 1,
-        d[i][j - 1] + 1,
-        d[i - 1][j - 1] + cost
-      );
-    }
-  }
-  return 1.0 - (d[m][n] / Math.max(m, n));
 }
 
 const POSITIONS = ['up', 'down', 'left', 'right'];

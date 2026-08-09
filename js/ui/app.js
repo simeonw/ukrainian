@@ -135,7 +135,7 @@ function renderHome() {
         </button>
         <button class="mode-card" id="open-conjugation">
           <div class="mode-card-title">Conjugation Cycle</div>
-          <div class="mode-card-desc">Rapid-fire want/can/have to/like combined with every verb you know — I want to..., you have to..., they can....</div>
+          <div class="mode-card-desc">Rapid-fire want/can/have to/like/start/try/decide... combined with every verb you know — I want to..., you have to..., they promise to....</div>
         </button>
       </div>
 

@@ -208,6 +208,96 @@ h1, h2, h3 {
   font-size: 16px;
 }
 
+.conjugation-mode-toggle {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.conjugation-mode-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-dim);
+  cursor: pointer;
+}
+.conjugation-mode-btn.is-active {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--bg);
+}
+.conjugation-score {
+  margin-left: auto;
+  font-weight: 700;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.conjugation-test-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 16px;
+}
+.conjugation-test-option {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 14px 10px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  text-align: center;
+}
+.conjugation-test-option:hover {
+  border-color: var(--accent);
+}
+.conjugation-test-option.is-correct {
+  border-color: var(--good);
+  background: rgba(52,211,153,0.12);
+  color: var(--good);
+}
+.conjugation-test-option.is-incorrect {
+  border-color: var(--bad);
+  background: rgba(248,113,113,0.12);
+  color: var(--bad);
+}
+.conjugation-test-option.is-selected {
+  border-color: var(--accent);
+  background: rgba(96,165,250,0.14);
+}
+.conjugation-haystack {
+  grid-template-columns: 1fr 1fr 1fr;
+}
+.conjugation-pronoun-hint {
+  font-size: 13px;
+  color: var(--text-dim);
+}
+.conjugation-test-type-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.conjugation-test-feedback {
+  margin-top: 16px;
+  text-align: center;
+}
+.conjugation-feedback-good {
+  color: var(--good);
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.conjugation-feedback-bad {
+  color: var(--bad);
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
 /* Compact "where am I / what's next" summary — immediate-impact read
    above the Drill/Lessons cards, replacing a wall of stats as the first
    thing seen. Mobile-first: stacked rows, generous tap-friendly padding. */
