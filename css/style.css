@@ -147,6 +147,24 @@ h1, h2, h3 {
 }
 
 /* ---------- conjugation cycle ---------- */
+.conjugation-options-accordion {
+  margin-bottom: 12px;
+}
+.conjugation-options-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  margin: 8px 0 6px;
+}
+.conjugation-idk-btn {
+  display: block;
+  width: 100%;
+  text-align: center;
+  margin-top: 10px;
+  cursor: pointer;
+}
 .conjugation-modal-filters {
   display: flex;
   flex-wrap: wrap;

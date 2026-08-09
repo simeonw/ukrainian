@@ -126,23 +126,28 @@ export function renderConjugationDrill(container, { onExit } = {}) {
         <span class="conjugation-score" id="conj-score" style="display: none;"></span>
       </div>
 
-      <div class="conjugation-test-type-filters" id="conj-test-type-filters" style="display: none;">
-        ${TEST_TYPES.map((t) => `
-          <label class="conjugation-modal-chip">
-            <input type="checkbox" class="conj-testtype-chk" value="${t.key}" checked />
-            <span>${escapeHtml(t.label)} <span class="conjugation-modal-en">(${escapeHtml(t.desc)})</span></span>
-          </label>
-        `).join('')}
-      </div>
+      <details class="stats-accordion conjugation-options-accordion">
+        <summary>⚙️ Options</summary>
+        <div class="conjugation-test-type-filters" id="conj-test-type-filters" style="display: none;">
+          <div class="conjugation-options-label">Active test types</div>
+          ${TEST_TYPES.map((t) => `
+            <label class="conjugation-modal-chip">
+              <input type="checkbox" class="conj-testtype-chk" value="${t.key}" checked />
+              <span>${escapeHtml(t.label)} <span class="conjugation-modal-en">(${escapeHtml(t.desc)})</span></span>
+            </label>
+          `).join('')}
+        </div>
 
-      <div class="conjugation-modal-filters">
-        ${MODALS.map((m) => `
-          <label class="conjugation-modal-chip">
-            <input type="checkbox" class="conj-modal-chk" value="${escapeHtml(m.uk)}" checked />
-            <span>${escapeHtml(m.uk)} <span class="conjugation-modal-en">(${escapeHtml(m.enLabel)})</span></span>
-          </label>
-        `).join('')}
-      </div>
+        <div class="conjugation-options-label">Active verbs (want, can, have to...)</div>
+        <div class="conjugation-modal-filters">
+          ${MODALS.map((m) => `
+            <label class="conjugation-modal-chip">
+              <input type="checkbox" class="conj-modal-chk" value="${escapeHtml(m.uk)}" checked />
+              <span>${escapeHtml(m.uk)} <span class="conjugation-modal-en">(${escapeHtml(m.enLabel)})</span></span>
+            </label>
+          `).join('')}
+        </div>
+      </details>
 
       <div id="conj-round-area"></div>
     </div>
@@ -171,6 +176,17 @@ export function renderConjugationDrill(container, { onExit } = {}) {
   function wireSpeaker(root, ukText) {
     const btn = root.querySelector('.speak-btn');
     if (btn) btn.addEventListener('click', (e) => { e.stopPropagation(); speakUkrainian(ukText); });
+  }
+
+  // Explicit escape hatch for every test type — especially Type the
+  // Meaning, where there's otherwise no way to get past a word you
+  // genuinely don't know without typing something just to move on.
+  function idkBtnHtml() {
+    return `<button type="button" class="btn-text conjugation-idk-btn" id="conj-idk-btn" style="color: var(--text-dim); text-decoration: none; font-size: 13px; margin-top: 10px;">I don't know</button>`;
+  }
+  function wireIdk(root, onIdk) {
+    const btn = root.querySelector('#conj-idk-btn');
+    if (btn) btn.addEventListener('click', onIdk);
   }
 
   // --- CYCLE MODE ---
@@ -233,27 +249,31 @@ export function renderConjugationDrill(container, { onExit } = {}) {
       <div class="conjugation-test-options">
         ${optionTexts.map((opt) => `<button type="button" class="conjugation-test-option">${escapeHtml(opt)}</button>`).join('')}
       </div>
+      ${idkBtnHtml()}
       <div class="conjugation-test-feedback" id="conj-test-feedback"></div>
     `;
 
     let locked = false;
     const feedbackEl = roundArea.querySelector('#conj-test-feedback');
+    function reveal(isCorrect) {
+      if (locked) return;
+      locked = true;
+      recordTestResult(isCorrect);
+      roundArea.querySelectorAll('.conjugation-test-option').forEach((b) => {
+        if (b.textContent.trim() === correctText) b.classList.add('is-correct');
+      });
+      feedbackEl.innerHTML = feedbackBlockHtml(isCorrect, combo);
+      wireFeedbackNext(feedbackEl, combo);
+    }
     roundArea.querySelectorAll('.conjugation-test-option').forEach((btn) => {
       btn.addEventListener('click', () => {
         if (locked) return;
-        locked = true;
         const isCorrect = btn.textContent.trim() === correctText;
-        recordTestResult(isCorrect);
-
-        roundArea.querySelectorAll('.conjugation-test-option').forEach((b) => {
-          if (b.textContent.trim() === correctText) b.classList.add('is-correct');
-          else if (b === btn) b.classList.add('is-incorrect');
-        });
-
-        feedbackEl.innerHTML = feedbackBlockHtml(isCorrect, combo);
-        wireFeedbackNext(feedbackEl, combo);
+        if (!isCorrect) btn.classList.add('is-incorrect');
+        reveal(isCorrect);
       });
     });
+    wireIdk(roundArea, () => reveal(false));
   }
 
   // --- TEST TYPE 2: Pick the Pair — English shown, select the 2 correct
@@ -275,12 +295,23 @@ export function renderConjugationDrill(container, { onExit } = {}) {
       <div class="conjugation-test-options conjugation-haystack">
         ${tiles.map((t) => `<button type="button" class="conjugation-test-option">${escapeHtml(t)}</button>`).join('')}
       </div>
+      ${idkBtnHtml()}
       <div class="conjugation-test-feedback" id="conj-test-feedback"></div>
     `;
 
     let locked = false;
     const selected = [];
     const feedbackEl = roundArea.querySelector('#conj-test-feedback');
+    function reveal(isCorrect) {
+      if (locked) return;
+      locked = true;
+      recordTestResult(isCorrect);
+      roundArea.querySelectorAll('.conjugation-test-option').forEach((b) => {
+        if (correctSet.has(b.textContent.trim())) b.classList.add('is-correct');
+      });
+      feedbackEl.innerHTML = feedbackBlockHtml(isCorrect, combo);
+      wireFeedbackNext(feedbackEl, combo);
+    }
     roundArea.querySelectorAll('.conjugation-test-option').forEach((btn) => {
       btn.addEventListener('click', () => {
         if (locked) return;
@@ -295,22 +326,14 @@ export function renderConjugationDrill(container, { onExit } = {}) {
         selected.push(btn);
 
         if (selected.length === 2) {
-          locked = true;
           const picked = new Set(selected.map((b) => b.textContent.trim()));
           const isCorrect = picked.size === correctSet.size && [...picked].every((v) => correctSet.has(v));
-          recordTestResult(isCorrect);
-
-          roundArea.querySelectorAll('.conjugation-test-option').forEach((b) => {
-            const text = b.textContent.trim();
-            if (correctSet.has(text)) b.classList.add('is-correct');
-            else if (b.classList.contains('is-selected')) b.classList.add('is-incorrect');
-          });
-
-          feedbackEl.innerHTML = feedbackBlockHtml(isCorrect, combo);
-          wireFeedbackNext(feedbackEl, combo);
+          if (!isCorrect) selected.forEach((b) => b.classList.add('is-incorrect'));
+          reveal(isCorrect);
         }
       });
     });
+    wireIdk(roundArea, () => reveal(false));
   }
 
   // --- TEST TYPE 3: Type the Meaning — Ukrainian shown complete, type the
@@ -324,6 +347,7 @@ export function renderConjugationDrill(container, { onExit } = {}) {
         <div class="conjugation-translit" style="display: ${settings.transliteration ? '' : 'none'};">${settings.transliteration ? escapeHtml(combo.translit) : ''}</div>
         <input type="text" class="drill-text-input" id="conj-type-input" placeholder="Type the English meaning..." autocomplete="off" style="margin-top: 12px;" />
         <button class="btn-primary" id="conj-type-submit" style="width: 100%; margin-top: 10px;">Check</button>
+        ${idkBtnHtml()}
       </div>
       <div class="conjugation-test-feedback" id="conj-test-feedback"></div>
     `;
@@ -336,21 +360,24 @@ export function renderConjugationDrill(container, { onExit } = {}) {
     input.focus();
 
     let locked = false;
+    function reveal(isCorrect) {
+      if (locked) return;
+      locked = true;
+      input.disabled = true;
+      recordTestResult(isCorrect);
+      feedbackEl.innerHTML = feedbackBlockHtml(isCorrect, combo);
+      wireFeedbackNext(feedbackEl, combo);
+    }
     function submit() {
       if (locked) return;
       const text = input.value.trim();
       if (!text) return;
-      locked = true;
-      input.disabled = true;
       const score = getFuzzyRatio(text, combo.en);
-      const isCorrect = score >= 0.72;
-      recordTestResult(isCorrect);
-
-      feedbackEl.innerHTML = feedbackBlockHtml(isCorrect, combo);
-      wireFeedbackNext(feedbackEl, combo);
+      reveal(score >= 0.72);
     }
     submitBtn.addEventListener('click', submit);
     input.addEventListener('keydown', (e) => { if (e.key === 'Enter') submit(); });
+    wireIdk(roundArea, () => reveal(false));
   }
 
   const TEST_RENDERERS = {
