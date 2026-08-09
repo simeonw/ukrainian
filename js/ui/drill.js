@@ -237,26 +237,89 @@ export function renderDrill(container, { onExit } = {}) {
     });
   }
 
+  // Which exercise format a card actually gets rendered as — respects
+  // Settings' enabled exercise types, with 'listen' only ever offered when
+  // there's a real Ukrainian voice to play (see core/speech.js). Falls back
+  // to a compatible type rather than an empty screen if the "native" type
+  // for this card's shape/direction has been turned off.
+  function pickRoundType(item, isSentence, direction) {
+    const enabled = settings.exerciseTypes || {};
+    const listenOk = enabled.listen && speechAvailable;
+
+    if (!isSentence) {
+      const candidates = [];
+      if (enabled.swipe) candidates.push('swipe');
+      if (listenOk) candidates.push('listen');
+      return candidates.length ? candidates[Math.floor(Math.random() * candidates.length)] : 'swipe';
+    }
+
+    const nativeType = direction === 'uk2en' ? 'semantic' : 'builder';
+    const candidates = [];
+    if (enabled[nativeType]) candidates.push(nativeType);
+    if (listenOk) candidates.push('listen');
+    if (candidates.length) return candidates[Math.floor(Math.random() * candidates.length)];
+    // Neither the native type nor listen is enabled — fall back to
+    // whichever sentence type IS on rather than an unrenderable round.
+    if (enabled.semantic) return 'semantic';
+    if (enabled.builder) return 'builder';
+    return nativeType;
+  }
+
   function renderRound(card) {
     clearFeedback();
 
     const { item, direction } = card;
     const isSentence = item.uk.split(' ').length > 2;
+    const roundType = pickRoundType(item, isSentence, direction);
 
-    if (!isSentence) {
-      gridEl.style.display = 'grid';
-      interactiveEl.style.display = 'none';
-      hintEl.textContent = 'Swipe, click, or use arrow keys to answer. Tap words for definitions.';
+    if (roundType === 'swipe' || roundType === 'listen') {
+      renderTileRound(card, roundType);
+    } else if (roundType === 'semantic') {
+      gridEl.style.display = 'none';
+      interactiveEl.style.display = 'block';
+      renderSemanticMatch(card);
+    } else {
+      gridEl.style.display = 'none';
+      interactiveEl.style.display = 'block';
+      renderSentenceBuilder(card);
+    }
+  }
 
-      const distractors = pickDistractors(item, direction, 3);
-      const options = shuffle([item, ...distractors]);
-      const positions = shuffle(POSITIONS);
-      const tiles = {};
-      positions.forEach((pos, i) => { tiles[pos] = options[i]; });
+  // Shared by the normal 4-way multiple choice ('swipe') and the new
+  // 'listen' mode — both use the same tile grid and the same submit()/idk
+  // handling, just differing in what's shown/played before you answer.
+  function renderTileRound(card, mode) {
+    const { item, direction } = card;
+    const isListen = mode === 'listen';
+    // Listening comprehension is inherently "hear Ukrainian, pick the
+    // meaning" regardless of the card's nominal direction — reuse the
+    // uk2en distractor/tile-text logic for it.
+    const effectiveDirection = isListen ? 'uk2en' : direction;
 
-      // Record high-resolution start time
-      currentRound = { correctItem: item, direction, tiles, locked: false, type: 'swipe', card, startTime: Date.now() };
+    gridEl.style.display = 'grid';
+    interactiveEl.style.display = 'none';
+    hintEl.textContent = isListen
+      ? 'Listen, then pick the meaning. Tap 🔊 to replay.'
+      : 'Swipe, click, or use arrow keys to answer. Tap words for definitions.';
 
+    const distractors = pickDistractors(item, effectiveDirection, 3);
+    const options = shuffle([item, ...distractors]);
+    const positions = shuffle(POSITIONS);
+    const tiles = {};
+    positions.forEach((pos, i) => { tiles[pos] = options[i]; });
+
+    // Record high-resolution start time
+    currentRound = { correctItem: item, direction: effectiveDirection, tiles, locked: false, type: 'swipe', roundMode: mode, card, startTime: Date.now() };
+
+    if (isListen) {
+      cardEl.innerHTML = `
+        <div class="drill-card-kind">Listen</div>
+        <div class="drill-card-main listen-prompt">${SPEAKER_BTN_HTML}</div>
+        ${speechAvailable ? '' : '<div style="color: var(--warn); font-size: 12px;">No Ukrainian voice available on this device.</div>'}
+      `;
+      attachSpeakerBtn(cardEl, item.uk);
+      if (speechAvailable) speakUkrainian(item.uk);
+    } else {
       const prompt = getPromptText(item, direction);
       // Speech is only offered up front when Ukrainian is already the given
       // text to interpret (uk2en) — the prompt and the audio say the same
@@ -274,28 +337,19 @@ export function renderDrill(container, { onExit } = {}) {
       `;
       addTokenEventListeners(cardEl);
       if (showPreAnswerSpeaker) attachSpeakerBtn(cardEl, item.uk);
+    }
 
-      cardEl.style.transition = '';
-      cardEl.style.transform = 'translate(0, 0) rotate(0deg)';
+    cardEl.style.transition = '';
+    cardEl.style.transform = 'translate(0, 0) rotate(0deg)';
 
-      for (const pos of POSITIONS) {
-        const tileItem = tiles[pos];
-        const text = getAnswerText(tileItem, direction);
-        const showTranslit = direction === 'en2uk' && settings.transliteration;
-        tileEls[pos].innerHTML = `
-          <div class="tile-text">${escapeHtml(text)}</div>
-          ${showTranslit ? `<div class="tile-translit">${escapeHtml(tileItem.translit)}</div>` : ''}
-        `;
-      }
-    } else {
-      gridEl.style.display = 'none';
-      interactiveEl.style.display = 'block';
-
-      if (direction === 'uk2en') {
-        renderSemanticMatch(card);
-      } else {
-        renderSentenceBuilder(card);
-      }
+    for (const pos of POSITIONS) {
+      const tileItem = tiles[pos];
+      const text = getAnswerText(tileItem, effectiveDirection);
+      const showTranslit = !isListen && direction === 'en2uk' && settings.transliteration;
+      tileEls[pos].innerHTML = `
+        <div class="tile-text">${escapeHtml(text)}</div>
+        ${showTranslit ? `<div class="tile-translit">${escapeHtml(tileItem.translit)}</div>` : ''}
+      `;
     }
   }
 
@@ -734,6 +788,13 @@ export function renderDrill(container, { onExit } = {}) {
       }
       attachSpeakerBtn(feedbackEl, item.uk);
 
+      // Same auto-speak setting as the 4-way tile round — the correct word
+      // order is already fully revealed in the feedback either way, so
+      // there's no early-reveal risk here.
+      if (speechAvailable && settings.autoSpeak) {
+        speakUkrainian(item.uk);
+      }
+
       // Slower than before on purpose — the old delay advanced before there
       // was real time to read the revealed correct answer/word order.
       setTimeout(() => proceedAfterAnswer(remediateLesson), isCorrect ? 2200 : 3500);
@@ -741,6 +802,16 @@ export function renderDrill(container, { onExit } = {}) {
 
     submitBtn.addEventListener('click', checkBuilder);
     regenerateBuilderText();
+  }
+
+  // Listen-mode rounds show no Ukrainian text before answering — reveal it
+  // afterward (correct or not) along with a replay button, since the whole
+  // point was hearing it, not just guessing the meaning blind forever.
+  function revealListenText() {
+    if (!currentRound || currentRound.roundMode !== 'listen') return;
+    cardEl.insertAdjacentHTML('beforeend', `<div class="listen-reveal">${tokenizeSentence(currentRound.correctItem.uk)} ${speechAvailable ? SPEAKER_BTN_HTML : ''}</div>`);
+    addTokenEventListeners(cardEl);
+    if (speechAvailable) attachSpeakerBtn(cardEl.querySelector('.listen-reveal'), currentRound.correctItem.uk);
   }
 
   function submit(position) {
@@ -789,12 +860,22 @@ export function renderDrill(container, { onExit } = {}) {
       }
     }
 
+    revealListenText();
+
     // en2uk rounds had no speaker button before answering (it would've read
     // the correct tile aloud ahead of the choice) — offer it now instead,
     // once the correct tile is already visually revealed either way.
-    if (speechAvailable && currentRound.direction !== 'uk2en') {
+    if (speechAvailable && currentRound.direction !== 'uk2en' && currentRound.roundMode !== 'listen') {
       cardEl.insertAdjacentHTML('beforeend', SPEAKER_BTN_HTML);
       attachSpeakerBtn(cardEl, currentRound.correctItem.uk);
+    }
+
+    // 4-way tile round only — per settings.autoSpeak, volunteer the
+    // pronunciation immediately instead of requiring a tap. Typed-answer
+    // rounds (semantic match / sentence builder) stay tap-to-hear regardless
+    // of this setting.
+    if (speechAvailable && settings.autoSpeak) {
+      speakUkrainian(currentRound.correctItem.uk);
     }
 
     setTimeout(() => {
@@ -836,6 +917,7 @@ export function renderDrill(container, { onExit } = {}) {
           tileEls[pos].classList.add('is-correct');
         }
       }
+      revealListenText();
       setTimeout(() => {
         gestureHandle && gestureHandle.reset();
         proceedAfterAnswer(remediateLesson);

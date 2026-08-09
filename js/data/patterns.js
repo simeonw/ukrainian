@@ -115,4 +115,50 @@ export const PATTERNS = [
   // --- l50: Czech/Russian false-friend caution ---
   p('p_falsefriend_1', 'false_friend', 'Я їм борщ.', 'Ya yim borshch.', 'I am eating borscht.', 'Jím boršč.', ['l50'], ['understanding']),
   p('p_falsefriend_2', 'false_friend', 'Що ти дивишся?', 'Shcho ty dyvyshsya?', 'What are you watching?', 'Co se díváš?', ['l50'], ['reflexive', 'understanding']),
+
+  // --- l51: Hobbies & Free Time (любити + infinitive) ---
+  p('p_hobby_1', 'like+inf', 'Я люблю плавати.', 'Ya lyublyu plavaty.', 'I like to swim.', 'Rád/a plavu.', ['l51'], ['grammar', 'production']),
+  p('p_hobby_2', 'like+inf', 'Що ти любиш робити на вихідних?', 'Shcho ty lyubysh robyty na vykhidnykh?', 'What do you like to do at the weekend?', 'Co rád/a děláš o víkendu?', ['l51'], ['grammar', 'understanding']),
+  p('p_hobby_3', 'like+inf', 'Що ти любиш робити у вільний час?', 'Shcho ty lyubysh robyty u vil\'nyi chas?', 'What do you like to do in your spare time?', 'Co rád/a děláš ve volném čase?', ['l51'], ['grammar', 'understanding']),
+  p('p_hobby_4', 'like+inf', 'Ти любиш відвідувати музей?', 'Ty lyubysh vidviduvaty muzey?', 'Do you like to visit the museum?', 'Rád/a navštěvuješ muzeum?', ['l51'], ['grammar', 'understanding']),
+
+  // --- l52: Reactions & Enjoying Things ---
+  p('p_react_1', 'react', 'Це виглядає важко.', 'Tse vyhlyadaye vazhko.', 'That looks hard.', 'To vypadá těžce.', ['l52'], ['dative', 'understanding']),
+  p('p_react_2', 'react', 'Я насолоджуюся цим.', 'Ya nasolodzhuyusya tsym.', 'I am enjoying this.', 'Užívám si to.', ['l52'], ['reflexive', 'production']),
+
+  // --- l53: Asking About Family & Quantities ---
+  p('p_quantity_1', 'quantity', 'Скільки людей у твоїй сім\'ї?', 'Skil\'ky lyudei u tvoyii sim\'yi?', 'How many people are in your family? (How big is your family?)', 'Kolik lidí je ve vaší rodině?', ['l53'], ['production']),
+
+  // --- l54: Talking About What You've Learned ---
+  p('p_learn_1', 'learn', 'Що ти вивчив цього року?', 'Shcho ty vyvchyv ts\'oho roku?', 'What have you learnt this year? (male speaker)', 'Co ses letos naučil?', ['l54'], ['past', 'understanding']),
+  p('p_learn_2', 'learn', 'Я вивчила багато цього року.', 'Ya vyvchyla bahato ts\'oho roku.', 'I learned a lot this year. (female speaker)', 'Letos jsem se hodně naučila.', ['l54'], ['past', 'production']),
+
+  // --- l55: Relative clauses (який/яка/яке/які) — verified against the
+  // user's CEFR reference doc's B1 block rather than invented. ---
+  p('p_rel_1', 'relative', 'Я зайшов у маленьке кафе, яке випадково знайшов.', 'Ya zayshov u malen\'ke kafe, yake vypadkovo znayshov.', 'I went into a small café that I happened to find.', 'Zašel jsem do malé kavárny, kterou jsem náhodou našel.', ['l55'], ['grammar', 'understanding']),
+  p('p_rel_2', 'relative', 'Мені подобається працювати з людьми, які відкрито висловлюють свою думку.', 'Meni podobayet\'sya pratsyuvaty z lyud\'my, yaki vidkryto vyslovlyuyut\' svoyu dumku.', 'I like working with people who openly express their opinions.', 'Rád/a pracuji s lidmi, kteří otevřeně vyjadřují svůj názor.', ['l55'], ['grammar', 'understanding']),
+  p('p_rel_3', 'relative', 'Напевно, концерт, на який я ходив минулого року.', 'Napevno, kontsert, na yakyi ya khodyv mynuloho roku.', 'Probably the concert I went to last year.', 'Asi ten koncert, na který jsem šel loni.', ['l55'], ['grammar', 'past', 'understanding']),
+
+  // --- l56: Purpose clauses (щоб) & indirect questions (чи) ---
+  p('p_purpose_1', 'purpose', 'Іноді я записую нові слова, щоб не забути їх.', 'Inodi ya zapysuyu novi slova, shchob ne zabuty yikh.', 'Sometimes I write down new words so I don\'t forget them.', 'Někdy si zapisuju nová slova, abych je nezapomněl/a.', ['l56'], ['grammar', 'production']),
+  p('p_purpose_2', 'purpose', 'Тепер, щоб його вимкнути, мені доводиться вставати.', 'Teper, shchob yoho vymknuty, meni dovodyt\'sya vstavaty.', 'Now, to turn it off, I have to get up.', 'Teď, abych to vypnul/a, musím vstát.', ['l56'], ['grammar', 'understanding']),
+  p('p_indirect_1', 'indirect_q', 'Зараз я намагаюся зрозуміти, чи є в ній щось корисне.', 'Zaraz ya namahayusya zrozumity, chy ye v niy shchos\' korysne.', 'Now I try to understand whether there is anything useful in it.', 'Teď se snažím pochopit, jestli je v tom něco užitečného.', ['l56'], ['grammar', 'understanding']),
+  p('p_indirect_2', 'indirect_q', 'Коли в мене багато справ, я часто не знаю, з чого почати.', 'Koly v mene bahato sprav, ya chasto ne znayu, z choho pochaty.', 'When I have a lot to do, I often don\'t know where to start.', 'Když mám hodně práce, často nevím, kde začít.', ['l56'], ['grammar', 'understanding']),
+
+  // --- l57: Connectors & cohesive devices ---
+  p('p_conn_1', 'connector', 'Я спізнився, тому що затримався на роботі.', 'Ya spiznyvsya, tomu shcho zatrymavsya na roboti.', 'I was late because I got held up at work.', 'Přišel jsem pozdě, protože jsem se zdržel v práci.', ['l57'], ['connector', 'past', 'production']),
+  p('p_conn_2', 'connector', 'З одного боку, це добре, з іншого боку — складно.', 'Z odnoho boku, tse dobre, z inshoho boku — skladno.', 'On one hand it\'s good, on the other hand it\'s difficult.', 'Na jednu stranu je to dobré, na druhou stranu složité.', ['l57'], ['connector', 'understanding']),
+  p('p_conn_3', 'connector', 'Наскільки мені відомо, він уже виїхав.', 'Naskil\'ky meni vidomo, vin uzhe vyyikhav.', 'As far as I know, he has already left.', 'Pokud vím, už odjel.', ['l57'], ['connector', 'past', 'understanding']),
+
+  // --- l59: C2 grammar targets — precision & qualification ---
+  p('p_c2_qual_1', 'c2_qualification', 'З цим можна погодитися лише за умови, що ми приймаємо певні припущення.', 'Z tsym mozhna pohodytysya lyshe za umovy, shcho my pryymayemo pevni prypushchennya.', 'One can agree with this only if we accept certain assumptions.', 'S tím lze souhlasit jen za předpokladu, že přijmeme určité domněnky.', ['l59'], ['connector', 'understanding']),
+  p('p_c2_qual_2', 'c2_qualification', 'Я не проти, але за умови, що ми заздалегідь домовимося про деталі.', 'Ya ne proty, ale za umovy, shcho my zazdalehid\' domovymosya pro detali.', 'I don\'t mind, provided that we agree on the details beforehand.', 'Nevadí mi to, ale za předpokladu, že se předem domluvíme na detailech.', ['l59'], ['connector', 'understanding']),
+  p('p_c2_qual_3', 'c2_qualification', 'Якщо ми нічого не змінимо, ситуація навряд чи покращиться.', 'Yakshcho my nichoho ne zminymo, sytuatsiya navryad chy pokrashchyt\'sya.', 'If we don\'t change anything, the situation is unlikely to improve.', 'Pokud nic nezměníme, situace se stěží zlepší.', ['l59'], ['connector', 'conditional', 'understanding']),
+  p('p_c2_qual_4', 'c2_qualification', 'Це не означає, що потрібно відмовлятися від власних переконань.', 'Tse ne oznachaye, shcho potribno vidmovlyatysya vid vlasnykh perekonan\'.', 'This doesn\'t mean you have to abandon your own beliefs.', 'To neznamená, že se musíme vzdát vlastního přesvědčení.', ['l59'], ['connector', 'understanding']),
+
+  // --- l60: C2 diplomacy & hedged argument ---
+  p('p_c2_dipl_1', 'c2_diplomacy', 'З одного боку, я тебе розумію, а з іншого — маю певні сумніви.', 'Z odnoho boku, ya tebe rozumiyu, a z inshoho — mayu pevni sumnivy.', 'On the one hand, I understand you, but on the other, I have some doubts.', 'Na jednu stranu ti rozumím, na druhou mám určité pochybnosti.', ['l60'], ['connector', 'production']),
+  p('p_c2_dipl_2', 'c2_diplomacy', 'Давай не будемо робити вигляд, ніби нічого не сталося.', 'Davay ne budemo robyty vyhlyad, niby nichoho ne stalosya.', 'Let\'s not pretend that nothing happened.', 'Nedělejme, že se nic nestalo.', ['l60'], ['past', 'production']),
+  p('p_c2_dipl_3', 'c2_diplomacy', 'Мені здається, ти трохи випускаєш із уваги головне.', 'Meni zdayet\'sya, ty trokhy vypuskayesh iz uvahy holovne.', 'I think you\'re overlooking the main point somewhat.', 'Zdá se mi, že trochu přehlížíš to hlavní.', ['l60'], ['dative', 'understanding']),
+  p('p_c2_dipl_4', 'c2_diplomacy', 'Зрештою, кожен має право на власну думку, але це не означає, що всі думки однаково обґрунтовані.', 'Zreshtoyu, kozhen maye pravo na vlasnu dumku, ale tse ne oznachaye, shcho vsi dumky odnakovo obgruntovani.', 'Ultimately, everyone has the right to their own opinion, but that doesn\'t mean all opinions are equally well-founded.', 'Nakonec má každý právo na svůj vlastní názor, ale to neznamená, že všechny názory jsou stejně opodstatněné.', ['l60'], ['connector', 'understanding']),
 ];

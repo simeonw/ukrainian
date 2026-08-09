@@ -400,7 +400,18 @@ export function getLessonPracticeTier(progress, lesson) {
 }
 
 export function getItemPracticeTier(progress, item) {
-  return getLessonPracticeTier(progress, lessonForItem(item));
+  const lessonTier = getLessonPracticeTier(progress, lessonForItem(item));
+  // A lesson reaching gold is an AGGREGATE read across all its items' shared
+  // skills (Wilson score) — it does not mean every individual item has hit
+  // its own known-streak (isItemKnown). Without this override, an item that
+  // personally hasn't been confirmed yet gets starved the moment its lesson
+  // "looks done": draw weight drops to 1x tier-wide, so the individual item
+  // rarely comes up again to earn its own 3-in-a-row. Keep it at boundary
+  // weight until IT is individually confirmed, regardless of the lesson's
+  // overall tier — this is what "I know numbers but it's not marked known"
+  // was actually caused by.
+  if (lessonTier === 'easy' && !isItemKnown(progress, item.id)) return 'boundary';
+  return lessonTier;
 }
 
 export function getLessonForItem(item) {

@@ -15,6 +15,8 @@ const POS_LABELS = {
   number: 'Numbers',
   adjective: 'Adjectives',
   conjunction: 'Conjunctions',
+  connector: 'Connectors',
+  idiom: 'Idioms',
 };
 
 // Milestones scale with how many items actually exist in a category instead

@@ -10,21 +10,27 @@ import { markLessonCompleted, markFastTrackEligible } from '../core/completion.j
 import { seedSkillRetention } from '../core/retention.js';
 import { TIER_MAX } from '../core/calibration.js';
 
-const CEFR_TIERS = ['beginner', 'b1', 'b2', 'c1'];
+// 'c2' is deliberately unreachable via cefrForTier below (max tier is 7,
+// Math.floor(7/2) = 3 = 'c1') — a short placement test shouldn't claim
+// someone is C2 from a handful of probes. It's still a real value
+// cefrForLessonOrder can return, for lesson-completion-driven fast-track
+// comparisons (see applyCalibrationResults below) — c2 content should only
+// ever be reached by actually working through the lessons under it.
+const CEFR_TIERS = ['beginner', 'b1', 'b2', 'c1', 'c2'];
 // tier 0-1 -> beginner, 2-3 -> b1, 4-5 -> b2, 6-7 -> c1 (see calibration.js's 8-rung scale)
 export function cefrForTier(tier) {
   return CEFR_TIERS[Math.floor(tier / 2)];
 }
 
 const LESSON_ORDER_BY_ID = new Map(LESSONS.map((l) => [l.id, l.order]));
-// Boundaries shifted +7 when l21-l27 (new beginner/A2 vocab lessons) were
-// inserted before the old B1 band — each band keeps its original width
-// (b1: 3 lessons, b2: 4 lessons, c1: everything after) just moved later.
-function cefrForLessonOrder(order) {
-  if (order <= 33) return 'beginner';
-  if (order <= 36) return 'b1';
-  if (order <= 40) return 'b2';
-  return 'c1';
+// Boundaries shifted as new lesson waves were inserted before the old B1
+// band — each band keeps roughly its original width, just moved later.
+export function cefrForLessonOrder(order) {
+  if (order <= 37) return 'beginner';
+  if (order <= 43) return 'b1';
+  if (order <= 47) return 'b2';
+  if (order <= 58) return 'c1';
+  return 'c2';
 }
 
 // -------------------- Track 1 & 2: comprehension (with / without transliteration) --------------------

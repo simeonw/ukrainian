@@ -593,8 +593,82 @@ export const LESSONS = [
       czechNote: 'Worth a deliberate pause here: робити (not "делать"), мати, бути, бачити, йти, дякувати (not "благодарить") are all already-learned Ukrainian words that can look or sound closer to Russian than to the Ukrainian you actually need. When in doubt, the Ukrainian word is usually its own thing, not a Czech-flavored guess at a Russian cognate — їсти (not "jíst"-shaped, not "есть"-shaped) and дивитися are two more worth fixing firmly as Ukrainian-first.',
     }),
 
+  // --- New conversational lessons (wave 3): hobbies, opinions, small talk —
+  // directly informed by the specific everyday sentences the user asked
+  // for ("I like to swim", "what do you do at the weekend", etc). Placed
+  // here (right after wave 2, before the B1 grammar block) rather than
+  // appended at the very end — this is genuinely A2/B1-level conversation,
+  // not advanced content, so it shouldn't sit locked behind all the C1
+  // material just because it was added later. ---
+  L('l51', 34, 'Hobbies & Free Time', 'grammar',
+    'любити + infinitive — talking about what you like doing, and asking someone else the same.',
+    ['v_lyubyty', 'v_plavaty', 'v_vidviduvaty', 'v_muzey', 'v_vykhidni', 'v_vilnyi_chas', 'p_hobby_1', 'p_hobby_2', 'p_hobby_3', 'p_hobby_4'],
+    {
+      patterns: [
+        { uk: 'Люблю + infinitive', translit: 'Lyublyu + infinitive', en: '"I like to ___" — любити works exactly like хотіти (Frame 1, l04): conjugated любити plus a plain infinitive, no extra words needed.', czNote: 'Direct parallel to Czech "mít rád" + infinitive, though Ukrainian just conjugates one verb (люблю) instead of using an adjective + verb.' },
+      ],
+      examples: [
+        { uk: 'Я люблю плавати.', translit: 'Ya lyublyu plavaty.', en: 'I like to swim.', cz: 'Rád/a plavu.' },
+        { uk: 'Що ти любиш робити на вихідних?', translit: 'Shcho ty lyubysh robyty na vykhidnykh?', en: 'What do you like to do at the weekend?', cz: 'Co rád/a děláš o víkendu?' },
+        { uk: 'Що ти любиш робити у вільний час?', translit: 'Shcho ty lyubysh robyty u vil\'nyi chas?', en: 'What do you like to do in your spare time?', cz: 'Co rád/a děláš ve volném čase?' },
+        { uk: 'Ти любиш відвідувати музей?', translit: 'Ty lyubysh vidviduvaty muzey?', en: 'Do you like to visit the museum?', cz: 'Rád/a navštěvuješ muzeum?' },
+      ],
+      substitutions: [
+        { template: 'Я люблю ___.', translit: 'Ya lyublyu ___.', en: 'I like to ___.', slotOptions: ['плавати', 'відвідувати музеї', 'читати'] },
+      ],
+      czechNote: 'на вихідних ("at the weekend") and у вільний час ("in your spare time") are both worth learning as fixed phrases rather than building word-by-word — the case endings inside them are not the point yet.',
+    }),
+
+  L('l52', 35, 'Reactions & Enjoying Things', 'grammar',
+    'Reacting to what you see or experience — виглядати (to look/seem) and насолоджуватися (to enjoy, from l46\'s reflexive verbs).',
+    ['v_vyhlyadaty', 'p_react_1', 'p_react_2'],
+    {
+      patterns: [
+        { uk: 'Це виглядає ___.', translit: 'Tse vyhlyadaye ___.', en: '"This/that looks ___" — виглядати plus an adverb, same shape as l45\'s dative adverbs (важко, легко, цікаво) reused here as the description.', czNote: 'Matches Czech "to vypadá ___" almost word for word.' },
+      ],
+      examples: [
+        { uk: 'Це виглядає важко.', translit: 'Tse vyhlyadaye vazhko.', en: 'That looks hard.', cz: 'To vypadá těžce.' },
+        { uk: 'Я насолоджуюся цим.', translit: 'Ya nasolodzhuyusya tsym.', en: 'I am enjoying this.', cz: 'Užívám si to.' },
+      ],
+      substitutions: [
+        { template: 'Це виглядає ___.', translit: 'Tse vyhlyadaye ___.', en: 'That looks ___.', slotOptions: ['важко', 'легко', 'цікаво'] },
+      ],
+      czechNote: 'насолоджуюся reuses l46\'s насолоджуватися — a good example of one reflexive verb showing up naturally in ordinary conversation once you have it.',
+    }),
+
+  L('l53', 36, 'Asking About Family & Quantities', 'grammar',
+    '"How big is your family?" — Ukrainian asks this as "how many people," not with a size adjective, using скільки (l42) + genitive.',
+    ['v_lyudy', 'p_quantity_1'],
+    {
+      patterns: [
+        { uk: 'Скільки людей у ___?', translit: 'Skil\'ky lyudei u ___?', en: '"How many people are in ___?" — the natural Ukrainian way to ask what English phrases as "how big is ___."', czNote: 'Czech can ask it either way ("Jak velká je vaše rodina?" or "Kolik je vás v rodině?") — Ukrainian leans on the "how many people" phrasing specifically.' },
+      ],
+      examples: [
+        { uk: 'Скільки людей у твоїй сім\'ї?', translit: 'Skil\'ky lyudei u tvoyii sim\'yi?', en: 'How many people are in your family? (How big is your family?)', cz: 'Kolik lidí je ve vaší rodině?' },
+      ],
+      substitutions: [],
+      czechNote: 'Reuses сім\'я from l39 and скільки from l42 — the only genuinely new piece here is люди (people) and the question shape itself.',
+    }),
+
+  L('l54', 37, 'Talking About What You\'ve Learned', 'grammar',
+    'English "what have you learnt" has no direct Ukrainian equivalent tense — it just uses the past tense (l08) plus a time word like цього року.',
+    ['v_vyvchyty', 'v_tsyoho_roku', 'v_mynuloho_roku', 'p_learn_1', 'p_learn_2'],
+    {
+      patterns: [
+        { uk: 'Що ти вивчив(ла) цього року?', translit: 'Shcho ty vyvchyv(la) ts\'oho roku?', en: '"What did you learn this year?" — Ukrainian has no separate "have learned" form; the ordinary past tense (l08\'s -в/-ла endings) covers it.', czNote: 'Same gap exists in Czech — "Co ses letos naučil?" is also just past tense, no distinct perfect form.' },
+      ],
+      examples: [
+        { uk: 'Що ти вивчив цього року?', translit: 'Shcho ty vyvchyv ts\'oho roku?', en: 'What have you learnt this year? (male speaker)', cz: 'Co ses letos naučil?' },
+        { uk: 'Я вивчила багато цього року.', translit: 'Ya vyvchyla bahato ts\'oho roku.', en: 'I learned a lot this year. (female speaker)', cz: 'Letos jsem se hodně naučila.' },
+      ],
+      substitutions: [
+        { template: 'Я вивчив(ла) ___ цього року.', translit: 'Ya vyvchyv(la) ___ ts\'oho roku.', en: 'I learned ___ this year.', slotOptions: ['багато', 'українську мову', 'нову пісню'] },
+      ],
+      czechNote: 'вивчити pairs naturally with l46\'s вчитися (to study/learn, ongoing) — вчитися is the everyday process, вивчити is having actually learned/mastered something specific.',
+    }),
+
   // --- B1 level expansion lessons ---
-  L('l21', 34, 'Narrating Experiences', 'grammar_b1',
+  L('l21', 38, 'Narrating Experiences', 'grammar_b1',
     'Learn to talk about what you have done, what you have never done, and life when you were younger.',
     ['p_b1_done_1', 'p_b1_never_1', 'p_b1_when_1', 'v_zrobyv', 'v_nikoly', 'v_molodshyi'],
     {
@@ -610,7 +684,7 @@ export const LESSONS = [
       czechNote: 'Excellent structure maps 1:1 except Ukrainian drops the "jsem" auxiliary verb.'
     }),
 
-  L('l22', 35, 'Explaining Situations', 'grammar_b1',
+  L('l22', 39, 'Explaining Situations', 'grammar_b1',
     'Learn to specify root causes using "The thing is that..." and "The reason is that...".',
     ['p_b1_thing_1', 'p_b1_reason_1', 'v_sprava', 'v_prychyna', 'v_polyahaye'],
     {
@@ -624,7 +698,7 @@ export const LESSONS = [
       czechNote: '"Справа в тому, що" is incredibly common in spoken Ukrainian to explain why something happened.'
     }),
 
-  L('l23', 36, 'Comparing and Contrasting', 'grammar_b1',
+  L('l23', 40, 'Comparing and Contrasting', 'grammar_b1',
     'Contrast elements using "Unlike..." and "Compared with...".',
     ['p_b1_compare_1', 'p_b1_compare_2', 'v_vidminu', 'v_porivnyano'],
     {
@@ -639,8 +713,66 @@ export const LESSONS = [
       czechNote: 'Notice that "Порівняно з" matches "porovnáno s" exactly.'
     }),
 
+  // --- Wave 4 (CEFR-doc-informed): B1 grammar gaps + a dedicated
+  // connectors lesson, placed here — right at the B1/B2 seam — rather than
+  // appended at the end, since connectors are useful from B1 all the way
+  // through C2 and shouldn't sit locked behind unrelated C1 content. ---
+  L('l55', 41, 'Relative Clauses: який / яка / яке / які', 'grammar_b1',
+    '"The café that I found", "people who speak openly" — який agrees in gender/number/case with the noun it describes, same idea as l08\'s past-tense agreement.',
+    ['v_yakyi', 'v_yaka_rel', 'v_yake', 'v_yaki', 'p_rel_1', 'p_rel_2', 'p_rel_3'],
+    {
+      patterns: [
+        { uk: '..., який/яка/яке/які ...', translit: '', en: 'A relative clause — який changes form to match the noun it refers to (masc/fem/neut/plural), not the noun it\'s attached to grammatically.', czNote: 'Direct parallel to Czech "který/která/které/kteří" — same agreement logic, same four forms.' },
+      ],
+      examples: [
+        { uk: 'Я зайшов у маленьке кафе, яке випадково знайшов.', translit: 'Ya zayshov u malen\'ke kafe, yake vypadkovo znayshov.', en: 'I went into a small café that I happened to find.', cz: 'Zašel jsem do malé kavárny, kterou jsem náhodou našel.' },
+        { uk: 'Мені подобається працювати з людьми, які відкрито висловлюють свою думку.', translit: 'Meni podobayet\'sya pratsyuvaty z lyud\'my, yaki vidkryto vyslovlyuyut\' svoyu dumku.', en: 'I like working with people who openly express their opinions.', cz: 'Rád/a pracuji s lidmi, kteří otevřeně vyjadřují svůj názor.' },
+        { uk: 'Напевно, концерт, на який я ходив минулого року.', translit: 'Napevno, kontsert, na yakyi ya khodyv mynuloho roku.', en: 'Probably the concert I went to last year.', cz: 'Asi ten koncert, na který jsem šel loni.' },
+      ],
+      substitutions: [],
+      czechNote: 'кафе (neuter) → яке; людьми (plural) → які; концерт (masc, after "на" governing accusative) → на який — the form tracks the noun\'s gender/number, the preposition/case tracks the clause\'s own grammar.',
+    }),
+
+  L('l56', 42, 'Purpose Clauses & Indirect Questions', 'grammar_b1',
+    '"So that I don\'t forget" (щоб) and "I don\'t know whether..." (чи) — two small words that unlock a lot of natural-sounding B1 speech.',
+    ['v_shchob', 'v_chy_whether', 'p_purpose_1', 'p_purpose_2', 'p_indirect_1', 'p_indirect_2'],
+    {
+      patterns: [
+        { uk: '..., щоб + [verb]', translit: '', en: '"...so that / in order to..." — щоб introduces the purpose or goal of the main clause.', czNote: 'Matches Czech "abych/abys/aby" — Ukrainian щоб doesn\'t change form with the subject the way Czech "aby" does, which is simpler.' },
+        { uk: '..., чи + [clause]', translit: '', en: '"...whether/if..." — чи turns a yes/no question into part of a larger sentence ("I don\'t know whether...").', czNote: 'Same job as Czech "zda/jestli".' },
+      ],
+      examples: [
+        { uk: 'Іноді я записую нові слова, щоб не забути їх.', translit: 'Inodi ya zapysuyu novi slova, shchob ne zabuty yikh.', en: 'Sometimes I write down new words so I don\'t forget them.', cz: 'Někdy si zapisuju nová slova, abych je nezapomněl/a.' },
+        { uk: 'Тепер, щоб його вимкнути, мені доводиться вставати.', translit: 'Teper, shchob yoho vymknuty, meni dovodyt\'sya vstavaty.', en: 'Now, to turn it off, I have to get up.', cz: 'Teď, abych to vypnul/a, musím vstát.' },
+        { uk: 'Зараз я намагаюся зрозуміти, чи є в ній щось корисне.', translit: 'Zaraz ya namahayusya zrozumity, chy ye v niy shchos\' korysne.', en: 'Now I try to understand whether there is anything useful in it.', cz: 'Teď se snažím pochopit, jestli je v tom něco užitečného.' },
+      ],
+      substitutions: [
+        { template: '..., щоб ___.', translit: '..., shchob ___.', en: '...so that ___.', slotOptions: ['не забути', 'зрозуміти краще', 'все встигнути'] },
+      ],
+      czechNote: 'чи also means "or" in a direct question ("кава чи чай?" = "coffee or tea?") — context makes the difference clear, same ambiguity-that-isn\'t-really-ambiguous exists in several Slavic languages.',
+    }),
+
+  L('l57', 43, 'Connectors & Cohesive Devices', 'grammar_b1',
+    'The small set of linking words that recur constantly from here through the most advanced content — тому що, з одного боку/з іншого боку, наскільки мені відомо, зрештою — worth mastering early since almost every later lesson leans on them.',
+    ['v_tomu_shcho', 'v_cherez_tse', 'v_z_odnoho_boku', 'v_z_inshoho_boku', 'v_naskilky_meni_vidomo', 'v_zreshtoyu', 'p_conn_1', 'p_conn_2', 'p_conn_3'],
+    {
+      patterns: [
+        { uk: 'тому що / через це', translit: 'tomu shcho / cherez tse', en: 'because / because of this — cause and consequence, the most basic connector pair.', czNote: 'тому що ~ Czech "protože"; через це ~ "kvůli tomu".' },
+        { uk: 'З одного боку..., з іншого боку...', translit: 'Z odnoho boku..., z inshoho boku...', en: 'On one hand..., on the other hand... — the single most useful frame for balanced opinions.', czNote: 'Na jednu stranu..., na druhou stranu... — word-for-word match.' },
+      ],
+      examples: [
+        { uk: 'Я спізнився, тому що затримався на роботі.', translit: 'Ya spiznyvsya, tomu shcho zatrymavsya na roboti.', en: 'I was late because I got held up at work.', cz: 'Přišel jsem pozdě, protože jsem se zdržel v práci.' },
+        { uk: 'З одного боку, це добре, з іншого боку — складно.', translit: 'Z odnoho boku, tse dobre, z inshoho boku — skladno.', en: 'On one hand it\'s good, on the other hand it\'s difficult.', cz: 'Na jednu stranu je to dobré, na druhou stranu složité.' },
+        { uk: 'Наскільки мені відомо, він уже виїхав.', translit: 'Naskil\'ky meni vidomo, vin uzhe vyyikhav.', en: 'As far as I know, he has already left.', cz: 'Pokud vím, už odjel.' },
+      ],
+      substitutions: [
+        { template: 'Це добре, ___ це складно.', translit: 'Tse dobre, ___ tse skladno.', en: 'This is good, ___ it\'s difficult.', slotOptions: ['тому що', 'проте', 'і водночас'] },
+      ],
+      czechNote: 'These connectors are structurally invariant — they never inflect, so once learned they slot onto any sentence you can already build. l36 (C1 Vocab: Abstract Connectors) adds a further 7 for more formal/written register — this lesson and that one are now tracked together as one "Connectors" vocabulary category.',
+    }),
+
   // --- B2 level expansion lessons ---
-  L('l24', 37, 'Complex Opinions', 'grammar_b2',
+  L('l24', 44, 'Complex Opinions', 'grammar_b2',
     'Express your viewpoint using "I believe that...", "From my point of view...", and "As far as I know...".',
     ['p_b2_opinion_1', 'p_b2_opinion_2', 'p_b2_opinion_3', 'v_vazhayu', 'v_tochka', 'v_zorun'],
     {
@@ -655,7 +787,7 @@ export const LESSONS = [
       czechNote: '"точка зору" is a literal loan-translation matching Czech "úhel pohledu" (point of view).'
     }),
 
-  L('l25', 38, 'Agreeing and Disagreeing Politely', 'grammar_b2',
+  L('l25', 45, 'Agreeing and Disagreeing Politely', 'grammar_b2',
     'Learn to navigate conversations politely and express reservations.',
     ['p_b2_agree_1', 'p_b2_agree_2', 'p_b2_agree_3', 'v_chastkovo', 'v_pohodzhuyusya', 'v_odnak'],
     {
@@ -669,7 +801,7 @@ export const LESSONS = [
       czechNote: 'Using "однак" (however) or "частково" (partially) softens disagreements.'
     }),
 
-  L('l26', 39, 'Hypothetical Situations', 'grammar_b2',
+  L('l26', 46, 'Hypothetical Situations', 'grammar_b2',
     'Master subjunctive conditionals with "If..., then..." structures.',
     ['p_b2_hypo_1', 'p_b2_hypo_2', 'v_yakby', 'v_shvydshe'],
     {
@@ -683,7 +815,7 @@ export const LESSONS = [
       czechNote: 'Ukrainian "якби" works exactly like Czech "kdyby".'
     }),
 
-  L('l27', 40, 'Reported Speech', 'grammar_b2',
+  L('l27', 47, 'Reported Speech', 'grammar_b2',
     'Describe what others said and explain reasons dynamically.',
     ['p_b2_speech_1', 'p_b2_speech_2', 'v_poyasnyla'],
     {
@@ -698,7 +830,7 @@ export const LESSONS = [
     }),
 
   // --- C1 level expansion lessons ---
-  L('l28', 41, 'Nuance and Qualification', 'grammar_c1',
+  L('l28', 48, 'Nuance and Qualification', 'grammar_c1',
     'Qualify claims using "In a certain sense...", "It cannot be denied that...", and "It is worth noting that...".',
     ['p_c1_nuance_1', 'p_c1_nuance_2', 'p_c1_nuance_3', 'p_c1_nuance_4', 'v_sensi', 'v_zaperechyty', 'v_varto', 'v_zaznachyty'],
     {
@@ -713,7 +845,7 @@ export const LESSONS = [
       czechNote: '"Варто" acts as a shorthand for "stojí za to".'
     }),
 
-  L('l29', 42, 'Complex Argumentation', 'grammar_c1',
+  L('l29', 49, 'Complex Argumentation', 'grammar_c1',
     'Argue complex viewpoints using "On one hand..., on the other hand..." and "I do not so much disagree as...".',
     ['p_c1_arg_1', 'p_c1_arg_2', 'p_c1_arg_3', 'v_odnoho', 'v_boku'],
     {
@@ -727,7 +859,7 @@ export const LESSONS = [
       czechNote: '"З одного боку" maps directly to Czech "z jedné strany".'
     }),
 
-  L('l30', 43, 'Expressing Consequences', 'grammar_c1',
+  L('l30', 50, 'Expressing Consequences', 'grammar_c1',
     'Explain outcomes using "This led to the fact that..." and "As a result...".',
     ['p_c1_cons_1', 'p_c1_cons_2', 'p_c1_cons_3', 'v_prizvelo', 'v_rezultati'],
     {
@@ -741,7 +873,7 @@ export const LESSONS = [
       czechNote: '"Призвело" is neuter past form agreeing with "Це".'
     }),
 
-  L('l31', 44, 'Complex Time Relationships', 'grammar_c1',
+  L('l31', 51, 'Complex Time Relationships', 'grammar_c1',
     'Convey sophisticated timelines using "By the time...", "After...", and "Before...".',
     ['p_c1_time_1', 'p_c1_time_2', 'p_c1_time_3', 'v_momentu'],
     {
@@ -755,7 +887,7 @@ export const LESSONS = [
       czechNote: 'Notice past-tense forms work sequentially here.'
     }),
 
-  L('l32', 45, 'Abstract Discussion', 'grammar_c1',
+  L('l32', 52, 'Abstract Discussion', 'grammar_c1',
     'Formulate opinions on complex areas like society, technology, and ecology.',
     ['p_c1_abs_1', 'p_c1_abs_2', 'v_tekhnolohiyi', 'v_suchasnoho'],
     {
@@ -769,7 +901,7 @@ export const LESSONS = [
     }),
 
   // --- C1 Vocabulary Categories (Themed) ---
-  L('l33', 46, 'C1 Vocab: Emotions and Opinions', 'vocab_c1',
+  L('l33', 53, 'C1 Vocab: Emotions and Opinions', 'vocab_c1',
     'Expand vocabulary to express nuance in reactions and personal views.',
     ['v_rozhachuvannya', 'v_zadovolennya', 'v_poboyuvannya', 'v_perekonannya', 'v_stavlennya'],
     {
@@ -782,7 +914,7 @@ export const LESSONS = [
       czechNote: 'Notice most neuter abstract nouns end in "-ння" like Czech "-ní".'
     }),
 
-  L('l34', 47, 'C1 Vocab: Work and Professional Life', 'vocab_c1',
+  L('l34', 54, 'C1 Vocab: Work and Professional Life', 'vocab_c1',
     'Communicate professionally regarding responsibilities, decisions, and requirements.',
     ['v_vidpovidalnist', 'v_mozhlyvist', 'v_rishennya', 'v_dosyahnennya', 'v_vymoha'],
     {
@@ -794,7 +926,7 @@ export const LESSONS = [
       czechNote: 'Nouns ending in "-ність" correspond to Czech "-nost".'
     }),
 
-  L('l35', 48, 'C1 Vocab: Society and Development', 'vocab_c1',
+  L('l35', 55, 'C1 Vocab: Society and Development', 'vocab_c1',
     'Discuss societal developments, changes, and influences.',
     ['v_suspilstvo', 'v_rozvytok', 'v_zminy', 'v_vplyv'],
     {
@@ -806,7 +938,7 @@ export const LESSONS = [
       czechNote: 'Excellent loanwords matching Czech cognitive structure.'
     }),
 
-  L('l36', 49, 'C1 Vocab: Abstract Connectors', 'vocab_c1',
+  L('l36', 56, 'C1 Vocab: Abstract Connectors', 'vocab_c1',
     'Structure your writing and arguments fluidly with logical transitions.',
     ['v_vodnochas', 'v_nezvazhayuchy_na', 'v_khocha', 'v_krim_toho', 'v_takym_chynom', 'v_zokrema', 'v_vidpovidno'],
     {
@@ -818,7 +950,7 @@ export const LESSONS = [
       czechNote: '"водночас" literally translates to Czech "jedním časem" or "zároveň".'
     }),
 
-  L('l37', 50, 'C1 Challenge Sentences', 'review_c1',
+  L('l37', 57, 'C1 Challenge Sentences', 'review_c1',
     'Ultimate diagnostic challenge sentences to verify absolute boundary of Ukrainian sentence-building ability.',
     ['p_c1_challenge_1', 'p_c1_challenge_2', 'p_c1_challenge_3', 'p_c1_challenge_4', 'p_c1_challenge_5'],
     {
@@ -828,5 +960,57 @@ export const LESSONS = [
       ],
       substitutions: [],
       czechNote: 'Highly advanced multi-clause sentences.'
+    }),
+
+  // --- Idioms — a dedicated lesson AND a dedicated pos ('idiom') so they
+  // show up as their own Vocabulary Mastered category, not just buried
+  // inside random example sentences. Sourced from the user's CEFR doc's
+  // own "Idiomatic & Natural C2 Speech" section. ---
+  L('l58', 58, 'Common Idioms', 'vocab_c1',
+    'Ten everyday Ukrainian idioms — the kind of thing that makes speech sound native rather than just correct.',
+    ['v_idiom_iceberg', 'v_idiom_velosyped', 'v_idiom_hrabli', 'v_idiom_palytsya', 'v_idiom_mukha_slona', 'v_idiom_na_ruku', 'v_idiom_ruka_na_pulsi', 'v_idiom_pasky', 'v_idiom_slova_na_vitry', 'v_idiom_spilna_mova'],
+    {
+      patterns: [],
+      examples: [
+        { uk: 'Це лише верхівка айсберга.', translit: 'Tse lyshe verkhivka aisberha.', en: 'This is only the tip of the iceberg.', cz: 'To je jen špička ledovce.' },
+        { uk: 'Не варто винаходити велосипед.', translit: 'Ne varto vynakhodyty velosyped.', en: 'There\'s no need to reinvent the wheel.', cz: 'Není třeba znovu vynalézat kolo.' },
+        { uk: 'Ми наступаємо на ті самі граблі.', translit: 'My nastupayemo na ti sami hrabli.', en: 'We are making the same mistake again.', cz: 'Šlapeme na stejné hrábě.' },
+        { uk: 'Тут палиця з двома кінцями.', translit: 'Tut palytsya z dvoma kintsyamy.', en: 'It\'s a double-edged sword.', cz: 'Je to dvousečná zbraň.' },
+      ],
+      substitutions: [],
+      czechNote: 'Idioms are the one category in this app that deliberately isn\'t auto-generated or substitution-based — they\'re fixed, non-compositional phrases, so each one is hand-authored rather than built from smaller reusable parts.',
+    }),
+
+  // --- A first real C2 tier — the reference doc's C1 content was already
+  // well-covered by l28-l37; this is genuinely new ground above it. ---
+  L('l59', 59, 'C2 Grammar Targets: Precision & Qualification', 'vocab_c1',
+    'The hedging/qualifying frames that separate "correct" from "precise" — за умови що, навряд чи, не означає що.',
+    ['v_za_umovy_shcho', 'v_navryad_chy', 'v_ne_oznachaye_shcho', 'p_c2_qual_1', 'p_c2_qual_2', 'p_c2_qual_3', 'p_c2_qual_4'],
+    {
+      patterns: [
+        { uk: 'за умови, що...', translit: 'za umovy, shcho...', en: '"provided that..." — introduces a necessary condition, more precise/formal than a plain якщо (if).', czNote: 'za předpokladu, že... — same register shift in Czech too.' },
+        { uk: 'навряд чи...', translit: 'navryad chy...', en: '"unlikely to... / hardly..." — a hedge, softer and more precise than a flat "no".', czNote: 'sotva... — same idea.' },
+      ],
+      examples: [
+        { uk: 'З цим можна погодитися лише за умови, що ми приймаємо певні припущення.', translit: 'Z tsym mozhna pohodytysya lyshe za umovy, shcho my pryymayemo pevni prypushchennya.', en: 'One can agree with this only if we accept certain assumptions.', cz: 'S tím lze souhlasit jen za předpokladu, že přijmeme určité domněnky.' },
+        { uk: 'Якщо ми нічого не змінимо, ситуація навряд чи покращиться.', translit: 'Yakshcho my nichoho ne zminymo, sytuatsiya navryad chy pokrashchyt\'sya.', en: 'If we don\'t change anything, the situation is unlikely to improve.', cz: 'Pokud nic nezměníme, situace se stěží zlepší.' },
+        { uk: 'Це не означає, що потрібно відмовлятися від власних переконань.', translit: 'Tse ne oznachaye, shcho potribno vidmovlyatysya vid vlasnykh perekonan\'.', en: 'This doesn\'t mean you have to abandon your own beliefs.', cz: 'To neznamená, že se musíme vzdát vlastního přesvědčení.' },
+      ],
+      substitutions: [],
+      czechNote: 'This whole lesson is drawn from the reference doc\'s own "C2 Vocabulary & Grammar Targets" list — deliberately the highest-leverage frames it names, not an arbitrary sample.',
+    }),
+
+  L('l60', 60, 'C2 Diplomacy & Hedged Argument', 'vocab_c1',
+    'Combining what you already know (з одного боку, зрештою, не означає що) into full, precisely-qualified arguments — the doc\'s own "C2 Mastery Test" idea: a simple statement expanded, not a new grammar system.',
+    ['v_robyty_vyhlyad', 'v_vypuskaty_z_uvahy', 'p_c2_dipl_1', 'p_c2_dipl_2', 'p_c2_dipl_3', 'p_c2_dipl_4'],
+    {
+      patterns: [],
+      examples: [
+        { uk: 'З одного боку, я тебе розумію, а з іншого — маю певні сумніви.', translit: 'Z odnoho boku, ya tebe rozumiyu, a z inshoho — mayu pevni sumnivy.', en: 'On the one hand, I understand you, but on the other, I have some doubts.', cz: 'Na jednu stranu ti rozumím, na druhou mám určité pochybnosti.' },
+        { uk: 'Давай не будемо робити вигляд, ніби нічого не сталося.', translit: 'Davay ne budemo robyty vyhlyad, niby nichoho ne stalosya.', en: 'Let\'s not pretend that nothing happened.', cz: 'Nedělejme, že se nic nestalo.' },
+        { uk: 'Зрештою, кожен має право на власну думку, але це не означає, що всі думки однаково обґрунтовані.', translit: 'Zreshtoyu, kozhen maye pravo na vlasnu dumku, ale tse ne oznachaye, shcho vsi dumky odnakovo obgruntovani.', en: 'Ultimately, everyone has the right to their own opinion, but that doesn\'t mean all opinions are equally well-founded.', cz: 'Nakonec má každý právo na svůj vlastní názor, ale to neznamená, že všechny názory jsou stejně opodstatněné.' },
+      ],
+      substitutions: [],
+      czechNote: 'Notice this lesson barely introduces new vocabulary — зрештою (l57) and не означає, що (l59) are both reused here. That\'s deliberate: real C2 fluency is mostly about combining a fairly small set of connectors well, not an ever-expanding vocabulary list.',
     }),
 ];

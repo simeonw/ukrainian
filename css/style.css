@@ -146,6 +146,66 @@ h1, h2, h3 {
   line-height: 1.4;
 }
 
+/* Compact "where am I / what's next" summary — immediate-impact read
+   above the Drill/Lessons cards, replacing a wall of stats as the first
+   thing seen. Mobile-first: stacked rows, generous tap-friendly padding. */
+.level-summary-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.level-summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 14px;
+}
+.level-summary-label {
+  color: var(--text-dim);
+}
+.level-summary-value {
+  font-weight: 700;
+  color: var(--text);
+}
+.level-summary-next {
+  margin-top: 4px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+  font-size: 13px;
+  color: var(--accent-2);
+  font-weight: 600;
+}
+
+/* Detailed stats accordion — native <details>, collapsed by default. */
+.stats-accordion {
+  margin-top: 4px;
+}
+.stats-accordion summary {
+  cursor: pointer;
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-dim);
+  padding: 10px 4px;
+  list-style: none;
+  user-select: none;
+}
+.stats-accordion summary::-webkit-details-marker {
+  display: none;
+}
+.stats-accordion summary::after {
+  content: '▾';
+  float: right;
+  transition: transform 120ms ease;
+}
+.stats-accordion[open] summary::after {
+  transform: rotate(180deg);
+}
+
 /* ---------- drill screen ---------- */
 .drill-screen {
   display: flex;
@@ -236,6 +296,24 @@ h1, h2, h3 {
 }
 .speak-btn:active {
   transform: scale(0.92);
+}
+
+/* "Listen & Choose" round — no text shown until after answering, so the
+   speaker icon itself is the whole prompt and needs real visual weight. */
+.listen-prompt {
+  display: flex;
+  justify-content: center;
+  padding: 12px 0;
+}
+.listen-prompt .speak-btn {
+  font-size: 48px;
+  opacity: 1;
+}
+.listen-reveal {
+  margin-top: 10px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
 }
 
 .drill-card.is-correct {

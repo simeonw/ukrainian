@@ -8,8 +8,8 @@ export const VOCAB = [
   // --- l01: Diagnostic word list (exact words from the spec) ---
   v('v_voda', 'вода', 'voda', 'water', 'voda', 'noun', { gender: 'f', topics: ['l01'] }),
   v('v_ruka', 'рука', 'ruka', 'hand / arm', 'ruka', 'noun', { gender: 'f', topics: ['l01'] }),
-  v('v_brat', 'брат', 'brat', 'brother', 'bratr', 'noun', { gender: 'm', topics: ['l01'] }),
-  v('v_sestra', 'сестра', 'sestra', 'sister', 'sestra', 'noun', { gender: 'f', topics: ['l01'] }),
+  v('v_brat', 'брат', 'brat', 'brother', 'bratr', 'noun', { gender: 'm', topics: ['l39'] }),
+  v('v_sestra', 'сестра', 'sestra', 'sister', 'sestra', 'noun', { gender: 'f', topics: ['l39'] }),
   v('v_misto', 'місто', 'misto', 'city / town', 'město', 'noun', { gender: 'n', topics: ['l01'] }),
   v('v_robyty', 'робити', 'robyty', 'to do / to make (ongoing)', 'dělat', 'verb', { aspect: 'imperfective', pairId: 'aspect_robyty', topics: ['l01'] }),
   v('v_bachyty', 'бачити', 'bachyty', 'to see (ongoing)', 'vidět', 'verb', { aspect: 'imperfective', pairId: 'aspect_bachyty', topics: ['l01'] }),
@@ -142,11 +142,11 @@ export const VOCAB = [
   v('v_ne_rozumiyu', 'не розумію', 'ne rozumiyu', 'I don\'t understand', 'nerozumím', 'phrase', { topics: ['l20'] }),
 
   // --- Numbers & question words (woven into l17/l18/l19 practice) ---
-  v('v_odyn', 'один', 'odyn', 'one', 'jeden', 'number', { topics: ['l19'] }),
-  v('v_dva', 'два', 'dva', 'two', 'dva', 'number', { topics: ['l19'] }),
-  v('v_try', 'три', 'try', 'three', 'tři', 'number', { topics: ['l19'] }),
-  v('v_chotyry', 'чотири', 'chotyry', 'four', 'čtyři', 'number', { topics: ['l19'] }),
-  v('v_p_yat', 'п\'ять', 'p\'yat\'', 'five', 'pět', 'number', { topics: ['l19'] }),
+  v('v_odyn', 'один', 'odyn', 'one', 'jeden', 'number', { topics: ['l38'] }),
+  v('v_dva', 'два', 'dva', 'two', 'dva', 'number', { topics: ['l38'] }),
+  v('v_try', 'три', 'try', 'three', 'tři', 'number', { topics: ['l38'] }),
+  v('v_chotyry', 'чотири', 'chotyry', 'four', 'čtyři', 'number', { topics: ['l38'] }),
+  v('v_p_yat', 'п\'ять', 'p\'yat\'', 'five', 'pět', 'number', { topics: ['l38'] }),
   v('v_skil_ky', 'скільки', 'skil\'ky', 'how much / how many', 'kolik', 'adverb', { topics: ['l17'] }),
   v('v_khto', 'хто', 'khto', 'who', 'kdo', 'pronoun', { topics: ['l16'] }),
   v('v_shcho', 'що', 'shcho', 'what', 'co', 'pronoun', { topics: ['l20'] }),
@@ -206,13 +206,13 @@ export const VOCAB = [
   v('v_zminy', 'зміни', 'zminy', 'changes', 'změny', 'noun', { topics: ['l35'] }),
   v('v_vplyv', 'вплив', 'vplyv', 'influence / impact', 'vliv', 'noun', { gender: 'm', topics: ['l35'] }),
   // Abstract connectors
-  v('v_vodnochas', 'водночас', 'vodnochas', 'at the same time / simultaneously', 'zároveň', 'adverb', { topics: ['l36'] }),
-  v('v_nezvazhayuchy_na', 'незважаючи на', 'nezvazhayuchy na', 'despite / in spite of', 'přes / nehledě na', 'phrase', { topics: ['l36'] }),
-  v('v_khocha', 'хоча', 'khocha', 'although / though', 'ačkoliv / ač', 'conjunction', { topics: ['l36'] }),
-  v('v_krim_toho', 'крім того', 'krim toho', 'besides / in addition', 'kromě toho', 'phrase', { topics: ['l36'] }),
-  v('v_takym_chynom', 'таким чином', 'takym chynom', 'thus / in this way', 'tímto způsobem / tak', 'phrase', { topics: ['l36'] }),
-  v('v_zokrema', 'зокрема', 'zokrema', 'in particular / particularly', 'zejména / konkrétně', 'adverb', { topics: ['l36'] }),
-  v('v_vidpovidno', 'відповідно', 'vidpovidno', 'accordingly / respectively', 'odpovídajícím způsobem', 'adverb', { topics: ['l36'] }),
+  v('v_vodnochas', 'водночас', 'vodnochas', 'at the same time / simultaneously', 'zároveň', 'connector', { topics: ['l36'], skills: ['connector'] }),
+  v('v_nezvazhayuchy_na', 'незважаючи на', 'nezvazhayuchy na', 'despite / in spite of', 'přes / nehledě na', 'connector', { topics: ['l36'], skills: ['connector'] }),
+  v('v_khocha', 'хоча', 'khocha', 'although / though', 'ačkoliv / ač', 'connector', { topics: ['l36'], skills: ['connector'] }),
+  v('v_krim_toho', 'крім того', 'krim toho', 'besides / in addition', 'kromě toho', 'connector', { topics: ['l36'], skills: ['connector'] }),
+  v('v_takym_chynom', 'таким чином', 'takym chynom', 'thus / in this way', 'tímto způsobem / tak', 'connector', { topics: ['l36'], skills: ['connector'] }),
+  v('v_zokrema', 'зокрема', 'zokrema', 'in particular / particularly', 'zejména / konkrétně', 'connector', { topics: ['l36'], skills: ['connector'] }),
+  v('v_vidpovidno', 'відповідно', 'vidpovidno', 'accordingly / respectively', 'odpovídajícím způsobem', 'connector', { topics: ['l36'], skills: ['connector'] }),
 
   // --- l38: Numbers, Time & Dates (шість-десять added; один-п'ять already exist, tagged l19) ---
   v('v_shist', 'шість', 'shist\'', 'six', 'šest', 'number', { topics: ['l38'] }),
@@ -336,4 +336,75 @@ export const VOCAB = [
   // l01-l03 rather than re-declaring duplicate vocab under a new lesson.
   v('v_yisty', 'їсти', 'yisty', 'to eat', 'jíst', 'verb', { topics: ['l50'] }),
   v('v_dyvytysya', 'дивитися', 'dyvytysya', 'to watch', 'dívat se', 'verb', { aspect: 'imperfective', topics: ['l50'], skills: ['reflexive'] }),
+
+  // --- New conversational lessons (wave 3): hobbies, opinions, small talk,
+  // informed directly by the sentences the user asked for. ---
+  // --- l51: Hobbies & Free Time ---
+  v('v_lyubyty', 'любити', 'lyubyty', 'to like / to love', 'mít rád', 'verb', { topics: ['l51'] }),
+  v('v_plavaty', 'плавати', 'plavaty', 'to swim', 'plavat', 'verb', { aspect: 'imperfective', topics: ['l51'] }),
+  v('v_vidviduvaty', 'відвідувати', 'vidviduvaty', 'to visit', 'navštěvovat', 'verb', { aspect: 'imperfective', topics: ['l51'] }),
+  v('v_muzey', 'музей', 'muzey', 'museum', 'muzeum', 'noun', { gender: 'm', topics: ['l51'] }),
+  v('v_vykhidni', 'вихідні', 'vykhidni', 'the weekend', 'víkend', 'noun', { topics: ['l51'] }),
+  v('v_vilnyi_chas', 'вільний час', 'vil\'nyi chas', 'free time / spare time', 'volný čas', 'phrase', { topics: ['l51'] }),
+
+  // --- l52: Reactions & Enjoying Things ---
+  v('v_vyhlyadaty', 'виглядати', 'vyhlyadaty', 'to look / to appear', 'vypadat', 'verb', { aspect: 'imperfective', topics: ['l52'] }),
+
+  // --- l53: Asking About Family & Quantities ---
+  v('v_lyudy', 'люди', 'lyudy', 'people', 'lidé', 'noun', { topics: ['l53'] }),
+
+  // --- l54: Talking About What You've Learned ---
+  v('v_vyvchyty', 'вивчити', 'vyvchyty', 'to learn / to master (a subject)', 'naučit se', 'verb', { aspect: 'perfective', topics: ['l54'] }),
+  v('v_tsyoho_roku', 'цього року', 'ts\'oho roku', 'this year', 'letos / tento rok', 'phrase', { topics: ['l54'] }),
+  v('v_mynuloho_roku', 'минулого року', 'mynuloho roku', 'last year', 'loni / minulý rok', 'phrase', { topics: ['l54'] }),
+
+  // --- Wave 4 (CEFR-doc-informed): B1 grammar gaps, a dedicated connectors
+  // category, idioms, and a first real C2 tier. Content and example
+  // sentences cross-checked against the user-supplied "cefr levels"
+  // reference document rather than invented from scratch. ---
+
+  // --- l55: Relative Clauses (який/яка/яке/які) ---
+  // Four forms of one lexeme, tracked as separate recognizable items —
+  // same approach already used for l08's pishov/pishla/pishly.
+  v('v_yakyi', 'який', 'yakyi', 'which / that (masc.)', 'který', 'pronoun', { gender: 'm', topics: ['l55'] }),
+  v('v_yaka_rel', 'яка', 'yaka', 'which / that (fem.)', 'která', 'pronoun', { gender: 'f', topics: ['l55'] }),
+  v('v_yake', 'яке', 'yake', 'which / that (neut.)', 'které', 'pronoun', { gender: 'n', topics: ['l55'] }),
+  v('v_yaki', 'які', 'yaki', 'which / that (plural)', 'které', 'pronoun', { topics: ['l55'] }),
+
+  // --- l56: Purpose Clauses & Indirect Questions (щоб, чи) ---
+  v('v_shchob', 'щоб', 'shchob', 'so that / in order to', 'aby', 'conjunction', { topics: ['l56'] }),
+  v('v_chy_whether', 'чи', 'chy', 'whether / if', 'zda', 'conjunction', { topics: ['l56'] }),
+
+  // --- l57: Connectors & Cohesive Devices — a dedicated, trackable
+  // category (pos: 'connector'), not scattered across adverb/phrase/
+  // conjunction like l36's existing set (which gets retagged to match). ---
+  v('v_tomu_shcho', 'тому що', 'tomu shcho', 'because', 'protože', 'connector', { topics: ['l57'], skills: ['connector'] }),
+  v('v_cherez_tse', 'через це', 'cherez tse', 'because of this / as a result', 'kvůli tomu', 'connector', { topics: ['l57'], skills: ['connector'] }),
+  v('v_z_odnoho_boku', 'з одного боку', 'z odnoho boku', 'on one hand', 'na jednu stranu', 'connector', { topics: ['l57'], skills: ['connector'] }),
+  v('v_z_inshoho_boku', 'з іншого боку', 'z inshoho boku', 'on the other hand', 'na druhou stranu', 'connector', { topics: ['l57'], skills: ['connector'] }),
+  v('v_naskilky_meni_vidomo', 'наскільки мені відомо', 'naskil\'ky meni vidomo', 'as far as I know', 'pokud vím', 'connector', { topics: ['l57'], skills: ['connector'] }),
+  v('v_zreshtoyu', 'зрештою', 'zreshtoyu', 'ultimately / after all', 'nakonec', 'connector', { topics: ['l57'], skills: ['connector'] }),
+
+  // --- l58: Common Idioms — a dedicated pos so it clears vocab-badges.js's
+  // "10+ items" threshold and shows up as its own Vocabulary Mastered
+  // category, per the user's explicit request. ---
+  v('v_idiom_iceberg', 'Це лише верхівка айсберга.', 'Tse lyshe verkhivka aisberha.', 'This is only the tip of the iceberg.', 'To je jen špička ledovce.', 'idiom', { topics: ['l58'] }),
+  v('v_idiom_velosyped', 'Не варто винаходити велосипед.', 'Ne varto vynakhodyty velosyped.', 'There\'s no need to reinvent the wheel.', 'Není třeba znovu vynalézat kolo.', 'idiom', { topics: ['l58'] }),
+  v('v_idiom_hrabli', 'Ми наступаємо на ті самі граблі.', 'My nastupayemo na ti sami hrabli.', 'We are making the same mistake again.', 'Šlapeme na stejné hrábě.', 'idiom', { topics: ['l58'] }),
+  v('v_idiom_palytsya', 'Тут палиця з двома кінцями.', 'Tut palytsya z dvoma kintsyamy.', 'It\'s a double-edged sword.', 'Je to dvousečná zbraň.', 'idiom', { topics: ['l58'] }),
+  v('v_idiom_mukha_slona', 'Він любить робити з мухи слона.', 'Vin lyubyt\' robyty z mukhy slona.', 'He likes to make a mountain out of a molehill.', 'Rád dělá z komára velblouda.', 'idiom', { topics: ['l58'] }),
+  v('v_idiom_na_ruku', 'Це може зіграти нам на руку.', 'Tse mozhe zihraty nam na ruku.', 'This could work in our favor.', 'To by nám mohlo hrát do karet.', 'idiom', { topics: ['l58'] }),
+  v('v_idiom_ruka_na_pulsi', 'Вона завжди тримає руку на пульсі.', 'Vona zavzhdy trymaye ruku na pul\'si.', 'She always keeps her finger on the pulse.', 'Vždy drží prst na tepu.', 'idiom', { topics: ['l58'] }),
+  v('v_idiom_pasky', 'Доведеться затягнути паски.', 'Dovedet\'sya zatyahnuty pasky.', 'We\'ll have to tighten our belts.', 'Budeme si muset utáhnout opasky.', 'idiom', { topics: ['l58'] }),
+  v('v_idiom_slova_na_vitry', 'Він не з тих, хто кидає слова на вітер.', 'Vin ne z tykh, khto kydaye slova na viter.', 'He\'s not someone who makes empty promises.', 'Neplácá jen tak do větru.', 'idiom', { topics: ['l58'] }),
+  v('v_idiom_spilna_mova', 'Вона вміє знаходити спільну мову з людьми.', 'Vona vmiye znakhodyty spil\'nu movu z lyud\'my.', 'She knows how to find common ground with people.', 'Umí najít společnou řeč s lidmi.', 'idiom', { topics: ['l58'] }),
+
+  // --- l59: C2 Grammar Targets — Precision & Qualification ---
+  v('v_za_umovy_shcho', 'за умови, що', 'za umovy, shcho', 'provided that', 'za předpokladu, že', 'connector', { topics: ['l59'], skills: ['connector'] }),
+  v('v_navryad_chy', 'навряд чи', 'navryad chy', 'unlikely / hardly', 'sotva', 'connector', { topics: ['l59'], skills: ['connector'] }),
+  v('v_ne_oznachaye_shcho', 'не означає, що', 'ne oznachaye, shcho', 'doesn\'t mean that', 'neznamená to, že', 'connector', { topics: ['l59'], skills: ['connector'] }),
+
+  // --- l60: C2 Diplomacy & Hedged Argument ---
+  v('v_robyty_vyhlyad', 'робити вигляд', 'robyty vyhlyad', 'to pretend / act as if', 'předstírat', 'phrase', { topics: ['l60'] }),
+  v('v_vypuskaty_z_uvahy', 'випускати з уваги', 'vypuskaty z uvahy', 'to overlook / lose sight of', 'přehlížet', 'phrase', { topics: ['l60'] }),
 ];

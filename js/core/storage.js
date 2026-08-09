@@ -13,6 +13,7 @@ export const ALL_SETTINGS_TOPICS = [
   'aspect',
   'dative',
   'reflexive',
+  'connector',
   'understanding',
   'production'
 ];
@@ -33,6 +34,15 @@ function defaultProgress() {
       settings: {
         transliteration: true,
         language: 'en',
+        // Whether the 4-way tile round speaks the correct pronunciation
+        // automatically once you've answered, vs. staying tap-to-hear.
+        // Free-text/typed rounds always stay tap-to-hear regardless of this.
+        autoSpeak: true,
+        // Which Drill exercise formats are in rotation. 'listen' needs a
+        // real uk-UA voice to function — see core/speech.js — so it's still
+        // listed here as a preference even when unsupported on this device;
+        // drill.js silently skips it if speech isn't actually available.
+        exerciseTypes: { swipe: true, builder: true, semantic: true, listen: true },
         topics: [...ALL_SETTINGS_TOPICS],
         // Content-domain filter (Settings' "Vocabulary Themes") — separate
         // axis from `topics` above. Defaults to everything on, same as
