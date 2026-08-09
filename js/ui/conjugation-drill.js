@@ -2,17 +2,21 @@
 // conjugations in pairs" (12 verbs that govern an infinitive — want, can,
 // have to, like, start, try, forget, promise, plan, decide, continue, be
 // afraid — × I/you/he/she/we/they × a growing infinitive pool).
-// Deliberately separate from the adaptive Drill/SRS system: this is
-// supplementary practice, not a graded quiz, so no test type below
-// records answers or affects "known" status anywhere.
 //
 // Two modes:
-//  - Cycle: passive flashcard exposure (the original request).
+//  - Cycle: passive flashcard exposure, no correctness signal — doesn't
+//    touch the vocab tracker (there's nothing to grade).
 //  - Test: three togglable formats, all defaulting on ("I can test all,
 //    allow me to select which types are active"). Every one keeps the
 //    conjugated ending GIVEN, never quizzed — per explicit feedback, the
 //    ending is "easy to pick" once you know the pattern; knowing WHICH
-//    verb root a meaning maps to is the actual hard part.
+//    verb root a meaning maps to is the actual hard part. Test-mode
+//    answers now DO feed core/srs.js's evidence tracking for the
+//    infinitive being tested (same isItemKnown bar the main Drill uses) —
+//    genuine recall demonstrated here is genuine recall, full stop; the
+//    earlier "deliberately separate, doesn't affect known status" design
+//    was wrong given real usage (an hour of 76%-correct Test-mode play
+//    should move the vocabulary tracker, not leave it stuck at 1 word).
 //    - Fill the Blank: pronoun+modal given, pick the missing root from 4
 //      tiles (or vice versa) — the original test type.
 //    - Pick the Pair: English shown, select the 2 correct Ukrainian words
@@ -23,7 +27,8 @@
 import { PRONOUNS, MODALS, conjugate } from '../data/conjugation.js';
 import { getInfinitiveVocabItems, bareInfinitiveEn } from '../data/substitution-fills.js';
 import { shuffle } from '../core/random.js';
-import { loadProgress } from '../core/storage.js';
+import { loadProgress, saveProgress } from '../core/storage.js';
+import { recordAnswer } from '../core/srs.js';
 import { escapeHtml } from './dom-utils.js';
 import { speakUkrainian, canSpeakUkrainian } from '../core/speech.js';
 import { getFuzzyRatio } from '../core/fuzzy.js';
@@ -211,6 +216,14 @@ export function renderConjugationDrill(container, { onExit } = {}) {
     updateScore();
   }
 
+  // Feeds the SAME evidence tracking the main Drill uses (core/srs.js's
+  // isItemKnown) for the infinitive actually being tested this round —
+  // see the file header for why this changed from "never records".
+  function recordVocabEvidence(infinitiveId, direction, isCorrect, modality, isIdk = false) {
+    recordAnswer(progress, infinitiveId, direction, isCorrect, isIdk, null, modality);
+    saveProgress(progress);
+  }
+
   // showEnglish: Type the Meaning shows the Ukrainian as the PROMPT already
   // (you're reading it, not guessing it) — what you actually asked for on
   // "I don't know" or a wrong guess there is the English answer, not the
@@ -262,10 +275,14 @@ export function renderConjugationDrill(container, { onExit } = {}) {
 
     let locked = false;
     const feedbackEl = roundArea.querySelector('#conj-test-feedback');
-    function reveal(isCorrect) {
+    function reveal(isCorrect, isIdk = false) {
       if (locked) return;
       locked = true;
       recordTestResult(isCorrect);
+      // Only the infinitive slot counts as vocabulary evidence — when the
+      // MODAL was blanked instead, the infinitive was given/shown, not
+      // tested, so recording it here would be false credit.
+      if (!blankModal) recordVocabEvidence(combo.infinitive.id, 'en2uk', isCorrect, 'mc', isIdk);
       roundArea.querySelectorAll('.conjugation-test-option').forEach((b) => {
         if (b.textContent.trim() === correctText) b.classList.add('is-correct');
       });
@@ -280,7 +297,7 @@ export function renderConjugationDrill(container, { onExit } = {}) {
         reveal(isCorrect);
       });
     });
-    wireIdk(roundArea, () => reveal(false));
+    wireIdk(roundArea, () => reveal(false, true));
   }
 
   // --- TEST TYPE 2: Pick the Pair — English shown, select the 2 correct
@@ -309,10 +326,14 @@ export function renderConjugationDrill(container, { onExit } = {}) {
     let locked = false;
     const selected = [];
     const feedbackEl = roundArea.querySelector('#conj-test-feedback');
-    function reveal(isCorrect) {
+    function reveal(isCorrect, isIdk = false) {
       if (locked) return;
       locked = true;
       recordTestResult(isCorrect);
+      // Both slots are tested at once here — overall correctness is the
+      // closest available signal for whether the infinitive was correctly
+      // identified as half of the pair.
+      recordVocabEvidence(combo.infinitive.id, 'en2uk', isCorrect, 'mc', isIdk);
       roundArea.querySelectorAll('.conjugation-test-option').forEach((b) => {
         if (correctSet.has(b.textContent.trim())) b.classList.add('is-correct');
       });
@@ -340,7 +361,7 @@ export function renderConjugationDrill(container, { onExit } = {}) {
         }
       });
     });
-    wireIdk(roundArea, () => reveal(false));
+    wireIdk(roundArea, () => reveal(false, true));
   }
 
   // --- TEST TYPE 3: Type the Meaning — Ukrainian shown complete, type the
@@ -367,11 +388,14 @@ export function renderConjugationDrill(container, { onExit } = {}) {
     input.focus();
 
     let locked = false;
-    function reveal(isCorrect) {
+    function reveal(isCorrect, isIdk = false) {
       if (locked) return;
       locked = true;
       input.disabled = true;
       recordTestResult(isCorrect);
+      // Typed translation of the full sentence — the strongest evidence
+      // tier, same as the main Drill's semantic-match rounds.
+      recordVocabEvidence(combo.infinitive.id, 'uk2en', isCorrect, 'freetext', isIdk);
       feedbackEl.innerHTML = feedbackBlockHtml(isCorrect, combo, { showEnglish: true });
       wireFeedbackNext(feedbackEl, combo);
     }
@@ -384,7 +408,7 @@ export function renderConjugationDrill(container, { onExit } = {}) {
     }
     submitBtn.addEventListener('click', submit);
     input.addEventListener('keydown', (e) => { if (e.key === 'Enter') submit(); });
-    wireIdk(roundArea, () => reveal(false));
+    wireIdk(roundArea, () => reveal(false, true));
   }
 
   const TEST_RENDERERS = {
