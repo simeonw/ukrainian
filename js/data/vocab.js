@@ -54,7 +54,7 @@ export const VOCAB = [
   v('v_prykhodyty', 'приходити', 'prykhodyty', 'to come / arrive (ongoing, repeated)', 'přicházet', 'verb', { aspect: 'imperfective', pairId: 'aspect_pryyty', topics: ['l05'] }),
   v('v_dopomohty', 'допомогти', 'dopomohty', 'to help (complete)', 'pomoct', 'verb', { aspect: 'perfective', pairId: 'aspect_dopomahaty', topics: ['l05'] }),
   v('v_dopomahaty', 'допомагати', 'dopomahaty', 'to help (ongoing)', 'pomáhat', 'verb', { aspect: 'imperfective', pairId: 'aspect_dopomahaty', topics: ['l05'] }),
-  v('v_zrozumity', 'зрозуміти', 'zrozumity', 'to understand (complete)', 'pochopit', 'verb', { aspect: 'perfective', topics: ['l05'] }),
+  v('v_zrozumity', 'зрозуміти', 'zrozumity', 'to understand (complete)', 'pochopit', 'verb', { aspect: 'perfective', topics: ['l05', 'l66'] }),
 
   // --- l07: Sentence Frame 3 — Future tense ---
   v('v_pratsyuvaty', 'працювати', 'pratsyuvaty', 'to work', 'pracovat', 'verb', { aspect: 'imperfective', topics: ['l07'] }),
@@ -464,4 +464,50 @@ export const VOCAB = [
   v('v_mytysya', 'митися', 'mytysya', 'to wash oneself', 'mýt se', 'verb', { aspect: 'imperfective', topics: ['l62'] }),
   v('v_holytysya', 'голитися', 'holytysya', 'to shave (oneself)', 'holit se', 'verb', { aspect: 'imperfective', topics: ['l62'] }),
   v('v_tsiluvaty', 'цілувати', 'tsiluvaty', 'to kiss', 'líbat', 'verb', { aspect: 'imperfective', topics: ['l62'] }),
+
+  // --- Prefix Mastery Lessons (l63 - l66) ---
+  // l63: ПЕРЕ- (across / over / again)
+  v('v_pereyikhaty', 'переїхати', 'pereyikhaty', 'to move house / go across', 'přestěhovat se / přejet', 'verb', { aspect: 'perfective', topics: ['l63'] }),
+  v('v_perepysaty', 'переписати', 'perepysaty', 'to rewrite / write again', 'přepsat', 'verb', { aspect: 'perfective', topics: ['l63'] }),
+  v('v_perechytaty', 'перечитати', 'perechytaty', 'to reread / read again', 'přečíst znovu', 'verb', { aspect: 'perfective', topics: ['l63'] }),
+  v('v_peredumaty', 'передумати', 'peredumaty', 'to change one\'s mind / think over', 'rozmyslet si', 'verb', { aspect: 'perfective', topics: ['l63'] }),
+  v('v_perebilshyty', 'перебільшити', 'perebilshyty', 'to exaggerate / make more', 'přehánět / nadsadit', 'verb', { aspect: 'perfective', topics: ['l63'] }),
+  v('v_perevantazhyty', 'перевантажити', 'perevantazhyty', 'to overload / load over', 'přetížit', 'verb', { aspect: 'perfective', topics: ['l63'] }),
+  v('v_pereviryty', 'перевірити', 'pereviryty', 'to verify / check over', 'prověřit / zkontrolovat', 'verb', { aspect: 'perfective', topics: ['l63'] }),
+  v('v_pereklasty', 'перекласти', 'pereklasty', 'to translate / put across', 'přeložit', 'verb', { aspect: 'perfective', topics: ['l63'] }),
+  v('v_perekonaty', 'переконати', 'perekonaty', 'to convince / bring over', 'přesvědčit', 'verb', { aspect: 'perfective', topics: ['l63'] }),
+  v('v_peredbachyty', 'передбачити', 'peredbachyty', 'to foresee / see beforehand', 'předvídat', 'verb', { aspect: 'perfective', topics: ['l63'] }),
+  v('v_perehlyanyty', 'переглянути', 'perehlyanyty', 'to review / look over', 'prohlédnout / zhlédnout', 'verb', { aspect: 'perfective', topics: ['l63'] }),
+
+  // l64: РОЗ- & ПІД- (apart / support / under)
+  v('v_rozibraty', 'розібрати', 'rozibraty', 'to take apart / disassemble / analyse', 'rozebrat / pochopit', 'verb', { aspect: 'perfective', topics: ['l64'] }),
+  v('v_rozdilyty', 'розділити', 'rozdilyty', 'to divide / make apart', 'rozdělit', 'verb', { aspect: 'perfective', topics: ['l64'] }),
+  v('v_rozkryty', 'розкрити', 'rozkryty', 'to reveal / open apart', 'odkrýt / odhalit', 'verb', { aspect: 'perfective', topics: ['l64'] }),
+  v('v_rozpovisty', 'розповісти', 'rozpovisty', 'to tell / tell out', 'vyprávět / povědět', 'verb', { aspect: 'perfective', topics: ['l64'] }),
+  v('v_rozbudyty', 'розбудити', 'rozbudyty', 'to wake someone / awaken out', 'probudit', 'verb', { aspect: 'perfective', topics: ['l64'] }),
+  v('v_rozpochaty', 'розпочати', 'rozpochaty', 'to start / begin outward', 'zahájit / začít', 'verb', { aspect: 'perfective', topics: ['l64'] }),
+  v('v_rozglyanyty', 'розглянути', 'rozglyanyty', 'to examine / look apart', 'prozkoumat / posoudit', 'verb', { aspect: 'perfective', topics: ['l64'] }),
+  v('v_pidpysaty', 'підписати', 'pidpysaty', 'to sign / write under', 'podepsat', 'verb', { aspect: 'perfective', topics: ['l64'] }),
+  v('v_pidkazaty', 'підказати', 'pidkazaty', 'to give a hint / say to', 'napovědět', 'verb', { aspect: 'perfective', topics: ['l64'] }),
+  v('v_pidtrymaty', 'підтримати', 'pidtrymaty', 'to support / hold up', 'podpořit / podržet', 'verb', { aspect: 'perfective', topics: ['l64'] }),
+  v('v_pidnyaty', 'підняти', 'pidnyaty', 'to lift / raise up', 'zvednout', 'verb', { aspect: 'perfective', topics: ['l64'] }),
+  v('v_pidiyty', 'підійти', 'pidiyty', 'to approach / go up to', 'přistoupit / jít blíž', 'verb', { aspect: 'perfective', topics: ['l64'] }),
+  v('v_pidhotuvaty', 'підготувати', 'pidhotuvaty', 'to prepare / prepare underneath', 'připravit', 'verb', { aspect: 'perfective', topics: ['l64'] }),
+
+  // l65: ВИ- & ЗА- (out / into / completely)
+  v('v_vynesty', 'винести', 'vynesty', 'to carry out / take out', 'vynést', 'verb', { aspect: 'perfective', topics: ['l65'] }),
+  v('v_vypysaty', 'виписати', 'vypysaty', 'to write out / extract', 'vypsat', 'verb', { aspect: 'perfective', topics: ['l65'] }),
+  v('v_vyhovoryty', 'виговорити', 'vyhovoryty', 'to articulate / speak out', 'vyslovit / vymluvit', 'verb', { aspect: 'perfective', topics: ['l65'] }),
+  v('v_vyavyty', 'виявити', 'vyavyty', 'to reveal / discover / bring out', 'projevit / odhalit', 'verb', { aspect: 'perfective', topics: ['l65'] }),
+  v('v_vytrymaty', 'витримати', 'vytrymaty', 'to endure / hold out', 'vydržet / snést', 'verb', { aspect: 'perfective', topics: ['l65'] }),
+  v('v_zaperechyty', 'заперечити', 'zaperechyty', 'to deny / object / speak against', 'popřít / namítat', 'verb', { aspect: 'perfective', topics: ['l65'] }),
+  v('v_zapamyataty', 'запам\'ятати', 'zapamyataty', 'to memorize / put into memory', 'zapamatovat si', 'verb', { aspect: 'perfective', topics: ['l65'] }),
+  v('v_zabuty', 'забути', 'zabuty', 'to forget / be behind', 'zapomenout', 'verb', { aspect: 'perfective', topics: ['l65'] }),
+
+  // l66: ВІД- & ДО- & ПРО- & У- & З- (away / until / through / inside / together)
+  v('v_vidmovyty', 'відмовити', 'vidmovyty', 'to refuse / deny / speak away', 'odmítnout', 'verb', { aspect: 'perfective', topics: ['l66'] }),
+  v('v_doslidyty', 'дослідити', 'doslidyty', 'to investigate / follow to end', 'vyzkoumat / prozkoumat', 'verb', { aspect: 'perfective', topics: ['l66'] }),
+  v('v_prostezhyty', 'простежити', 'prostezhyty', 'to trace / monitor / follow through', 'sledovat / vysledovat', 'verb', { aspect: 'perfective', topics: ['l66'] }),
+  v('v_produmaty', 'продумати', 'produmaty', 'to think through / work out', 'promyslet', 'verb', { aspect: 'perfective', topics: ['l66'] }),
+  v('v_utrymaty', 'утримати', 'utrymaty', 'to retain / hold in', 'udržet / zachovat', 'verb', { aspect: 'perfective', topics: ['l66'] }),
 ];
