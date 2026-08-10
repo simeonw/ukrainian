@@ -299,6 +299,62 @@ export function renderLessons(container, { onExit, onOpenDiagnostic } = {}) {
           </section>
         ` : ''}
 
+        ${content.prefixes && content.prefixes.length ? `
+          <section class="lesson-section">
+            <h3>Prefix Composition & Meaning</h3>
+            <p style="font-size: 13px; color: var(--text-dim); margin-bottom: 12px;">
+              Mastering how prefixes attach to root verbs to shift their meaning. Pay attention to whether the derivation is literally active today or just historical.
+            </p>
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+              ${content.prefixes.map((p, i) => {
+                let badgeLabel = 'Actually Transparent';
+                let badgeClass = 'status-learned';
+                if (p.compositionType === 'semantic') {
+                  badgeLabel = 'Semantically Related';
+                  badgeClass = 'status-learning';
+                } else if (p.compositionType === 'coincidence') {
+                  badgeLabel = 'Historical Coincidence (Do not decompose)';
+                  badgeClass = 'status-needs-review';
+                }
+
+                return `
+                  <div class="prefix-block" data-prefix-idx="${i}" style="background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; flex-wrap: wrap;">
+                      <div style="font-size: 18px; font-weight: bold; color: var(--text);">
+                        ${escapeHtml(p.uk)} ${speechAvailable ? SPEAKER_BTN_HTML : ''}
+                        ${(showTranslit && p.translit) ? `<span style="font-size: 14px; font-weight: normal; color: var(--text-dim); margin-left: 6px;">(${escapeHtml(p.translit)})</span>` : ''}
+                      </div>
+                      <span class="lesson-badge ${badgeClass}" style="font-size: 11px; padding: 3px 8px; font-weight: 600; text-transform: none;">${badgeLabel}</span>
+                    </div>
+
+                    <div style="margin-top: 10px; display: grid; grid-template-columns: 100px 1fr; gap: 6px 12px; font-size: 13px;">
+                      <span style="color: var(--text-dim); font-weight: 600;">Prefix:</span>
+                      <span style="color: var(--accent-2); font-weight: 600;">${escapeHtml(p.prefix)}</span>
+
+                      <span style="color: var(--text-dim); font-weight: 600;">Root:</span>
+                      <span>${escapeHtml(p.root)}</span>
+
+                      <span style="color: var(--text-dim); font-weight: 600;">Literal:</span>
+                      <span style="font-family: monospace; background: var(--surface-2); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--border); justify-self: start;">${escapeHtml(p.literal)}</span>
+
+                      <span style="color: var(--text-dim); font-weight: 600;">Mental Picture:</span>
+                      <span style="font-style: italic; color: var(--text);">${escapeHtml(p.mentalPicture)}</span>
+
+                      <span style="color: var(--text-dim); font-weight: 600;">Meaning:</span>
+                      <span style="font-weight: 600; color: var(--good);">${escapeHtml(p.en)}</span>
+
+                      ${p.cz ? `
+                        <span style="color: var(--text-dim); font-weight: 600;">Czech:</span>
+                        <span style="color: var(--accent-2);">${escapeHtml(p.cz)}</span>
+                      ` : ''}
+                    </div>
+                  </div>
+                `;
+              }).join('')}
+            </div>
+          </section>
+        ` : ''}
+
         ${content.substitutions && content.substitutions.length ? `
           <section class="lesson-section">
             <h3>Try substituting</h3>
@@ -346,6 +402,11 @@ export function renderLessons(container, { onExit, onOpenDiagnostic } = {}) {
       const ex = content.examples[Number(el.dataset.exampleIdx)];
       const btn = el.querySelector('.speak-btn');
       if (ex && btn) btn.addEventListener('click', (e) => { e.stopPropagation(); speakUkrainian(ex.uk); });
+    });
+    container.querySelectorAll('.prefix-block').forEach((el) => {
+      const p = content.prefixes[Number(el.dataset.prefixIdx)];
+      const btn = el.querySelector('.speak-btn');
+      if (p && btn) btn.addEventListener('click', (e) => { e.stopPropagation(); speakUkrainian(p.uk); });
     });
 
     // Reset current lesson logic

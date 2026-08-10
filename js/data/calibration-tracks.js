@@ -26,10 +26,10 @@ const LESSON_ORDER_BY_ID = new Map(LESSONS.map((l) => [l.id, l.order]));
 // Boundaries shifted as new lesson waves were inserted before the old B1
 // band — each band keeps roughly its original width, just moved later.
 export function cefrForLessonOrder(order) {
-  if (order <= 37) return 'beginner';
-  if (order <= 43) return 'b1';
-  if (order <= 47) return 'b2';
-  if (order <= 58) return 'c1';
+  if (order <= 41) return 'beginner';
+  if (order <= 47) return 'b1';
+  if (order <= 51) return 'b2';
+  if (order <= 62) return 'c1';
   return 'c2';
 }
 

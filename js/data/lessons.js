@@ -496,7 +496,111 @@ export const LESSONS = [
   // --- New A2/B1 lessons (wave 2 of the content-expansion request, informed
   // by "Ukrainian Czech Guide.docx" but independently verified — the doc
   // was treated as a lead, not gospel, per the user's own caveat) ---
-  L('l45', 28, 'The Dative Case: Saying What You Need or Feel', 'grammar',
+
+  L('l63', 28, 'Prefix Mastery: ПЕРЕ- (Across / Over / Again)', 'vocab',
+    'Learn how the ПЕРЕ- prefix modifies meaning to express across, over, repetition, or excess, and see how root verbs reinforce each other.',
+    ['v_pereyikhaty', 'v_perepysaty', 'v_perechytaty', 'v_peredumaty', 'v_perebilshyty', 'v_perevantazhyty', 'v_pereviryty', 'v_pereklasty', 'v_perekonaty', 'v_peredbachyty', 'v_perehlyanyty'],
+    {
+      patterns: [],
+      examples: [
+        { uk: 'Я хочу переїхати.', translit: 'Ya khochu pereyikhaty.', en: 'I want to move house.', cz: 'Chci se přestěhovat.' },
+        { uk: 'Мушу перекласти це.', translit: 'Mushu pereklasty tse.', en: 'I must translate this.', cz: 'Musím to přeložit.' },
+        { uk: 'Я хочу перевірити це.', translit: 'Ya khochu pereviryty tse.', en: 'I want to check this.', cz: 'Chci to zkontrolovat.' },
+      ],
+      substitutions: [],
+      czechNote: 'The prefix ПЕРЕ- corresponds roughly to Czech "pře-" (přeložit, přepsat, přečíst, přejet) or "roz-" (rozmyslet). It is highly transparent and productive.',
+      prefixes: [
+        { uk: 'переїхати', translit: 'pereyikhaty', prefix: 'пере-', root: 'їхати', compositionType: 'transparent', literal: 'пере- (across) + їхати (to go by vehicle)', mentalPicture: 'go across to a new home → move house / cross over', en: 'move house / go across', cz: 'přestěhovat se / přejet' },
+        { uk: 'переписати', translit: 'perepysaty', prefix: 'пере-', root: 'писати', compositionType: 'transparent', literal: 'пере- (again) + писати (to write)', mentalPicture: 'write again from the start → rewrite', en: 'rewrite', cz: 'přepsat' },
+        { uk: 'перечитати', translit: 'perechytaty', prefix: 'пере-', root: 'читати', compositionType: 'transparent', literal: 'пере- (again) + читати (to read)', mentalPicture: 'read again → reread', en: 'reread', cz: 'přečíst znovu' },
+        { uk: 'передумати', translit: 'peredumaty', prefix: 'пере-', root: 'думати', compositionType: 'transparent', literal: 'пере- (over) + думати (to think)', mentalPicture: 'think over again and change decision → change mind', en: 'change one\'s mind', cz: 'rozmyslet si' },
+        { uk: 'перебільшити', translit: 'perebilshyty', prefix: 'пере-', root: 'більшити', compositionType: 'transparent', literal: 'пере- (over) + більшити (to make bigger)', mentalPicture: 'make something over-sized or over-large → exaggerate', en: 'exaggerate', cz: 'přehánět / nadsadit' },
+        { uk: 'перевантажити', translit: 'perevantazhyty', prefix: 'пере-', root: 'вантажити', compositionType: 'transparent', literal: 'пере- (over) + вантажити (to load)', mentalPicture: 'load over the capacity → overload', en: 'overload', cz: 'přetížit' },
+        { uk: 'перевірити', translit: 'pereviryty', prefix: 'пере-', root: 'вірити', compositionType: 'semantic', literal: 'пере- (over) + вірити (to believe)', mentalPicture: 'look over a belief to check its correctness → verify / check', en: 'verify / check over', cz: 'prověřit / zkontrolovat' },
+        { uk: 'перекласти', translit: 'pereklasty', prefix: 'пере-', root: 'класти', compositionType: 'transparent', literal: 'пере- (across) + класти (to lay/put)', mentalPicture: 'lay words across from one language to another → translate', en: 'translate / put across', cz: 'přeložit' },
+        { uk: 'переконати', translit: 'perekonaty', prefix: 'пере-', root: 'конати', compositionType: 'semantic', literal: 'пере- (over/completely) + конати (to finish/end)', mentalPicture: 'overcome someone\'s doubts to bring them over to your side → convince', en: 'convince / bring over', cz: 'přesvědčit' },
+        { uk: 'передбачити', translit: 'peredbachyty', prefix: 'перед-', root: 'бачити', compositionType: 'transparent', literal: 'перед- (before) + бачити (to see)', mentalPicture: 'see beforehand → foresee / predict', en: 'foresee / predict', cz: 'předvídat' },
+        { uk: 'переглянути', translit: 'perehlyanyty', prefix: 'пере-', root: 'глянути', compositionType: 'transparent', literal: 'пере- (over) + глянути (to look)', mentalPicture: 'look over a document or movie → review / watch', en: 'review / watch', cz: 'prohlédnout' },
+      ],
+    }),
+
+  L('l64', 29, 'Prefix Mastery: РОЗ- & ПІД- (Apart / Support)', 'vocab',
+    'Explore РОЗ- (apart, outward) and ПІД- (under, up to, support) to discover how spatial concepts translate to abstract meanings.',
+    ['v_rozibraty', 'v_rozdilyty', 'v_rozkryty', 'v_rozpovisty', 'v_rozbudyty', 'v_rozpochaty', 'v_rozglyanyty', 'v_pidpysaty', 'v_pidkazaty', 'v_pidtrymaty', 'v_pidnyaty', 'v_pidiyty', 'v_pidhotuvaty'],
+    {
+      patterns: [],
+      examples: [
+        { uk: 'Можеш підказати мені?', translit: 'Mozhesh pidkazaty meni?', en: 'Can you give me a hint?', cz: 'Můžeš mi napovědět?' },
+        { uk: 'Хочу розібрати це.', translit: 'Khochu rozibraty tse.', en: 'I want to analyze / understand this.', cz: 'Chci to rozebrat.' },
+        { uk: 'Треба підготувати все.', translit: 'Treba pidhotuvaty vse.', en: 'One needs to prepare everything.', cz: 'Je třeba vše připravit.' },
+      ],
+      substitutions: [],
+      czechNote: 'РОЗ- corresponds to Czech "roz-" (rozebrat, rozdělit, rozkrýt). ПІД- matches Czech "pod-" or "před-" (podepsat, podpořit, podchytit).',
+      prefixes: [
+        { uk: 'розібрати', translit: 'rozibraty', prefix: 'роз-', root: 'брати', compositionType: 'transparent', literal: 'роз- (apart) + брати (to take)', mentalPicture: 'take apart a machine or text to analyze it → disassemble / analyze / understand', en: 'disassemble / analyze / understand', cz: 'rozebrat / pochopit' },
+        { uk: 'розділити', translit: 'rozdilyty', prefix: 'роз-', root: 'ділити', compositionType: 'transparent', literal: 'роз- (apart) + ділити (to share/divide)', mentalPicture: 'make things apart by dividing → divide', en: 'divide / share', cz: 'rozdělit' },
+        { uk: 'розкрити', translit: 'rozkryty', prefix: 'роз-', root: 'крити', compositionType: 'transparent', literal: 'роз- (apart) + крити (to cover)', mentalPicture: 'uncover apart what was hidden → reveal / uncover', en: 'reveal / uncover', cz: 'odkrýt / odhalit' },
+        { uk: 'розповісти', translit: 'rozpovisty', prefix: 'роз-', root: 'повісти', compositionType: 'transparent', literal: 'роз- (outward) + повісти (to tell)', mentalPicture: 'tell out a story outward → tell / narrate', en: 'tell / narrate', cz: 'vyprávět' },
+        { uk: 'розбудити', translit: 'rozbudyty', prefix: 'роз-', root: 'будити', compositionType: 'transparent', literal: 'роз- (outward) + будити (to wake)', mentalPicture: 'awaken someone out of sleep → wake someone', en: 'wake someone', cz: 'probudit' },
+        { uk: 'розпочати', translit: 'rozpochaty', prefix: 'роз-', root: 'почати', compositionType: 'transparent', literal: 'роз- (outward) + почати (to begin)', mentalPicture: 'begin outward → start / commence', en: 'start / begin', cz: 'zahájit / začít' },
+        { uk: 'розглянути', translit: 'rozglyanyty', prefix: 'роз-', root: 'глянути', compositionType: 'transparent', literal: 'роз- (apart) + глянути (to look)', mentalPicture: 'look around or look apart at all details → examine / consider', en: 'examine / consider', cz: 'prozkoumat / posoudit' },
+        { uk: 'підписати', translit: 'pidpysaty', prefix: 'під-', root: 'писати', compositionType: 'transparent', literal: 'під- (under) + писати (to write)', mentalPicture: 'write one\'s name under a document → sign', en: 'sign', cz: 'podepsat' },
+        { uk: 'підказати', translit: 'pidkazaty', prefix: 'під-', root: 'казати', compositionType: 'transparent', literal: 'під- (under/to) + казати (to say)', mentalPicture: 'say quietly under one\'s breath to help → give a hint', en: 'give a hint', cz: 'napovědět' },
+        { uk: 'підтримати', translit: 'pidtrymaty', prefix: 'під-', root: 'тримати', compositionType: 'transparent', literal: 'під- (up/under) + тримати (to hold)', mentalPicture: 'hold up from underneath to keep from falling → support', en: 'support', cz: 'podpořit' },
+        { uk: 'підняти', translit: 'pidnyaty', prefix: 'під-', root: 'няти', compositionType: 'transparent', literal: 'під- (up) + няти (to take/raise)', mentalPicture: 'take up or raise up → lift / raise', en: 'lift / raise', cz: 'zvednout' },
+        { uk: 'підійти', translit: 'pidiyty', prefix: 'під-', root: 'йти', compositionType: 'transparent', literal: 'під- (up to) + йти (to go)', mentalPicture: 'go up to someone/something → approach', en: 'approach', cz: 'přestoupit / jít blíž' },
+        { uk: 'підготувати', translit: 'pidhotuvaty', prefix: 'під-', root: 'готувати', compositionType: 'transparent', literal: 'під- (underneath/for) + готувати (to prepare)', mentalPicture: 'prepare underneath in advance → prepare', en: 'prepare', cz: 'připravit' },
+      ],
+    }),
+
+  L('l65', 30, 'Prefix Mastery: ВИ- & ЗА- (Out / Into)', 'vocab',
+    'Examine how ВИ- (outward motion) and ЗА- (into, behind, or complete action) shape the actions we perform daily.',
+    ['v_vynesty', 'v_vypysaty', 'v_vyhovoryty', 'v_vyavyty', 'v_vytrymaty', 'v_zaperechyty', 'v_zapamyataty', 'v_zabuty'],
+    {
+      patterns: [],
+      examples: [
+        { uk: 'Хочу виписати ці слова.', translit: 'Khochu vypysaty tsi slova.', en: 'I want to write out these words.', cz: 'Chci si vypsat tato slova.' },
+        { uk: 'Вона може витримати це.', translit: 'Vona mozhe vytrymaty tse.', en: 'She can endure this.', cz: 'Ona to může vydržet.' },
+        { uk: 'Не забудь подзвонити мені.', translit: 'Ne zabud\' podzvonyty meni.', en: 'Don\'t forget to call me.', cz: 'Nezapomeň mi zavolat.' },
+      ],
+      substitutions: [],
+      czechNote: 'ВИ- perfectly matches Czech "vy-" (vynést, vypsat, vyslovit). ЗА- functions like Czech "za-" (zapomenout, zapamatovat, zakázat).',
+      prefixes: [
+        { uk: 'вийти', translit: 'vyyty', prefix: 'ви-', root: 'йти', compositionType: 'transparent', literal: 'ви- (out) + йти (to go)', mentalPicture: 'go out on foot → exit / go out', en: 'exit / go out', cz: 'vycházet' },
+        { uk: 'винести', translit: 'vynesty', prefix: 'ви-', root: 'нести', compositionType: 'transparent', literal: 'ви- (out) + нести (to carry)', mentalPicture: 'carry out something → take out / carry out', en: 'take out / carry out', cz: 'vynést' },
+        { uk: 'виписати', translit: 'vypysaty', prefix: 'ви-', root: 'писати', compositionType: 'transparent', literal: 'ви- (out) + писати (to write)', mentalPicture: 'write out elements from a text → write out / extract', en: 'write out / extract', cz: 'vypsat' },
+        { uk: 'виговорити', translit: 'vyhovoryty', prefix: 'ви-', root: 'говорити', compositionType: 'transparent', literal: 'ви- (out) + говорити (to speak)', mentalPicture: 'speak out clearly and articulate → articulate / pronounce', en: 'articulate / pronounce', cz: 'vyslovit' },
+        { uk: 'виявити', translit: 'vyavyty', prefix: 'ви-', root: 'явити', compositionType: 'transparent', literal: 'ви- (out) + явити (to show/make visible)', mentalPicture: 'make visible or bring out → reveal / discover', en: 'reveal / discover', cz: 'projevit / odhalit' },
+        { uk: 'витримати', translit: 'vytrymaty', prefix: 'ви-', root: 'тримати', compositionType: 'transparent', literal: 'ви- (out) + тримати (to hold)', mentalPicture: 'hold out against pressure → endure / withstand', en: 'endure / withstand', cz: 'vydržet / snést' },
+        { uk: 'заперечити', translit: 'zaperechyty', prefix: 'за-', root: 'перечити', compositionType: 'transparent', literal: 'за- (against) + перечити (to contradict/speak)', mentalPicture: 'speak against a claim → deny / object', en: 'deny / object / speak against', cz: 'popřít / namítat' },
+        { uk: 'запам\'ятати', translit: 'zapamyataty', prefix: 'за-', root: 'пам\'ятати', compositionType: 'transparent', literal: 'за- (into) + пам\'ятати (to remember)', mentalPicture: 'put into memory → memorize / remember', en: 'memorize / remember', cz: 'zapamatovat si' },
+        { uk: 'забути', translit: 'zabuty', prefix: 'за-', root: 'бути', compositionType: 'coincidence', literal: 'за- (behind) + бути (to be)', mentalPicture: 'be behind or away in consciousness (unproductive folk-looking decomposition today) → forget', en: 'forget', cz: 'zapomenout' },
+      ],
+    }),
+
+  L('l66', 31, 'Prefix Mastery: ВІД-, ДО-, ПРО-, У-, З- (Spaced Prefixes)', 'vocab',
+    'Conclude prefix mastery with various spatial and aspectual prefixes: ВІД- (away), ДО- (to end), ПРО- (through), У- (in), and З- (together).',
+    ['v_vidmovyty', 'v_doslidyty', 'v_prostezhyty', 'v_produmaty', 'v_utrymaty', 'v_zrozumity'],
+    {
+      patterns: [],
+      examples: [
+        { uk: 'Вона вирішила відмовити.', translit: 'Vona vyryshyla vidmovyty.', en: 'She decided to refuse.', cz: 'Rozhodla se odmítnout.' },
+        { uk: 'Треба дослідити проблему.', translit: 'Treba doslidyty problemu.', en: 'One needs to investigate the problem.', cz: 'Je třeba vyzkoumat problém.' },
+        { uk: 'Я хочу утримати це.', translit: 'Ya khochu utrymaty tse.', en: 'I want to retain this.', cz: 'Chci to udržet.' },
+      ],
+      substitutions: [],
+      czechNote: 'ВІД- matches "od-" (odmítnout), ДО- matches "do-" (dokončit), ПРО- matches "pro-" (promyslet), У- matches "u-" (udržet), and З- matches "s-" (sjednotit).',
+      prefixes: [
+        { uk: 'відмовити', translit: 'vidmovyty', prefix: 'від-', root: 'мовити', compositionType: 'transparent', literal: 'від- (away) + мовити (to speak)', mentalPicture: 'speak away/from a request → refuse / deny', en: 'refuse / deny / speak away', cz: 'odmítnout' },
+        { uk: 'дослідити', translit: 'doslidyty', prefix: 'до-', root: 'слідити', compositionType: 'transparent', literal: 'до- (to end) + слідити (to follow steps)', mentalPicture: 'follow steps to the very end → investigate / examine', en: 'investigate / examine / follow to end', cz: 'vyzkoumat / prozkoumat' },
+        { uk: 'простежити', translit: 'prostezhyty', prefix: 'про-', root: 'стежити', compositionType: 'transparent', literal: 'про- (through) + стежити (to monitor/follow)', mentalPicture: 'follow through the course → trace / monitor', en: 'trace / monitor / follow through', cz: 'sledovat / vysledovat' },
+        { uk: 'продумати', translit: 'produmaty', prefix: 'про-', root: 'думати', compositionType: 'transparent', literal: 'про- (through) + думати (to think)', mentalPicture: 'think through completely → think through / work out', en: 'think through / work out', cz: 'promyslet' },
+        { uk: 'утримати', translit: 'utrymaty', prefix: 'у-', root: 'тримати', compositionType: 'transparent', literal: 'у- (in) + тримати (to hold)', mentalPicture: 'hold inside / keep back → retain / hold back', en: 'retain / hold in', cz: 'udržet / zachovat' },
+        { uk: 'зрозуміти', translit: 'zrozumity', prefix: 'з-', root: 'розуміти', compositionType: 'semantic', literal: 'з- (together) + розуміти (to understand)', mentalPicture: 'come together with understanding (s- + rozumět in Czech) → understand', en: 'understand / come together with understanding', cz: 'pochopit' },
+      ],
+    }),
+
+  L('l45', 32, 'The Dative Case: Saying What You Need or Feel', 'grammar',
     'мені, тобі, йому, їй, нам, вам, їм — the dative pronouns behind a whole family of impersonal constructions like "I am cold" or "it is hard for him."',
     ['v_meni', 'v_tobi', 'v_yomu', 'v_yiy', 'v_nam', 'v_vam', 'v_yim', 'v_mozhna', 'v_khochetsya', 'v_vazhko', 'v_lehko', 'v_tsikavo', 'v_sumno', 'p_dative_1', 'p_dative_2', 'p_dative_3', 'p_dative_4'],
     {
@@ -515,7 +619,7 @@ export const LESSONS = [
       czechNote: 'This same pattern already showed up piecemeal — "мені потрібна" (l11/l20) and "мені болить" (l43) are both instances of it. This lesson names the pattern explicitly and extends it to the other five pronouns.',
     }),
 
-  L('l46', 29, 'Reflexive Verbs: Actions on Yourself', 'grammar',
+  L('l46', 33, 'Reflexive Verbs: Actions on Yourself', 'grammar',
     'The -ся ending turns a verb back on its own subject — вчитися (to study, lit. "to teach oneself"), боятися (to be afraid), сподіватися (to hope), and more.',
     ['v_vchytysya', 'v_boyatysya', 'v_dyvuvatysya', 'v_spodivatysya', 'v_usmikhatysya', 'p_reflexive_1', 'p_reflexive_2', 'p_reflexive_3'],
     {
@@ -532,7 +636,7 @@ export const LESSONS = [
       czechNote: 'боятися and сподіватися both take a genitive-case object ("боюся павуків" — "afraid of spiders", genitive) — that case ending is a later refinement; for now, just recognizing and using the -ся verb itself is the goal.',
     }),
 
-  L('l47', 30, 'Days of the Week', 'topic',
+  L('l47', 34, 'Days of the Week', 'topic',
     'Monday through Sunday, plus how to say "on" a given day.',
     ['v_ponedilok', 'v_vivtorok', 'v_sereda', 'v_chetver', 'v_pyatnytsya', 'v_subota', 'v_nedilya', 'p_days_1', 'p_days_2'],
     {
@@ -550,7 +654,7 @@ export const LESSONS = [
       czechNote: 'Get comfortable recognizing all seven days by sight first — the accusative endings on the feminine ones (суботу, неділю, п\'ятницю) are a small detail to absorb gradually through examples like the ones above.',
     }),
 
-  L('l48', 31, 'More Everyday Verbs', 'vocab',
+  L('l48', 35, 'More Everyday Verbs', 'vocab',
     'брати, давати, отримувати, тримати, відпочивати, подорожувати — high-frequency verbs that round out everyday conversation.',
     ['v_braty', 'v_davaty', 'v_otrymuvaty', 'v_trymaty', 'v_vidpochyvaty', 'v_podorozhuvaty', 'p_everyday_1', 'p_everyday_2'],
     {
@@ -564,7 +668,7 @@ export const LESSONS = [
       czechNote: 'брати/давати/тримати are close cousins of Czech "brát/dávat/držet" — the sound is close enough to lean on directly.',
     }),
 
-  L('l49', 32, 'Home & Everyday Objects', 'topic',
+  L('l49', 36, 'Home & Everyday Objects', 'topic',
     'школа, шафа, пральна машина, одяг, туалет, ванна кімната — practical nouns for everyday life and asking where things are.',
     ['v_shkola', 'v_shafa', 'v_pralna_mashyna', 'v_odyah', 'v_tualet', 'v_vanna_kimnata', 'p_home_1', 'p_home_2'],
     {
@@ -580,7 +684,7 @@ export const LESSONS = [
       czechNote: '"Де ___?" is the single most useful question-frame in this lesson — reuse it for anything, not just the nouns listed here.',
     }),
 
-  L('l50', 33, 'Czech/Russian False Friends: A Caution', 'topic',
+  L('l50', 37, 'Czech/Russian False Friends: A Caution', 'topic',
     'Ukrainian, Czech, and Russian share deep roots, but that can be a trap — a handful of everyday verbs are worth double-checking rather than assuming.',
     ['v_yisty', 'v_dyvytysya', 'p_falsefriend_1', 'p_falsefriend_2'],
     {
@@ -600,7 +704,7 @@ export const LESSONS = [
   // appended at the very end — this is genuinely A2/B1-level conversation,
   // not advanced content, so it shouldn't sit locked behind all the C1
   // material just because it was added later. ---
-  L('l51', 34, 'Hobbies & Free Time', 'grammar',
+  L('l51', 38, 'Hobbies & Free Time', 'grammar',
     'любити + infinitive — talking about what you like doing, and asking someone else the same.',
     ['v_lyubyty', 'v_plavaty', 'v_vidviduvaty', 'v_muzey', 'v_vykhidni', 'v_vilnyi_chas', 'p_hobby_1', 'p_hobby_2', 'p_hobby_3', 'p_hobby_4'],
     {
@@ -619,7 +723,7 @@ export const LESSONS = [
       czechNote: 'на вихідних ("at the weekend") and у вільний час ("in your spare time") are both worth learning as fixed phrases rather than building word-by-word — the case endings inside them are not the point yet.',
     }),
 
-  L('l52', 35, 'Reactions & Enjoying Things', 'grammar',
+  L('l52', 39, 'Reactions & Enjoying Things', 'grammar',
     'Reacting to what you see or experience — виглядати (to look/seem) and насолоджуватися (to enjoy, from l46\'s reflexive verbs).',
     ['v_vyhlyadaty', 'p_react_1', 'p_react_2'],
     {
@@ -636,7 +740,7 @@ export const LESSONS = [
       czechNote: 'насолоджуюся reuses l46\'s насолоджуватися — a good example of one reflexive verb showing up naturally in ordinary conversation once you have it.',
     }),
 
-  L('l53', 36, 'Asking About Family & Quantities', 'grammar',
+  L('l53', 40, 'Asking About Family & Quantities', 'grammar',
     '"How big is your family?" — Ukrainian asks this as "how many people," not with a size adjective, using скільки (l42) + genitive.',
     ['v_lyudy', 'p_quantity_1'],
     {
@@ -650,7 +754,7 @@ export const LESSONS = [
       czechNote: 'Reuses сім\'я from l39 and скільки from l42 — the only genuinely new piece here is люди (people) and the question shape itself.',
     }),
 
-  L('l54', 37, 'Talking About What You\'ve Learned', 'grammar',
+  L('l54', 41, 'Talking About What You\'ve Learned', 'grammar',
     'English "what have you learnt" has no direct Ukrainian equivalent tense — it just uses the past tense (l08) plus a time word like цього року.',
     ['v_vyvchyty', 'v_tsyoho_roku', 'v_mynuloho_roku', 'p_learn_1', 'p_learn_2'],
     {
@@ -668,7 +772,7 @@ export const LESSONS = [
     }),
 
   // --- B1 level expansion lessons ---
-  L('l21', 38, 'Narrating Experiences', 'grammar_b1',
+  L('l21', 42, 'Narrating Experiences', 'grammar_b1',
     'Learn to talk about what you have done, what you have never done, and life when you were younger.',
     ['p_b1_done_1', 'p_b1_never_1', 'p_b1_when_1', 'v_zrobyv', 'v_nikoly', 'v_molodshyi'],
     {
@@ -684,7 +788,7 @@ export const LESSONS = [
       czechNote: 'Excellent structure maps 1:1 except Ukrainian drops the "jsem" auxiliary verb.'
     }),
 
-  L('l22', 39, 'Explaining Situations', 'grammar_b1',
+  L('l22', 43, 'Explaining Situations', 'grammar_b1',
     'Learn to specify root causes using "The thing is that..." and "The reason is that...".',
     ['p_b1_thing_1', 'p_b1_reason_1', 'v_sprava', 'v_prychyna', 'v_polyahaye'],
     {
@@ -698,7 +802,7 @@ export const LESSONS = [
       czechNote: '"Справа в тому, що" is incredibly common in spoken Ukrainian to explain why something happened.'
     }),
 
-  L('l23', 40, 'Comparing and Contrasting', 'grammar_b1',
+  L('l23', 44, 'Comparing and Contrasting', 'grammar_b1',
     'Contrast elements using "Unlike..." and "Compared with...".',
     ['p_b1_compare_1', 'p_b1_compare_2', 'v_vidminu', 'v_porivnyano'],
     {
@@ -717,7 +821,7 @@ export const LESSONS = [
   // connectors lesson, placed here — right at the B1/B2 seam — rather than
   // appended at the end, since connectors are useful from B1 all the way
   // through C2 and shouldn't sit locked behind unrelated C1 content. ---
-  L('l55', 41, 'Relative Clauses: який / яка / яке / які', 'grammar_b1',
+  L('l55', 45, 'Relative Clauses: який / яка / яке / які', 'grammar_b1',
     '"The café that I found", "people who speak openly" — який agrees in gender/number/case with the noun it describes, same idea as l08\'s past-tense agreement.',
     ['v_yakyi', 'v_yaka_rel', 'v_yake', 'v_yaki', 'p_rel_1', 'p_rel_2', 'p_rel_3'],
     {
@@ -733,7 +837,7 @@ export const LESSONS = [
       czechNote: 'кафе (neuter) → яке; людьми (plural) → які; концерт (masc, after "на" governing accusative) → на який — the form tracks the noun\'s gender/number, the preposition/case tracks the clause\'s own grammar.',
     }),
 
-  L('l56', 42, 'Purpose Clauses & Indirect Questions', 'grammar_b1',
+  L('l56', 46, 'Purpose Clauses & Indirect Questions', 'grammar_b1',
     '"So that I don\'t forget" (щоб) and "I don\'t know whether..." (чи) — two small words that unlock a lot of natural-sounding B1 speech.',
     ['v_shchob', 'v_chy_whether', 'p_purpose_1', 'p_purpose_2', 'p_indirect_1', 'p_indirect_2'],
     {
@@ -752,7 +856,7 @@ export const LESSONS = [
       czechNote: 'чи also means "or" in a direct question ("кава чи чай?" = "coffee or tea?") — context makes the difference clear, same ambiguity-that-isn\'t-really-ambiguous exists in several Slavic languages.',
     }),
 
-  L('l57', 43, 'Connectors & Cohesive Devices', 'grammar_b1',
+  L('l57', 47, 'Connectors & Cohesive Devices', 'grammar_b1',
     'The small set of linking words that recur constantly from here through the most advanced content — тому що, з одного боку/з іншого боку, наскільки мені відомо, зрештою — worth mastering early since almost every later lesson leans on them.',
     ['v_tomu_shcho', 'v_cherez_tse', 'v_z_odnoho_boku', 'v_z_inshoho_boku', 'v_naskilky_meni_vidomo', 'v_zreshtoyu', 'p_conn_1', 'p_conn_2', 'p_conn_3'],
     {
@@ -772,7 +876,7 @@ export const LESSONS = [
     }),
 
   // --- B2 level expansion lessons ---
-  L('l24', 44, 'Complex Opinions', 'grammar_b2',
+  L('l24', 48, 'Complex Opinions', 'grammar_b2',
     'Express your viewpoint using "I believe that...", "From my point of view...", and "As far as I know...".',
     ['p_b2_opinion_1', 'p_b2_opinion_2', 'p_b2_opinion_3', 'v_vazhayu', 'v_tochka', 'v_zorun'],
     {
@@ -787,7 +891,7 @@ export const LESSONS = [
       czechNote: '"точка зору" is a literal loan-translation matching Czech "úhel pohledu" (point of view).'
     }),
 
-  L('l25', 45, 'Agreeing and Disagreeing Politely', 'grammar_b2',
+  L('l25', 49, 'Agreeing and Disagreeing Politely', 'grammar_b2',
     'Learn to navigate conversations politely and express reservations.',
     ['p_b2_agree_1', 'p_b2_agree_2', 'p_b2_agree_3', 'v_chastkovo', 'v_pohodzhuyusya', 'v_odnak'],
     {
@@ -801,7 +905,7 @@ export const LESSONS = [
       czechNote: 'Using "однак" (however) or "частково" (partially) softens disagreements.'
     }),
 
-  L('l26', 46, 'Hypothetical Situations', 'grammar_b2',
+  L('l26', 50, 'Hypothetical Situations', 'grammar_b2',
     'Master subjunctive conditionals with "If..., then..." structures.',
     ['p_b2_hypo_1', 'p_b2_hypo_2', 'v_yakby', 'v_shvydshe'],
     {
@@ -815,7 +919,7 @@ export const LESSONS = [
       czechNote: 'Ukrainian "якби" works exactly like Czech "kdyby".'
     }),
 
-  L('l27', 47, 'Reported Speech', 'grammar_b2',
+  L('l27', 51, 'Reported Speech', 'grammar_b2',
     'Describe what others said and explain reasons dynamically.',
     ['p_b2_speech_1', 'p_b2_speech_2', 'v_poyasnyla'],
     {
@@ -830,7 +934,7 @@ export const LESSONS = [
     }),
 
   // --- C1 level expansion lessons ---
-  L('l28', 48, 'Nuance and Qualification', 'grammar_c1',
+  L('l28', 52, 'Nuance and Qualification', 'grammar_c1',
     'Qualify claims using "In a certain sense...", "It cannot be denied that...", and "It is worth noting that...".',
     ['p_c1_nuance_1', 'p_c1_nuance_2', 'p_c1_nuance_3', 'p_c1_nuance_4', 'v_sensi', 'v_zaperechyty', 'v_varto', 'v_zaznachyty'],
     {
@@ -845,7 +949,7 @@ export const LESSONS = [
       czechNote: '"Варто" acts as a shorthand for "stojí za to".'
     }),
 
-  L('l29', 49, 'Complex Argumentation', 'grammar_c1',
+  L('l29', 53, 'Complex Argumentation', 'grammar_c1',
     'Argue complex viewpoints using "On one hand..., on the other hand..." and "I do not so much disagree as...".',
     ['p_c1_arg_1', 'p_c1_arg_2', 'p_c1_arg_3', 'v_odnoho', 'v_boku'],
     {
@@ -859,7 +963,7 @@ export const LESSONS = [
       czechNote: '"З одного боку" maps directly to Czech "z jedné strany".'
     }),
 
-  L('l30', 50, 'Expressing Consequences', 'grammar_c1',
+  L('l30', 54, 'Expressing Consequences', 'grammar_c1',
     'Explain outcomes using "This led to the fact that..." and "As a result...".',
     ['p_c1_cons_1', 'p_c1_cons_2', 'p_c1_cons_3', 'v_prizvelo', 'v_rezultati'],
     {
@@ -873,7 +977,7 @@ export const LESSONS = [
       czechNote: '"Призвело" is neuter past form agreeing with "Це".'
     }),
 
-  L('l31', 51, 'Complex Time Relationships', 'grammar_c1',
+  L('l31', 55, 'Complex Time Relationships', 'grammar_c1',
     'Convey sophisticated timelines using "By the time...", "After...", and "Before...".',
     ['p_c1_time_1', 'p_c1_time_2', 'p_c1_time_3', 'v_momentu'],
     {
@@ -887,7 +991,7 @@ export const LESSONS = [
       czechNote: 'Notice past-tense forms work sequentially here.'
     }),
 
-  L('l32', 52, 'Abstract Discussion', 'grammar_c1',
+  L('l32', 56, 'Abstract Discussion', 'grammar_c1',
     'Formulate opinions on complex areas like society, technology, and ecology.',
     ['p_c1_abs_1', 'p_c1_abs_2', 'v_tekhnolohiyi', 'v_suchasnoho'],
     {
@@ -901,7 +1005,7 @@ export const LESSONS = [
     }),
 
   // --- C1 Vocabulary Categories (Themed) ---
-  L('l33', 53, 'C1 Vocab: Emotions and Opinions', 'vocab_c1',
+  L('l33', 57, 'C1 Vocab: Emotions and Opinions', 'vocab_c1',
     'Expand vocabulary to express nuance in reactions and personal views.',
     ['v_rozhachuvannya', 'v_zadovolennya', 'v_poboyuvannya', 'v_perekonannya', 'v_stavlennya'],
     {
@@ -914,7 +1018,7 @@ export const LESSONS = [
       czechNote: 'Notice most neuter abstract nouns end in "-ння" like Czech "-ní".'
     }),
 
-  L('l34', 54, 'C1 Vocab: Work and Professional Life', 'vocab_c1',
+  L('l34', 58, 'C1 Vocab: Work and Professional Life', 'vocab_c1',
     'Communicate professionally regarding responsibilities, decisions, and requirements.',
     ['v_vidpovidalnist', 'v_mozhlyvist', 'v_rishennya', 'v_dosyahnennya', 'v_vymoha'],
     {
@@ -926,7 +1030,7 @@ export const LESSONS = [
       czechNote: 'Nouns ending in "-ність" correspond to Czech "-nost".'
     }),
 
-  L('l35', 55, 'C1 Vocab: Society and Development', 'vocab_c1',
+  L('l35', 59, 'C1 Vocab: Society and Development', 'vocab_c1',
     'Discuss societal developments, changes, and influences.',
     ['v_suspilstvo', 'v_rozvytok', 'v_zminy', 'v_vplyv'],
     {
@@ -938,7 +1042,7 @@ export const LESSONS = [
       czechNote: 'Excellent loanwords matching Czech cognitive structure.'
     }),
 
-  L('l36', 56, 'C1 Vocab: Abstract Connectors', 'vocab_c1',
+  L('l36', 60, 'C1 Vocab: Abstract Connectors', 'vocab_c1',
     'Structure your writing and arguments fluidly with logical transitions.',
     ['v_vodnochas', 'v_nezvazhayuchy_na', 'v_khocha', 'v_krim_toho', 'v_takym_chynom', 'v_zokrema', 'v_vidpovidno'],
     {
@@ -950,7 +1054,7 @@ export const LESSONS = [
       czechNote: '"водночас" literally translates to Czech "jedním časem" or "zároveň".'
     }),
 
-  L('l37', 57, 'C1 Challenge Sentences', 'review_c1',
+  L('l37', 61, 'C1 Challenge Sentences', 'review_c1',
     'Ultimate diagnostic challenge sentences to verify absolute boundary of Ukrainian sentence-building ability.',
     ['p_c1_challenge_1', 'p_c1_challenge_2', 'p_c1_challenge_3', 'p_c1_challenge_4', 'p_c1_challenge_5'],
     {
@@ -966,7 +1070,7 @@ export const LESSONS = [
   // show up as their own Vocabulary Mastered category, not just buried
   // inside random example sentences. Sourced from the user's CEFR doc's
   // own "Idiomatic & Natural C2 Speech" section. ---
-  L('l58', 58, 'Common Idioms', 'vocab_c1',
+  L('l58', 62, 'Common Idioms', 'vocab_c1',
     'Ten everyday Ukrainian idioms — the kind of thing that makes speech sound native rather than just correct.',
     ['v_idiom_iceberg', 'v_idiom_velosyped', 'v_idiom_hrabli', 'v_idiom_palytsya', 'v_idiom_mukha_slona', 'v_idiom_na_ruku', 'v_idiom_ruka_na_pulsi', 'v_idiom_pasky', 'v_idiom_slova_na_vitry', 'v_idiom_spilna_mova'],
     {
@@ -983,7 +1087,7 @@ export const LESSONS = [
 
   // --- A first real C2 tier — the reference doc's C1 content was already
   // well-covered by l28-l37; this is genuinely new ground above it. ---
-  L('l59', 59, 'C2 Grammar Targets: Precision & Qualification', 'vocab_c1',
+  L('l59', 63, 'C2 Grammar Targets: Precision & Qualification', 'vocab_c1',
     'The hedging/qualifying frames that separate "correct" from "precise" — за умови що, навряд чи, не означає що.',
     ['v_za_umovy_shcho', 'v_navryad_chy', 'v_ne_oznachaye_shcho', 'p_c2_qual_1', 'p_c2_qual_2', 'p_c2_qual_3', 'p_c2_qual_4'],
     {
@@ -1000,7 +1104,7 @@ export const LESSONS = [
       czechNote: 'This whole lesson is drawn from the reference doc\'s own "C2 Vocabulary & Grammar Targets" list — deliberately the highest-leverage frames it names, not an arbitrary sample.',
     }),
 
-  L('l60', 60, 'C2 Diplomacy & Hedged Argument', 'vocab_c1',
+  L('l60', 64, 'C2 Diplomacy & Hedged Argument', 'vocab_c1',
     'Combining what you already know (з одного боку, зрештою, не означає що) into full, precisely-qualified arguments — the doc\'s own "C2 Mastery Test" idea: a simple statement expanded, not a new grammar system.',
     ['v_robyty_vyhlyad', 'v_vypuskaty_z_uvahy', 'p_c2_dipl_1', 'p_c2_dipl_2', 'p_c2_dipl_3', 'p_c2_dipl_4'],
     {
@@ -1017,7 +1121,7 @@ export const LESSONS = [
   // --- Growing the general verb pool the Conjugation Cycle draws from
   // (was capped at 44 infinitives total) — a first, quality-checked batch
   // toward a much larger target rather than a single unverified rush. ---
-  L('l61', 61, 'Everyday Action Verbs I', 'vocab',
+  L('l61', 65, 'Everyday Action Verbs I', 'vocab',
     'Common household and daily-life verbs — call, listen, cook, clean, open, search, build — the kind of high-frequency words that combine with want/can/have to for endless real sentences.',
     ['v_dzvonyty', 'v_slukhaty', 'v_dyakuvaty', 'v_spivaty', 'v_tantsyuvaty', 'v_malyuvaty', 'v_hotuvaty', 'v_myty', 'v_praty', 'v_prybyraty', 'v_vidkryvaty', 'v_zakryvaty', 'v_vmykaty', 'v_vymykaty', 'v_prynosyty', 'v_vidnosyty', 'v_nosyty', 'v_shukaty', 'v_znakhodyty', 'v_hubyty', 'v_zalyshaty', 'v_kydaty', 'v_lovyty', 'v_buduvaty', 'v_rozmovlyaty'],
     {
@@ -1032,7 +1136,7 @@ export const LESSONS = [
       czechNote: 'Most of these are regular -ати/-увати/-ити pattern verbs, the same shape as verbs already covered — they mainly add new roots, not new grammar to learn.',
     }),
 
-  L('l62', 62, 'Everyday Action Verbs II', 'vocab',
+  L('l62', 66, 'Everyday Action Verbs II', 'vocab',
     'Body and motion verbs — sleep, wake up, sit, stand, run, fall, get dressed — the physical everyday actions that come up constantly in ordinary conversation.',
     ['v_plakaty', 'v_smiyatysya', 'v_krychaty', 'v_movchaty', 'v_spaty', 'v_prokydatysya', 'v_lyahaty', 'v_vstavaty', 'v_sydity', 'v_stoyaty', 'v_lezhaty', 'v_bihty', 'v_strybaty', 'v_padaty', 'v_rukhatysya', 'v_zupynyatysya', 'v_povertatysya', 'v_vykhodyty', 'v_zakhodyty', 'v_hotuvatysya', 'v_odyahatysya', 'v_rozdyahatysya', 'v_mytysya', 'v_holytysya', 'v_tsiluvaty'],
     {

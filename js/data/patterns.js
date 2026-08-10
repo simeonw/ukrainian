@@ -161,4 +161,26 @@ export const PATTERNS = [
   p('p_c2_dipl_2', 'c2_diplomacy', 'Давай не будемо робити вигляд, ніби нічого не сталося.', 'Davay ne budemo robyty vyhlyad, niby nichoho ne stalosya.', 'Let\'s not pretend that nothing happened.', 'Nedělejme, že se nic nestalo.', ['l60'], ['past', 'production']),
   p('p_c2_dipl_3', 'c2_diplomacy', 'Мені здається, ти трохи випускаєш із уваги головне.', 'Meni zdayet\'sya, ty trokhy vypuskayesh iz uvahy holovne.', 'I think you\'re overlooking the main point somewhat.', 'Zdá se mi, že trochu přehlížíš to hlavní.', ['l60'], ['dative', 'understanding']),
   p('p_c2_dipl_4', 'c2_diplomacy', 'Зрештою, кожен має право на власну думку, але це не означає, що всі думки однаково обґрунтовані.', 'Zreshtoyu, kozhen maye pravo na vlasnu dumku, ale tse ne oznachaye, shcho vsi dumky odnakovo obgruntovani.', 'Ultimately, everyone has the right to their own opinion, but that doesn\'t mean all opinions are equally well-founded.', 'Nakonec má každý právo na svůj vlastní názor, ale to neznamená, že všechny názory jsou stejně opodstatněné.', ['l60'], ['connector', 'understanding']),
+
+  // --- l63: Prefix Mastery ПЕРЕ- ---
+  p('p_pere_1', 'pere_prefix', 'Я хочу переїхати в інше місто.', 'Ya khochu pereyikhaty v inshe misto.', 'I want to move to another city.', 'Chci se přestěhovat do jiného města.', ['l63'], ['grammar', 'production']),
+  p('p_pere_2', 'pere_prefix', 'Ти мусиш переписати цей лист.', 'Ty musysh perepysaty tsey lyst.', 'You must rewrite this letter.', 'Musíš přepsat tento dopis.', ['l63'], ['grammar', 'understanding']),
+  p('p_pere_3', 'pere_prefix', 'Вона вирішила передумати.', 'Vona vyryshyla peredumaty.', 'She decided to change her mind.', 'Rozhodla se to rozmyslet.', ['l63'], ['past', 'understanding']),
+  p('p_pere_4', 'pere_prefix', 'Я намагаюся переконати тебе.', 'Ya namahayusya perekonaty tebe.', 'I am trying to convince you.', 'Snažím se tě přesvědčit.', ['l63'], ['grammar', 'production']),
+
+  // --- l64: Prefix Mastery РОЗ- & ПІД- ---
+  p('p_roz_pid_1', 'roz_pid_prefix', 'Я хочу розібрати цю проблему.', 'Ya khochu rozibraty tsyu problemu.', 'I want to analyze this problem.', 'Chci rozebrat tento problém.', ['l64'], ['grammar', 'production']),
+  p('p_roz_pid_2', 'roz_pid_prefix', 'Можеш підказати мені правильне рішення?', 'Mozhesh pidkazaty meni pravylne rishennya?', 'Can you give me a hint for the right decision?', 'Můžeš mi napovědět správné rozhodnutí?', ['l64'], ['grammar', 'understanding']),
+  p('p_roz_pid_3', 'roz_pid_prefix', 'Я намагаюся підготувати все заздалегідь.', 'Ya namahayusya pidhotuvaty vse zazdalehid.', 'I am trying to prepare everything beforehand.', 'Snažím se vše připravit předem.', ['l64'], ['grammar', 'production']),
+
+  // --- l65: Prefix Mastery ВИ- & ЗА- ---
+  p('p_vy_za_1', 'vy_za_prefix', 'Вона допомогла мені винести речі.', 'Vona dopomohla meni vynesty rechi.', 'She helped me carry out the things.', 'Pomohla mi vynést věci.', ['l65'], ['past', 'understanding']),
+  p('p_vy_za_2', 'vy_za_prefix', 'Я хочу вивчити і запам\'ятати ці слова.', 'Ya khochu vyvchyty i zapamyataty tsi slova.', 'I want to learn and memorize these words.', 'Chci se naučit a zapamatovat si tato slova.', ['l65'], ['grammar', 'production']),
+  p('p_vy_za_3', 'vy_za_prefix', 'Я намагаюся забути про це.', 'Ya namahayusya zabuty pro tse.', 'I am trying to forget about this.', 'Snažím se na to zapomenout.', ['l65'], ['grammar', 'understanding']),
+
+  // --- l66: Prefix Mastery ВІД-, ДО-, ПРО-, У-, З- ---
+  p('p_spaced_1', 'spaced_prefix', 'Я не можу відмовити тобі.', 'Ya ne mozhu vidmovyty tobi.', 'I cannot refuse you.', 'Nemůžu tě odmítnout.', ['l66'], ['grammar', 'production']),
+  p('p_spaced_2', 'spaced_prefix', 'Ми хочемо дослідити це питання.', 'My khochemo doslidyty tse pytannya.', 'We want to investigate this question.', 'Chceme prozkoumat tuto otázku.', ['l66'], ['grammar', 'understanding']),
+  p('p_spaced_3', 'spaced_prefix', 'Я маю простежити за цим процесом.', 'Ya mayu prostezhyty za tsym protsesom.', 'I have to trace this process.', 'Musím vysledovat tento proces.', ['l66'], ['grammar', 'understanding']),
+  p('p_spaced_4', 'spaced_prefix', 'Він допоміг мені все продумати.', 'Vin dopomih meni vse produmaty.', 'He helped me think through everything.', 'Pomohl mi vše promyslet.', ['l66'], ['past', 'understanding']),
 ];
